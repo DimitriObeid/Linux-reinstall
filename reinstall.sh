@@ -16,8 +16,8 @@ rouge='\33[0;91m'
 defaut_cou="\33[39m"
 
 # Mises à jour selon le gestionnaire de paquets
-apt_upd="apt update && apt upgrade"     # Pour les distributions basées sur Debian (Ubuntu, Mint, Kali, ...)
-dnf_upd="dnf update && dnf upgrade"     # Pour les distributions basées sur Red Hat (Fedora, ...)
+apt_upd="apt update && apt upgrade"     # Pour les distributions basées sur Debian (Ubuntu, Mint, Kali, Elementary OS, ...)
+dnf_upd="dnf update && dnf upgrade"     # Pour les distributions basées sur Red Hat (Fedora, CentOS, ...)
 pac_upd="pacman -Syu"                   # Pour les distributions basées sur Arch Linux (Manjaro, ...)
 
 pack_upg=$apt_upd || $dnf_upd || $pac_upd
@@ -75,7 +75,7 @@ update_packages()
 {
     echo "$jaune>>> Mise à jour des paquets $defaut_cou"
     $pack_upg
-    echo "$jaune>>> Mise à jour des paquet terminée $defaut_cou"
+    echo "$vert>>> Mise à jour des paquet terminée $defaut_cou"
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
@@ -93,7 +93,7 @@ packages_to_install()
     lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
     
     paquets=$commandes $jeux $images $internet $logiciels $modelisation $programmation $video $windows $lamp
-    $pack_inst $paquets # Mettre dans une boucle for pour écrire en temps réel les étapes d'installation des paquets
+    $pack_inst $paquets # Mettre dans une boucle pour écrire en temps réel les étapes d'installation des paquets
    
     # Installation de Git si Git n'est pas installé
     if [ ! /usr/git* ]; then
@@ -110,11 +110,10 @@ packages_to_install()
                 ;;
         esac
     fi
-    
     return
 }
 
-# Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL ET SÉCURISÉ (exemple : Github, Source Forge, etc...))
+# Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
 wget_install()
 {
     # Installation de wget si le binaire n'est pas installé
@@ -131,8 +130,8 @@ wget_install()
                 echo "$rouge>>> wget ne sera pas installé $defaut_cou"
                 ;;
         esac
-        else
-            echo "$vert>>> Le paquet\"wget\" est déjà installé sur votre ordinateur"
+    else
+        echo "$vert>>> Le paquet\"wget\" est déjà installé sur votre ordinateur $defaut_cou"
     fi
 }
 
@@ -145,17 +144,17 @@ software_install()
         wget media.steampowered.com/client/installer/steam.deb
         dpkg -i 
     else
-        echo "$vert>>> Steam est installé sur votre ordinateur $defaut_cou"
+        echo "$vert>>> Steam est déjà installé sur votre ordinateur $defaut_cou"
     fi
     
     # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
     youtube_dl_exe="/usr/local/bin/youtube-dl"
     if [ ! -f $youtube_dl_exe ]; then
-        wget https://yt-dl.org/downloads/latest/youtube-dl -O $youtube_dl_exe
+        wget https://yt-dl.org/downloads/latest/youtube-dl -O /usr/local/bin
         chmod a+rx $youtube_dl_exe
         # youtube-dl -U # Pour mettre à jour youtube-dl
     else
-        echo "$vert>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur"
+        echo "$vert>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $defaut_cou"
     fi
 }
 
