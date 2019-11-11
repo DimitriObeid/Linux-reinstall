@@ -29,84 +29,7 @@ pac_inst="pacman -S"
 
 pack_inst=$apt_inst || $dnf_inst || $pac_inst
 
-# Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL ET SÉCURISÉ (exemple : Github, Source Forge, etc...))
-wget_install()
-{
-    # Installation de wget si le binaire n'est pas installé
-    if [ ! /usr/bin/wget ]; then
-        echo "$jaune>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $defaut_cou"
-        read wget_rep
-        case $wget_rep in
-            "o" | "oui" | "y" | "yes")
-                echo "$vert>>> Installation de wget $defaut_cou"
-                $pack_inst wget
-                echo "$vert>>> wget a été installé avec succès $defaut_cou"
-                ;;
-            *)
-                echo "$rouge>>> wget ne sera pas installé $defaut_cou"
-                ;;
-        esac
-    fi
-    
-    # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
-    youtube_dl_dir="/usr/local/bin/youtube-dl"
-    if [ ! -f $youtube_dl_dir ]; then
-        wget https://yt-dl.org/downloads/latest/youtube-dl -O $youtube_dl_dir
-        chmod a+rx $youtube_dl_dir
-        # youtube-dl -U # Pour mettre à jour youtube-dl
-    else
-        echo "$vert>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur"
-    fi
-}
-
-# Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-packages_to_install()
-{
-    commandes="neofetch tree sl"
-    jeux="bsdgames pacman "
-    images="gimp inkscape"
-    internet="thunderbird"
-    logiciels="snapd k4dirstat"
-    modelisation="blender"
-    programmation="atom codeblocks emacs libsfml-dev libcsfml-dev python-pip valgrind"
-    video="vlc"
-    lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
-    
-    paquets=$commandes $jeux $images $internet $logiciels $modelisation $programmation $video $lamp
-    $pack_inst $paquets # Mettre dans une boucle for pour écrire en temps réel les étapes d'installation des paquets
-   
-    # Installation de Git si Git n'est pas installé
-    if [ ! /usr/git* ]; then
-        echo "$jaune>>> La commande \"git\" manque à l'appel, souhaitez vous l'installer ? $defaut_cou"
-        read git_rep
-        case $git_rep in
-            "o" | "oui" | "y" | "yes")
-                echo "$vert>>> Installation de git $defaut_cou"
-                $pack_inst git
-                echo "$vert>>> git a été installé avec succès $defaut_cou"
-                ;;
-            *)
-                echo "$rouge>>> git ne sera pas installé $defaut_cou"
-                ;;
-        esac
-    fi
-    
-    return
-}
-
-update_packages()
-{
-    echo "$jaune>>> Mise à jour des paquets $defaut_cou"
-    $pack_upg
-    echo "$jaune>>> Mise à jour des paquet terminée $defaut_cou"
-}
-
-detect_linux_distro()
-{
-    version=`lsb_release -ds`
-    echo "Ajout des dépôts pour $version"
-}
-
+# Détection du mode super-administrateur (root)
 detect_root()
 {
     # Si le script n'est pas exécuté en root
@@ -128,6 +51,8 @@ detect_root()
     case $rep in
         "o" | "oui" | "y" | "yes")
             echo "$vert>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $defaut_cou"
+            echo "$jaune>>> Création d'un dossier temporaire dans votre dossier personnel pour y stocker des binaires d'installation $defaut_cou"
+            cd $HOME && mkdir reinstall_tmp.d && cd reinstall_tmp.d
             ;;
         *)
             echo "$rouge>>> Pour lire le script, entrez la commande suivante :"
@@ -137,6 +62,108 @@ detect_root()
             ;;
     esac
 }
+
+# Détection de la distribution
+detect_linux_distro()
+{
+    version=`lsb_release -ds`
+    echo "Ajout des dépôts pour $version"
+}
+
+# Mise à jour des paquets actuels
+update_packages()
+{
+    echo "$jaune>>> Mise à jour des paquets $defaut_cou"
+    $pack_upg
+    echo "$jaune>>> Mise à jour des paquet terminée $defaut_cou"
+}
+
+# Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
+packages_to_install()
+{
+    commandes="neofetch tree sl"
+    jeux="bsdgames pacman "
+    images="gimp inkscape"
+    internet="thunderbird"
+    logiciels="snapd k4dirstat"
+    modelisation="blender"
+    programmation="atom codeblocks emacs libsfml-dev libcsfml-dev python-pip valgrind"
+    video="vlc"
+    windows="wine mono-complete"
+    lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
+    
+    paquets=$commandes $jeux $images $internet $logiciels $modelisation $programmation $video $windows $lamp
+    $pack_inst $paquets # Mettre dans une boucle for pour écrire en temps réel les étapes d'installation des paquets
+   
+    # Installation de Git si Git n'est pas installé
+    if [ ! /usr/git* ]; then
+        echo "$jaune>>> La commande \"git\" manque à l'appel, souhaitez vous l'installer ? $defaut_cou"
+        read git_rep
+        case $git_rep in
+            "o" | "oui" | "y" | "yes")
+                echo "$vert>>> Installation de git $defaut_cou"
+                $pack_inst git
+                echo "$vert>>> git a été installé avec succès $defaut_cou"
+                ;;
+            *)
+                echo "$rouge>>> git ne sera pas installé $defaut_cou"
+                ;;
+        esac
+    fi
+    
+    return
+}
+
+# Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL ET SÉCURISÉ (exemple : Github, Source Forge, etc...))
+wget_install()
+{
+    # Installation de wget si le binaire n'est pas installé
+    if [ ! /usr/bin/wget ]; then
+        echo "$jaune>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $defaut_cou"
+        read wget_rep
+        case $wget_rep in
+            "o" | "oui" | "y" | "yes")
+                echo "$vert>>> Installation de wget $defaut_cou"
+                $pack_inst wget
+                echo "$vert>>> wget a été installé avec succès $defaut_cou"
+                ;;
+            *)
+                echo "$rouge>>> wget ne sera pas installé $defaut_cou"
+                ;;
+        esac
+        else
+            echo "$vert>>> Le paquet\"wget\" est déjà installé sur votre ordinateur"
+    fi
+}
+
+# Pour installer des logiciels disponibles dans la logithèque de la distribution (Steam), indisponibles dans les gestionnaires de paquets et la logithèque (VMware) ou mis à jour plus rapidement ou uniquement sur le site officiel du paquet (youtube-dl).
+software_install()
+{
+    # Installation de Steam
+    steam_exe=/usr/games/steam
+    if [ ! -f $steam_exe ]; then
+        wget media.steampowered.com/client/installer/steam.deb
+        dpkg -i 
+    else
+        echo "$vert>>> Steam est installé sur votre ordinateur $defaut_cou"
+    fi
+    
+    # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
+    youtube_dl_exe="/usr/local/bin/youtube-dl"
+    if [ ! -f $youtube_dl_exe ]; then
+        wget https://yt-dl.org/downloads/latest/youtube-dl -O $youtube_dl_exe
+        chmod a+rx $youtube_dl_exe
+        # youtube-dl -U # Pour mettre à jour youtube-dl
+    else
+        echo "$vert>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur"
+    fi
+}
+
+is_installation_done()
+{
+    cd $HOME && rm -rf reinstall_tmp.d
+}
+
 
 detect_root
 detect_linux_distro
