@@ -9,8 +9,11 @@
 
 ## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
 
+# File buffer
+INSTALL_VAL=0
+
 #
-install_val=0
+COLS=$(tput cols)
 
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 196)   # Rouge clair
@@ -22,7 +25,7 @@ C_HEADER_LINE=$(tput setaf 6)      # Ne modifier l'encodage de couleurs du heade
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 function line()
 {
-	cols=$(tput cols)
+	cols=$COLS
 	char=$1
 	color=$2
 	if test "$color" != ""; then
@@ -123,6 +126,7 @@ function detect_root()
             fi
             echo "$C_JAUNE>>> Création du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
             mkdir $install_dir && cd $install_dir
+            echo ""
             ;;
         *)
             echo "$C_ROUGE>>> Pour lire le script, entrez la commande suivante :"
@@ -134,10 +138,12 @@ function detect_root()
     esac
 }
 
-# Mise à jour des paquets actuels
+# Mise à jour des paquets actuels selon le gestionnaire de paquets supporté (ÉTAPE IMPORTANTE, NE PAS MODIFIER, SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 function dist_upgrade()
 {
-    echo "$C_VERT>>> Mise à jour du système $C_RESET"
+    script_header "$C_HEADER_LINE MISE À JOUR DU SYSTÈME $C_HEADER_LINE"
+    echo ""
+    echo "$C_RESET"
     case "$OS_FAMILY" in
 		opensuse)
 			sudo zypper -y update
@@ -156,6 +162,7 @@ function dist_upgrade()
 			;;
 	esac
 	echo "$C_VERT>>> Mise à jour du système effectuée avec succès $C_RESET"
+    echo ""
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
@@ -188,7 +195,7 @@ function packages_to_install()
     if test -z "$cmd_install"; then
 		cmd_install=$(get_cmd_install) dépôts
 	fi
-    if test install_val -eq 1; then
+    if test $INSTALL_VAL -eq 1; then
         echo "Installation de : " $package_name "(commande :" $cmd_install $package_name ")"
         return
     fi
@@ -197,8 +204,11 @@ function packages_to_install()
 
 
 # Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
-wget_install()
+function wget_install()
 {
+    script_header "$C_HEADER_LINE INSTALLATION DE WGET $C_HEADER_LINE"
+    echo ""
+    echo ""
     # Installation de wget si le binaire n'est pas installé
     if [ ! /usr/bin/wget ]; then
         echo "$C_JAUNE>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_RESET"
@@ -253,4 +263,5 @@ get_dist_package_manager
 # handle_error # Supprimer cette ligne quand j'aurai une fonction fonctionnelle à utiliser dans une condition
 detect_root
 dist_upgrade
+wget_install
 is_installation_done
