@@ -7,16 +7,16 @@
 # Ou encore
 # bash -x reinstall.sh
 
-## Ce script sert à réinstaller tous les programmes Linux en l'exécutant.
+## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
 
 #
 install_val=0
 
 # Couleurs pour mieux lire les étapes de l'exécution du script
-C_VERT='\33[1;32m'
-C_JAUNE='\33[1;33m'
-C_ROUGE='\33[0;91m'
-C_DEFAUT="\33[39m"
+C_ROUGE=$(tput setaf 1)
+C_VERT=$(tput setaf 2)
+C_JAUNE=$(tput setaf 3)
+C_RESET=$(tput sgr0)
 
 # On détecte le gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
@@ -43,7 +43,7 @@ handle_error()
                 return
                 ;;
             *)
-                echo "$C_ROUGE>>> Abandon $C_DEFAUT"
+                echo "$C_ROUGE>>> Abandon $C_RESET"
                 exit 1
                 ;;
         esac
@@ -59,40 +59,40 @@ detect_root()
     	echo ">>> Placez sudo devant votre commande :"
     	echo ">>> sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
     	echo ">>> Abandon"
-    	echo "$C_DEFAUT"
+    	echo "$C_RESET"
     	exit 1          # Quitter le programme en cas d'erreur
     fi
 
     # Sinon, si le script est exécuté en root
-    echo "$C_JAUNE>>> Détection de votre gestionnaire de paquet $C_DEFAUT"
+    echo "$C_JAUNE>>> Détection de votre gestionnaire de paquet $C_RESET"
     $OS_FAMILY = "void"
     get_dist_package_manager
     if [ "$OS_FAMILY" = "void" ]; then  # Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
         echo "$C_ROUGE>>> ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
         echo ">>> Abandon"
-        echo "$C_DEFAUT"
+        echo "$C_RESET"
         exit 1
     else
-        echo "$C_VERT>>> Le gestionnaire de paquets de votre distribution est supporté $C_DEFAUT"
+        echo "$C_VERT>>> Le gestionnaire de paquets de votre distribution est supporté $C_RESET"
     fi
     echo "$C_JAUNE>>> Assurez-vous d'avoir lu la documentation du script avant de l'exécuter."
-    echo -n "$C_JAUNE>>> Êtes-vous sûr de savoir ce que vous faites ? (o/n) $C_DEFAUT"
+    echo -n "$C_JAUNE>>> Êtes-vous sûr de savoir ce que vous faites ? (o/n) $C_RESET"
     read rep
     case $rep in
         "o" | "oui" | "y" | "yes")
-            echo "$C_VERT>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_DEFAUT"
+            echo "$C_VERT>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"
             install_dir=/tmp/reinstall_tmp.d
             if [ -d "$install_dir" ]; then
                 rm -rf $install_dir
             fi
-            echo "$C_JAUNE>>> Création du dossier d'installation temporaire dans \"/tmp\" $C_DEFAUT"
+            echo "$C_JAUNE>>> Création du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
             mkdir $install_dir && cd $install_dir
             ;;
         *)
             echo "$C_ROUGE>>> Pour lire le script, entrez la commande suivante :"
             echo ">>> cat reinstall.sh"
             echo ">>> Abandon"
-            echo "$C_DEFAUT"
+            echo "$C_RESET"
             exit 1
             ;;
     esac
@@ -101,7 +101,7 @@ detect_root()
 # Mise à jour des paquets actuels
 dist_upgrade()
 {
-    echo "$C_VERT>>> Mise à jour du système $C_DEFAUT"
+    echo "$C_VERT>>> Mise à jour du système $C_RESET"
     case "$OS_FAMILY" in
 		opensuse)
 			sudo zypper -y update
@@ -119,7 +119,7 @@ dist_upgrade()
 			sudo emerge -u world
 			;;
 	esac
-	echo "$C_VERT>>> Mise à jour du système effectuée avec succès $C_DEFAUT"
+	echo "$C_VERT>>> Mise à jour du système effectuée avec succès $C_RESET"
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
@@ -165,20 +165,20 @@ wget_install()
 {
     # Installation de wget si le binaire n'est pas installé
     if [ ! /usr/bin/wget ]; then
-        echo "$C_JAUNE>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_DEFAUT"
+        echo "$C_JAUNE>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_RESET"
         read wget_rep
         case $wget_rep in
             "o" | "oui" | "y" | "yes")
-                echo "$C_VERT>>> Installation de wget $C_DEFAUT"
+                echo "$C_VERT>>> Installation de wget $C_RESET"
                 $pack_inst wget
-                echo "$C_VERT>>> wget a été installé avec succès $C_DEFAUT"
+                echo "$C_VERT>>> wget a été installé avec succès $C_RESET"
                 ;;
             *)
-                echo "$C_ROUGE>>> wget ne sera pas installé $C_DEFAUT"
+                echo "$C_ROUGE>>> wget ne sera pas installé $C_RESET"
                 ;;
         esac
     else
-        echo "$C_VERT>>> Le paquet \"wget\" est déjà installé sur votre ordinateur $C_DEFAUT"
+        echo "$C_VERT>>> Le paquet \"wget\" est déjà installé sur votre ordinateur $C_RESET"
     fi
 }
 
@@ -188,12 +188,12 @@ software_install()
     # Installation de Steam
     steam_exe=/usr/games/steam
     if [ ! -f $steam_exe ]; then
-        echo "$C_VERT>>> Téléchargement de Steam $C_DEFAUT"
+        echo "$C_VERT>>> Téléchargement de Steam $C_RESET"
         wget media.steampowered.com/client/installer/steam.deb
-        echo "$C_VERT>>> Décompression de Steam $C_DEFAUT"
+        echo "$C_VERT>>> Décompression de Steam $C_RESET"
         # dpkg -i
     else
-        echo "$C_VERT>>> Steam est déjà installé sur votre ordinateur $C_DEFAUT"
+        echo "$C_VERT>>> Steam est déjà installé sur votre ordinateur $C_RESET"
     fi
 
     # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
@@ -203,20 +203,18 @@ software_install()
         chmod a+rx $youtube_dl_exe
         # youtube-dl -U # Pour mettre à jour youtube-dl
     else
-        echo "$C_VERT>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $C_DEFAUT"
+        echo "$C_VERT>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $C_RESET"
     fi
 }
 
 is_installation_done()
 {
-    echo "$C_VERT>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_DEFAUT"
+    echo "$C_VERT>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
     rm -rf $install_dir
 }
 
 get_dist_package_manager
-handle_error
+# handle_error # Supprimer cette ligne quand j'aurai une fonction fonctionnelle à utiliser dans une condition
 detect_root
 dist_upgrade
-packages_to_install
-wget_install
 is_installation_done
