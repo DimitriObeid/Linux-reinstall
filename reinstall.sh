@@ -1,137 +1,184 @@
-﻿#!/bin/bash
+#!/bin/bash
 
 # Pour débugguer ce script, si jamais, taper la commande :
 # <shell utilisé> -x <nom du fichier>
-# Exemple : 
+# Exemple :
 # /bin/bash -x reinstall.sh
 # Ou encore
 # bash -x reinstall.sh
 
 ## Ce script sert à réinstaller tous les programmes Linux en l'exécutant.
 
+#
+install_val=0
+
 # Couleurs pour mieux lire les étapes de l'exécution du script
-vert='\33[1;32m'
-jaune='\33[1;33m'
-rouge='\33[0;91m'
-defaut_cou="\33[39m"
+C_VERT='\33[1;32m'
+C_JAUNE='\33[1;33m'
+C_ROUGE='\33[0;91m'
+C_DEFAUT="\33[39m"
 
-# Mises à jour selon le gestionnaire de paquets
-apt_upd="apt update && apt upgrade"     # Pour les distributions basées sur Debian (Ubuntu, Mint, Kali, Elementary OS, ...)
-dnf_upd="dnf update && dnf upgrade"     # Pour les distributions basées sur Red Hat (Fedora, CentOS, ...)
-pac_upd="pacman -Syu"                   # Pour les distributions basées sur Arch Linux (Manjaro, ...)
+# On détecte le gestionnaire de paquets de la distribution utilisée
+get_dist_package_manager()
+{
+    which zypper &> /dev/null && OS_FAMILY="opensuse"
+    which pacman &> /dev/null && OS_FAMILY="archlinux"
+    which dnf &> /dev/null && OS_FAMILY="fedora"
+    which apt-get &> /dev/null && OS_FAMILY="debian"
+    which emerge &> /dev/null && OS_FAMILY="gentoo"
+}
 
-pack_upg=$apt_upd || $dnf_upd || $pac_upd
-
-# Installation selon le gestionnaire de paquets
-apt_inst="apt install"
-dnf_inst="dnf install"
-pac_inst="pacman -S"
-
-pack_inst=$apt_inst || $dnf_inst || $pac_inst
+# Gestion d'erreurs
+handle_error()
+{
+    result=$1
+    if test $result -eq 0; then
+        return
+    else
+        echo "$C_ROUGE>>> Erreur lors de l'installation, souhaitez vous arrêter l'installation ? (o/n)"
+        read stop_script
+        case $stop_script in
+            "n" | "non")
+                echo "$DEFAULT"
+                return
+                ;;
+            *)
+                echo "$C_ROUGE>>> Abandon $C_DEFAUT"
+                exit 1
+                ;;
+        esac
+    fi
+}
 
 # Détection du mode super-administrateur (root)
 detect_root()
 {
     # Si le script n'est pas exécuté en root
     if [ "$EUID" -ne 0 ]; then
-    	echo "$rouge>>> Ce script doit être exécuté en tant qu'administrateur (root)."
-    	echo "$rouge>>> Placez sudo devant votre commande :"
-    	echo "$rouge>>> sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
-    	echo "$rouge>>> Ou bien connectez vous directement en tant qu'administrateur en tapant :"
-    	echo "$rouge>>> su"
-    	echo "$rouge>>> Puis exécutez de nouveau le script"
-    	echo "$rouge>>> Abandon"
+    	echo "$C_ROUGE>>> Ce script doit être exécuté en tant qu'administrateur (root)."
+    	echo ">>> Placez sudo devant votre commande :"
+    	echo ">>> sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
+    	echo ">>> Abandon"
+    	echo "$C_DEFAUT"
     	exit 1          # Quitter le programme en cas d'erreur
     fi
 
     # Sinon, si le script est exécuté en root
-    echo "$jaune>>> Assurez-vous d'avoir lu et compris le script avant de l'exécuter."
-    echo -n "$jaune>>> Êtes-vous sûr de savoir ce que vous faites ? (o/n) $defaut_cou"
+    echo "$C_JAUNE>>> Détection de votre gestionnaire de paquet $C_DEFAUT"
+    $OS_FAMILY = "void"
+    get_dist_package_manager
+    if [ "$OS_FAMILY" = "void" ]; then  # Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
+        echo "$C_ROUGE>>> ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
+        echo ">>> Abandon"
+        echo "$C_DEFAUT"
+        exit 1
+    else
+        echo "$C_VERT>>> Le gestionnaire de paquets de votre distribution est supporté $C_DEFAUT"
+    fi
+    echo "$C_JAUNE>>> Assurez-vous d'avoir lu la documentation du script avant de l'exécuter."
+    echo -n "$C_JAUNE>>> Êtes-vous sûr de savoir ce que vous faites ? (o/n) $C_DEFAUT"
     read rep
     case $rep in
         "o" | "oui" | "y" | "yes")
-            echo "$vert>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $defaut_cou"
-            echo "$jaune>>> Création d'un dossier temporaire dans votre dossier personnel pour y stocker des binaires d'installation $defaut_cou"
-            cd $HOME && mkdir reinstall_tmp.d && cd reinstall_tmp.d
+            echo "$C_VERT>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_DEFAUT"
+            install_dir=/tmp/reinstall_tmp.d
+            if [ -d "$install_dir" ]; then
+                rm -rf $install_dir
+            fi
+            echo "$C_JAUNE>>> Création du dossier d'installation temporaire dans \"/tmp\" $C_DEFAUT"
+            mkdir $install_dir && cd $install_dir
             ;;
         *)
-            echo "$rouge>>> Pour lire le script, entrez la commande suivante :"
-            echo "$rouge>>> cat reinstall.sh"
-            echo "$rouge>>> Abandon"
+            echo "$C_ROUGE>>> Pour lire le script, entrez la commande suivante :"
+            echo ">>> cat reinstall.sh"
+            echo ">>> Abandon"
+            echo "$C_DEFAUT"
             exit 1
             ;;
     esac
 }
 
-# Détection de la distribution
-detect_linux_distro()
-{
-    version=`lsb_release -ds`
-    echo "Ajout des dépôts pour $version"
-}
-
 # Mise à jour des paquets actuels
-update_packages()
+dist_upgrade()
 {
-    echo "$jaune>>> Mise à jour des paquets $defaut_cou"
-    $pack_upg
-    echo "$vert>>> Mise à jour des paquet terminée $defaut_cou"
+    echo "$C_VERT>>> Mise à jour du système $C_DEFAUT"
+    case "$OS_FAMILY" in
+		opensuse)
+			sudo zypper -y update
+			;;
+		archlinux)
+			sudo pacman --noconfirm -Syu
+			;;
+		fedora)
+			sudo dnf -y update
+			;;
+		debian)
+			sudo apt-get -y update; sudo apt-get -y upgrade
+			;;
+		gentoo)
+			sudo emerge -u world
+			;;
+	esac
+	echo "$C_VERT>>> Mise à jour du système effectuée avec succès $C_DEFAUT"
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
 packages_to_install()
 {
-    commandes="neofetch tree sl"
-    jeux="bsdgames pacman "
-    images="gimp inkscape"
-    internet="thunderbird"
-    logiciels="snapd k4dirstat"
-    modelisation="blender"
-    programmation="atom codeblocks emacs libsfml-dev libcsfml-dev python-pip valgrind"
-    video="vlc"
-    windows="wine mono-complete"
-    lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
-    
-    paquets=$commandes $jeux $images $internet $logiciels $modelisation $programmation $video $windows $lamp
-    $pack_inst $paquets # Mettre dans une boucle pour écrire en temps réel les étapes d'installation des paquets
-   
-    # Installation de Git si Git n'est pas installé
-    if [ ! /usr/git* ]; then
-        echo "$jaune>>> La commande \"git\" manque à l'appel, souhaitez vous l'installer ? $defaut_cou"
-        read git_rep
-        case $git_rep in
-            "o" | "oui" | "y" | "yes")
-                echo "$vert>>> Installation de git $defaut_cou"
-                $pack_inst git
-                echo "$vert>>> git a été installé avec succès $defaut_cou"
-                ;;
-            *)
-                echo "$rouge>>> git ne sera pas installé $defaut_cou"
-                ;;
-        esac
+    package_name=$1
+
+    get_cmd_install()
+    {
+        case $OS_FAMILY in
+            opensuse)
+				echo "zypper -y install"
+				;;
+			archlinux)
+				echo "pacman --noconfirm -S"
+				;;
+			fedora)
+				echo "dnf -y install"
+				;;
+			debian)
+				echo "apt-get -y install"
+				;;
+			gentoo)
+				echo "emerge"
+				;;
+		esac
+    }
+
+    # Si la longueur de la chaîne de caractères est égale à 0
+    if test -z "$cmd_install"; then
+		cmd_install=$(get_cmd_install) dépôts
+	fi
+    if test install_val -eq 1; then
+        echo "Installation de : " $package_name "(commande :" $cmd_install $package_name ")"
+        return
     fi
-    return
+    $cmd_install $package_name
 }
+
 
 # Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
 wget_install()
 {
     # Installation de wget si le binaire n'est pas installé
     if [ ! /usr/bin/wget ]; then
-        echo "$jaune>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $defaut_cou"
+        echo "$C_JAUNE>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_DEFAUT"
         read wget_rep
         case $wget_rep in
             "o" | "oui" | "y" | "yes")
-                echo "$vert>>> Installation de wget $defaut_cou"
+                echo "$C_VERT>>> Installation de wget $C_DEFAUT"
                 $pack_inst wget
-                echo "$vert>>> wget a été installé avec succès $defaut_cou"
+                echo "$C_VERT>>> wget a été installé avec succès $C_DEFAUT"
                 ;;
             *)
-                echo "$rouge>>> wget ne sera pas installé $defaut_cou"
+                echo "$C_ROUGE>>> wget ne sera pas installé $C_DEFAUT"
                 ;;
         esac
     else
-        echo "$vert>>> Le paquet\"wget\" est déjà installé sur votre ordinateur $defaut_cou"
+        echo "$C_VERT>>> Le paquet \"wget\" est déjà installé sur votre ordinateur $C_DEFAUT"
     fi
 }
 
@@ -141,12 +188,14 @@ software_install()
     # Installation de Steam
     steam_exe=/usr/games/steam
     if [ ! -f $steam_exe ]; then
+        echo "$C_VERT>>> Téléchargement de Steam $C_DEFAUT"
         wget media.steampowered.com/client/installer/steam.deb
-        dpkg -i 
+        echo "$C_VERT>>> Décompression de Steam $C_DEFAUT"
+        # dpkg -i
     else
-        echo "$vert>>> Steam est déjà installé sur votre ordinateur $defaut_cou"
+        echo "$C_VERT>>> Steam est déjà installé sur votre ordinateur $C_DEFAUT"
     fi
-    
+
     # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
     youtube_dl_exe="/usr/local/bin/youtube-dl"
     if [ ! -f $youtube_dl_exe ]; then
@@ -154,17 +203,20 @@ software_install()
         chmod a+rx $youtube_dl_exe
         # youtube-dl -U # Pour mettre à jour youtube-dl
     else
-        echo "$vert>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $defaut_cou"
+        echo "$C_VERT>>> Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $C_DEFAUT"
     fi
 }
 
 is_installation_done()
 {
-    cd $HOME && rm -rf reinstall_tmp.d
+    echo "$C_VERT>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_DEFAUT"
+    rm -rf $install_dir
 }
 
-
+get_dist_package_manager
+handle_error
 detect_root
-detect_linux_distro
+dist_upgrade
 packages_to_install
 wget_install
+is_installation_done
