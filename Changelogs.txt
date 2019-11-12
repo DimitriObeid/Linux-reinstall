@@ -1,5 +1,5 @@
-Version actuelle : Alpha 0.0.1.0
+Version actuelle : Alpha 0.0.0.2
 
 Changelogs :
-    - Ajout d'une première version d'un header
+    - L'affichage jaune est réellement jaune
     - 

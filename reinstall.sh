@@ -15,7 +15,7 @@ install_val=0
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 1)
 C_VERT=$(tput setaf 2)
-C_JAUNE=$(tput setaf 22)
+C_JAUNE=$(tput setaf 226)
 C_RESET=$(tput sgr0)
 
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
