@@ -1,7 +1,8 @@
 # Reinstall Linux : Le programme qui va vous simplifier la réinstallation sur Linux
 
-Vous en avez plus qu'assez de vous retaper toutes les étapes de réinstallation de vos logiciels à la main ?
+/!\ ATTENTION : LA DOCUMENTATION DU SCRIPT N'EST PAS À JOUR !! sa refonte est en cours /!\
 
+Vous en avez plus qu'assez de vous retaper toutes les étapes de réinstallation de vos logiciels à la main ?
 
 Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger ce script et à l'exécuter en tapant exactement la commande suivante :
 
