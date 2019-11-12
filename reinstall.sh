@@ -17,7 +17,7 @@ C_ROUGE=$(tput setaf 196)   # Rouge clair
 C_VERT=$(tput setaf 82)     # Vert clair
 C_JAUNE=$(tput setaf 226)   # Jaune clair
 C_RESET=$(tput sgr0)
-C_HEADER_LINE=$C_ROUGE      # Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici
+C_HEADER_LINE=$(tput setaf 6)      # Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici
 
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 function line()
@@ -41,29 +41,20 @@ function script_header()
 {
 	color=$2
 	if test "$color" = ""; then
-		color=$C_HEADER_LINE    # Définit la couleur des lignes
+		color=$C_HEADER_LINE
 	fi
 
 	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
 	line "-"
-    echo -ne $C_RESET
+    # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
+#    echo -ne $C_RESET
 	echo "##> "$1
 	line "-"
 	echo -ne $color
 }
 
-# On détecte le gestionnaire de paquets de la distribution utilisée
-function get_dist_package_manager()
-{
-    which zypper &> /dev/null && OS_FAMILY="opensuse"
-    which pacman &> /dev/null && OS_FAMILY="archlinux"
-    which dnf &> /dev/null && OS_FAMILY="fedora"
-    which apt-get &> /dev/null && OS_FAMILY="debian"
-    which emerge &> /dev/null && OS_FAMILY="gentoo"
-}
-
-# Gestion d'erreurs
-handle_error()
+# Gestion de cas d'erreur lors de l'installation du script
+function handle_error()
 {
     result=$1
     if test $result -eq 0; then
@@ -84,6 +75,16 @@ handle_error()
     fi
 }
 
+# On détecte le gestionnaire de paquets de la distribution utilisée
+function get_dist_package_manager()
+{
+    which zypper &> /dev/null && OS_FAMILY="opensuse"
+    which pacman &> /dev/null && OS_FAMILY="archlinux"
+    which dnf &> /dev/null && OS_FAMILY="fedora"
+    which apt-get &> /dev/null && OS_FAMILY="debian"
+    which emerge &> /dev/null && OS_FAMILY="gentoo"
+}
+
 # Détection du mode super-administrateur (root)
 function detect_root()
 {
@@ -98,7 +99,7 @@ function detect_root()
     fi
 
     # Sinon, si le script est exécuté en root
-    script_header "$C_VERT BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
+    script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
     echo "$C_JAUNE>>> Détection de votre gestionnaire de paquet $C_RESET"
     $OS_FAMILY = "void"
     get_dist_package_manager
