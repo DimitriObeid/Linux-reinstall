@@ -15,11 +15,47 @@ install_val=0
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 1)
 C_VERT=$(tput setaf 2)
-C_JAUNE=$(tput setaf 3)
+C_JAUNE=$(tput setaf 22)
 C_RESET=$(tput sgr0)
 
+# Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
+function line()
+{
+	cols=$(tput cols)
+	char=$1
+	color=$2
+
+	if test "$color" != ""; then
+		echo -ne $color
+	fi
+
+	for i in $(eval echo "{1..$cols}"); do
+		echo -n $char
+	done
+	echo
+
+	if test "$color" != ""; then
+		echo -ne $C_RST
+	fi
+}
+
+# Affichage du texte des headers
+function script_header()
+{
+	color=$2
+	if test "$color" = ""; then
+		color=$C_RED
+	fi
+
+	echo -ne $color
+	line "-"
+	echo "##> "$1
+	line "-"
+	echo -ne $C_RST
+}
+
 # On détecte le gestionnaire de paquets de la distribution utilisée
-get_dist_package_manager()
+function get_dist_package_manager()
 {
     which zypper &> /dev/null && OS_FAMILY="opensuse"
     which pacman &> /dev/null && OS_FAMILY="archlinux"
@@ -51,7 +87,7 @@ handle_error()
 }
 
 # Détection du mode super-administrateur (root)
-detect_root()
+function detect_root()
 {
     # Si le script n'est pas exécuté en root
     if [ "$EUID" -ne 0 ]; then
@@ -64,6 +100,7 @@ detect_root()
     fi
 
     # Sinon, si le script est exécuté en root
+    script_header "$C_VERT BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_RESET"
     echo "$C_JAUNE>>> Détection de votre gestionnaire de paquet $C_RESET"
     $OS_FAMILY = "void"
     get_dist_package_manager
@@ -99,7 +136,7 @@ detect_root()
 }
 
 # Mise à jour des paquets actuels
-dist_upgrade()
+function dist_upgrade()
 {
     echo "$C_VERT>>> Mise à jour du système $C_RESET"
     case "$OS_FAMILY" in
@@ -123,7 +160,7 @@ dist_upgrade()
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-packages_to_install()
+function packages_to_install()
 {
     package_name=$1
 
@@ -207,7 +244,7 @@ software_install()
     fi
 }
 
-is_installation_done()
+function is_installation_done()
 {
     echo "$C_VERT>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
     rm -rf $install_dir
