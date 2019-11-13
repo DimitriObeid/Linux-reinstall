@@ -12,8 +12,13 @@
 # File buffer
 INSTALL_VAL=0
 
-#
+# FILES="./.files"
+
+# Variable globale pour les colonnes des headers
 COLS=$(tput cols)
+
+# Trouver l'origine d'une éventuelle erreur
+ERR_OR=""
 
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 196)   # Rouge clair
@@ -60,6 +65,7 @@ function script_header()
 function handle_error()
 {
     result=$1
+
     if test $result -eq 0; then
         return
     else
@@ -138,6 +144,16 @@ function detect_root()
     esac
 }
 
+function check_internet_connection()
+{
+	script_header "$C_HEADER_LINE VÉRIFICATION DE LA CONNEXION À INTERNET $C_HEADER_LINE"
+	if ping -q -c 1 -W 1 google.com >/dev/null; then
+		echo "$C_VERT>>> Votre ordinateur ext connecté à internet $C_RESET"
+	else
+		handle_error $?
+	fi
+}
+
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté (ÉTAPE IMPORTANTE, NE PAS MODIFIER, SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 function dist_upgrade()
 {
@@ -166,7 +182,7 @@ function dist_upgrade()
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-function packages_to_install()
+function install_for_dist()
 {
     package_name=$1
 
@@ -193,14 +209,28 @@ function packages_to_install()
 
     # Si la longueur de la chaîne de caractères est égale à 0
     if test -z "$cmd_install"; then
-		cmd_install=$(get_cmd_install) dépôts
+		cmd_install="$(get_cmd_install)"
 	fi
     if test $INSTALL_VAL -eq 1; then
         echo "Installation de : " $package_name "(commande :" $cmd_install $package_name ")"
         return
     fi
     $cmd_install $package_name
+	handle_error $?
 }
+
+function script_install
+{
+	if test $INSTALL_VAL -eq 1; then
+		echo "Installation de" $1 "(script_install)"
+		return
+	fi
+	sudo cp $FILES/$1 /usr/bin/$1
+	handle_error $?
+	sudo chmod 755 /usr/bin/$1
+	handle_error $?
+}
+
 
 
 # Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
@@ -262,6 +292,9 @@ function is_installation_done()
 get_dist_package_manager
 # handle_error # Supprimer cette ligne quand j'aurai une fonction fonctionnelle à utiliser dans une condition
 detect_root
+check_internet_connection
 dist_upgrade
+install
+script_install
 wget_install
 is_installation_done
