@@ -18,8 +18,8 @@ La lecture de la documentation est vivement conseillée, surtout si vous avez be
 
 ## Description des fichiers
 
-Bug tracking.txt    : Mise à jour des bugs connus
-Changelogs.txt      : Contient les changements ayant eu lieu entre deux versions
-Documentation fichier de réinstallation.odt.old : Version auncienne de la documentation. Comme expliqué, sa refonte est en cours
-README.md       : Un fichier écrit en Markdown pour être affiché comme vous le lisez actuellement
-reinstall.sh    : C'est LE fichier que vous voulez exécuter pour installer tous vos programmes
+*__Bug tracking.txt :__* Mise à jour des bugs connus.  
+*__Changelogs.txt :__* Contient les changements ayant eu lieu entre deux versions.  
+*__Documentation fichier de réinstallation.odt.old :__* Version auncienne de la documentation. Comme expliqué, sa refonte est en cours.  
+*__README.md :__* Un fichier écrit en Markdown pour être affiché comme vous le lisez actuellement.  
+*__reinstall.sh :__* C'est LE fichier que vous voulez exécuter pour installer tous vos programmes.
