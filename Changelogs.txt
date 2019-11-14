@@ -1,5 +1,7 @@
-Version actuelle : Alpha 0.0.0.2
+Version : Alpha 0.0.1.0
 
 Changelogs :
-    - L'affichage jaune est réellement jaune
+    - Ajout d'une fonction d'auto-suppression des paquets obsolètes à la fin du script
+    - Réorganisation des variables globales du début
+    - Ajout d'un chronomètre pour définir le temps d'affichage des headers
     - 
