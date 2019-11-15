@@ -5,3 +5,9 @@ Changelogs :
     - Réorganisation des variables globales du début
     - Ajout d'un chronomètre pour définir le temps d'affichage des headers
     - 
+
+Version : Alpha 0.1.0.0
+
+Changelogs :
+    - Suppression de la fonction "handle_error()", appel de la première chaîne de caractères, puis de la deuxième chaîne de caractères spécifique à l'erreur, et de la chaîne de caractères finale. La string entière est finalement écrite en brut.
+    - 

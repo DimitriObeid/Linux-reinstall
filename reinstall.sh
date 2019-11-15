@@ -13,7 +13,7 @@
 ### DÉFINITION DES VARIABLES GLOBALES ###
 
 ## HEADER
-COLS=$(tput cols)   # Définition des colonnes des headers
+LINE_CHAR="-"		# Si vous souhaitez mettre d'autres caractères à la place d'une ligne
 
 ## CHRONOMÈTRE
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape. Pour changer le timer, changer la valeur de "sleep". Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
@@ -22,8 +22,7 @@ SLEEP=sleep\ 1.5 # NE PAS SUPPRIMER L'ANTISLASH, SINON LA VALEUR DE "sleep" NE S
 # File buffer
 INSTALL_VAL=0
 
-# FILES="./.files"
-
+# Nombre de chevrons avant les chaînes de caractères vertes et rouges
 TAB=">>>>>"
 
 ## COULEURS
@@ -34,21 +33,18 @@ C_JAUNE=$(tput setaf 226)   # Jaune clair
 C_RESET=$(tput sgr0)        # Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
 C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici /!\
 
-# Trouver l'origine d'une éventuelle erreur (les deux premières lignes ne varient pas lors de chaque cas d'erreur)
-HEADER_ERR_1="$C_ROUGE>>> Une erreur s'est produite lors de l'installation :"
-HEADER_ERR_2="$C_ROUGE Souhaitez vous arrêter l'installation ? (o/n)$C_RESET"
-ERR_OR=
-
+## GESTION D'ERREURS
 # Codes de sortie d'erreur
-E_NON_ROOT=67
+EXIT_ERR_NON_ROOT=67
+# Cas d'erreurs possibles
+ERROR_OUTPUT_1="$C_ROUGE$TAB>>> Une erreur s'est produite lors de l'installation : "
+ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
 
-
-## DÉBUT DU SCRIPT
-
+## DÉBUT DE L'INSTALLATION
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
-line()
+draw_line()
 {
-	cols=$COLS
+	cols=$(tput cols)
 	char=$1
 	color=$2
 	if test "$color" != ""; then
@@ -71,41 +67,40 @@ script_header()
 		color=$C_HEADER_LINE
 	fi
 
+	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #    $SLEEP
 	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
-	line "-"
+	draw_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
 	echo "##> "$1
-	line "-"
+	draw_line $LINE_CHAR
 	echo -ne $color
 	$SLEEP
 }
 
 # Gestion de cas d'erreur lors de l'installation du script
-handle_error()
-{
-    result=$1
-    ERROR_OUTPUT="$TAB$HEADER_ERR_1$C_JAUNE$ERR_OR$HEADER_ERR_2"
-    if test $result -eq 0; then
-        return
-    else
-        echo "$ERROR_OUTPUT"
-        read stop_script
-        case ${stop_script,,} in
-            "n" | "non" | "no")
-                echo "$DEFAULT"
-                return "$ERROR_OUTPUT"
-                ;;
-            *)
-                echo "$C_ROUGE$TAB>>> Vous avez arrêté l'exécution du script"
-                echo "$TAB>>> Abandon $C_RESET"
-                script_header "$C_HEADER_LINE FIN DE L'EXÉCUTION DU SCRIPT $C_HEADER_LINE"
-                exit $E_NON_ROOT
-                ;;
-        esac
-    fi
-}
+#handle_error()
+#{
+#    result=$1
+#    error_output="$C_JAUNE$ERR_OR."
+#    if test $result -eq 0; then
+#        return
+#    if ! test $result -eq 0; then
+#        trap "echo $error_output"
+#        read stop_script
+#        case ${stop_script,,} in
+#            "n" | "non" | "no")
+#				return
+#                ;;
+#            *)
+#                echo "$C_ROUGE$TAB>>> Vous avez arrêté l'exécution du script"
+#                echo "$TAB>>> Abandon $C_RESET"
+#				exit 1
+#                ;;
+#        esac
+#    fi
+#}
 
 # On détecte le gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
@@ -143,11 +138,11 @@ detect_root()
         echo "$C_VERT$TAB>>> Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
     fi
     echo "$C_JAUNE>>> Assurez-vous d'avoir lu la documentation du script avant de l'exécuter."
-    echo -n "$C_JAUNE>>> Êtes-vous sûr de savoir ce que vous faites ? (o/n) $C_RESET"; echo ""
+    echo -n "$C_JAUNE>>> Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
     read rep
     case ${rep,,} in
         "o" | "oui" | "y" | "yes")
-            echo "$C_VERT$TAB>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"
+            echo "$C_VERT$TAB>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"; echo ""
             install_dir=/tmp/reinstall_tmp.d
             if [ -d "$install_dir" ]; then
                 rm -rf $install_dir
@@ -168,12 +163,15 @@ detect_root()
 
 check_internet_connection()
 {
-    $ERR_OR="ERREUR : VOTRE ORDINATEUR N\'EST PAS CONNECTÉ À INTERNET"
-	script_header "$C_HEADER_LINE VÉRIFICATION DE LA CONNEXION À INTERNET $C_HEADER_LINE"; echo ""
+	is_not_connected="ERREUR DE CONNEXION À INTERNET !!"
+	script_header "$C_HEADER_LINE VÉRIFICATION DE LA CONNEXION À INTERNET $C_HEADER_LINE"; echo "$C_RESET";
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
-		echo "$C_VERT$TAB>>> Votre ordinateur est connecté à internet $C_RESET"
+		echo "$C_VERT$TAB>>> Votre ordinateur est connecté à internet$C_RESET"
+		echo ""
 	else
-		handle_error $ERR_OR
+		echo "$ERROR_OUTPUT_1$is_not_connected$ERROR_OUTPUT_2"
+		echo "$C_ROUGE$TAB>>> Abandon$C_RESET"
+		exit 1
 	fi
 }
 
@@ -204,9 +202,8 @@ dist_upgrade()
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-install_for_dist()
+install_for_dist_cmd()
 {
-	script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET"; echo""
     package_name=$1
 
     get_cmd_install()
@@ -230,23 +227,24 @@ install_for_dist()
 		esac
     }
 
-    # Si la longueur de la chaîne de caractères est égale à 0
-    if test -z "$cmd_install"; then
-		cmd_install="$(get_cmd_install)"
-	fi
-    if test $INSTALL_VAL -eq 1; then
-        echo "$C_JAUNE>>> Installation de : " $package_name "(commande :" $cmd_install $package_name ") $C_RESET"
-        return
-    fi
-    $cmd_install $package_name
-	handle_error $?
+#    # Si la longueur de la chaîne de caractères est égale à 0
+#    if test -z "$cmd_install"; then
+#		cmd_install="$(get_cmd_install)"
+#	fi
+#    if test $INSTALL_VAL -eq 1; then
+#        echo "$C_JAUNE>>> Installation de : " $package_name "(commande :" $cmd_install $package_name ") $C_RESET"
+#        return
+#    fi
+#    $cmd_install $package_name
+#	handle_error $?
 }
 
-script_install()
+script_install_cmd()
 {
+	$handle_error $cmd_install
     $cmd_install
 	if test $INSTALL_VAL -eq 1; then
-		echo "$C_JAUNE>>> Installation de" $1 "(script_install)"
+		echo "$C_JAUNE>>> Installation de" $1 "($script_install_cmd)"
 		return
 	fi
 }
@@ -254,7 +252,7 @@ script_install()
 # Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
 wget_install()
 {
-    script_header "$C_HEADER_LINE INSTALLATION DE WGET $C_HEADER_LINE"; echo ""
+    echo ""; script_header "$C_HEADER_LINE INSTALLATION DE WGET $C_HEADER_LINE"; echo ""
 
     # Installation de wget si le binaire n'est pas installé
     if [ ! /usr/bin/wget ]; then
@@ -265,36 +263,21 @@ wget_install()
                 echo "$C_VERT>>> Installation de wget $C_RESET"
                 $pack_inst wget
                 echo "$C_VERT>>> wget a été installé avec succès $C_RESET"
+				echo ""
                 ;;
             *)
                 echo "$C_ROUGE$TAB>>> wget ne sera pas installé $C_RESET"
+				echo ""
                 ;;
         esac
     else
         echo "$C_VERT>>> Le paquet \"wget\" est déjà installé sur votre ordinateur $C_RESET"
+		echo ""
     fi
 }
 
-# La liste des paquets à télécharger
-package_install()
-{
-	commandes="neofetch tree sl"
-    images="gimp inkscape"
-    internet="thunderbird"
-    logiciels="snapd k4dirstat"
-    modelisation="blender"
-    programmation="atom codeblocks emacs libsfml-dev libcsfml-dev python-pip valgrind"
-    video="vlc"
-    windows="wine mono-complete"
-    lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
-
-    paquets=$commandes $images $internet $logiciels $modelisation $programmation $video $windows $lamp
-    script_install $paquets # Mettre dans une boucle pour écrire en temps réel les étapes d'installation des paquets
-
-}
-
 # Pour installer des logiciels disponibles dans la logithèque de la distribution (Steam), indisponibles dans les gestionnaires de paquets et la logithèque (VMware) ou mis à jour plus rapidement ou uniquement sur le site officiel du paquet (youtube-dl).
-software_install()
+software_install_cmd()
 {
     # Installation de Steam
     steam_exe=/usr/games/steam
@@ -318,36 +301,94 @@ software_install()
     fi
 }
 
+main_install()
+{
+	script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET"; echo""
+
+	####################################################
+	# ICI COMMENCE LA LISTE DES PROGRAMMES À INSTALLER #
+	####################################################
+	## PAQUETS À INSTALLER DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION SELON LEUR CATÉGORIE
+
+	# Des commandes pratiques... ou bien juste pour le fun
+	commandes="neofetch tree sl "
+
+	# Manipulation d'images
+	images="gimp "
+
+	# Messageries, clients internet, ect...
+	internet="thunderbird "
+
+	# Des logiciels pratiques pour votre ordinateur... ou pour en installer d'autres
+	logiciels="snapd k4dirstat "
+
+	# Pour faire de la modélisation 3D
+	modelisation="blender "
+
+	# Pour bien programmer. Après tout, chaque distribution Linux est le meilleur système d'exploitation pour programmer
+	programmation="atom codeblocks emacs gcc g++ libsfml-dev libcsfml-dev python-pip valgrind "
+
+	# Visionneuse ou éditeur de vidéos
+	video="vlc "
+
+	# Pour convertir les appels systèmes des logiciels conçus uniquement pour Windaube en appels systèmes POSIX dès leur utilisation
+	windows="wine mono-complete "
+
+	# Pour travailler avec LAMP (Linux Apache, MySQL, PHP)
+	lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip "
+
+	# Ainsi, si vous voulez ajouter ou supprimer un paquet, vous n'avez qu'à l'ajouter ou le supprimer à un seul endroit dans la liste ci-dessus
+	paquets_a_installer="$commandes $images $internet $logiciels $modelisation $programmation $video $windows $lamp"
+
+	script_install_cmd "$paquets_a_installer"
+
+	####################################################
+	#    FIN DE LA LISTE DES PROGRAMMES À INSTALLER    #
+	####################################################
+}
+
 ## Suppression des paquets obsolètes avec "deborphan"
 autoremove()
 {
     script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
     echo "$C_RESET"
-    case "$OS_FAMILY" in
-        opensuse)
-            zypper
-            ;;
-        archlinux)
-            pacman -Qdt
-            ;;
-        fedora)
-            dnf autoremove
-            ;;
-        debian)
-            apt-get autoremove
-            ;;
-        gentoo)
-            emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
-            emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
-            eix-test-obsolete       # Tester s'il reste des paquets obsolètes
-            ;;
-    esac
-    echo "$C_VERT$TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+	echo "$C_JAUNE>>> Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
+	read $autoremove_rep
+	case {$autoremove_rep,,} in
+		"o" | "oui" | "y" | "yes")
+			echo "$C_VERT$TAB>>> Suppresiion des paquets $C_RESET"; echo ""
+    		case "$OS_FAMILY" in
+        		opensuse)
+            		echo "zypper"
+            		;;
+        		archlinux)
+            		echo "pacman -Qdt"
+            		;;
+        		fedora)
+            		echo "dnf autoremove"
+            		;;
+        		debian)
+            		echo "apt-get autoremove"
+            		;;
+        		gentoo)
+            		echo "emerge -uDN @world"      # D'abord, vérifier qu'aucune tâche d'installation est active
+            		echo "emerge --depclean -a"    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
+            		echo "eix-test-obsolete"       # Tester s'il reste des paquets obsolètes
+            		;;
+			esac
+			echo "$C_VERT$TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+			;;
+		*)
+			echo "$C_VERT$TAB>>> Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
+			return
+			;;
+	esac
 }
 
 is_installation_done()
 {
-    echo "$C_VERT>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
+	script_header "$C_HEADER_LINE FIN DE L'INSTALLATION $C_HEADER_LINE"; echo ""
+    echo "$C_VERT$TAB>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
     rm -rf $install_dir
 }
 
@@ -356,8 +397,9 @@ get_dist_package_manager
 detect_root
 check_internet_connection
 dist_upgrade
-install_for_dist
-script_install
+install_for_dist_cmd
+script_install_cmd
 wget_install
+main_install
 autoremove
 is_installation_done
