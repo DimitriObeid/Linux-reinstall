@@ -264,7 +264,7 @@ wget_install()
             "o" | "oui" | "y" | "yes")
                 echo "$V_TAB Installation de wget $C_RESET"
                 $pack_inst wget
-                echo "$V_TAB>>> wget a été installé avec succès $C_RESET"
+                echo "$V_TAB wget a été installé avec succès $C_RESET"
 				echo ""
                 ;;
             *)
@@ -354,7 +354,7 @@ autoremove()
 {
     script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
     echo "$C_RESET"
-	echo "$J_TAB>>> Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
+	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
 	read $autoremove_rep
 	case {$autoremove_rep,,} in
 		"o" | "oui" | "y" | "yes")
@@ -381,7 +381,7 @@ autoremove()
 			echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
 			;;
 		*)
-			echo "$V_TAB>>> Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
+			echo "$V_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
 			return
 			;;
 	esac
