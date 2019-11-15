@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Pour débugguer ce script, si jamais, taper la commande :
+# Pour débugguer ce script, si besoin, taper la commande :
 # <shell utilisé> -x <nom du fichier>
 # Exemple :
 # /bin/bash -x reinstall.sh
@@ -22,9 +22,6 @@ SLEEP=sleep\ 1.5 # NE PAS SUPPRIMER L'ANTISLASH, SINON LA VALEUR DE "sleep" NE S
 # File buffer
 INSTALL_VAL=0
 
-# Nombre de chevrons avant les chaînes de caractères vertes et rouges
-TAB=">>>>>"
-
 ## COULEURS
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 196)   # Rouge clair
@@ -33,11 +30,17 @@ C_JAUNE=$(tput setaf 226)   # Jaune clair
 C_RESET=$(tput sgr0)        # Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
 C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici /!\
 
+# Nombre de chevrons avant les chaînes de caractères vertes et rouges
+TAB=">>>>"
+J_TAB="$C_JAUNE$TAB"
+$R_TAB="$ROUGE$TAB>>>>"
+$V_TAB="$VERT$TAB>>>>"
+
 ## GESTION D'ERREURS
 # Codes de sortie d'erreur
 EXIT_ERR_NON_ROOT=67
 # Cas d'erreurs possibles
-ERROR_OUTPUT_1="$C_ROUGE$TAB>>> Une erreur s'est produite lors de l'installation : "
+ERROR_OUTPUT_1="$R_TAB>>> Une erreur s'est produite lors de l'installation :"
 ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
 
 ## DÉBUT DE L'INSTALLATION
@@ -83,7 +86,7 @@ script_header()
 #handle_error()
 #{
 #    result=$1
-#    error_output="$C_JAUNE$ERR_OR."
+#    error_output="$J_TAB$ERR_OR."
 #    if test $result -eq 0; then
 #        return
 #    if ! test $result -eq 0; then
@@ -94,7 +97,7 @@ script_header()
 #				return
 #                ;;
 #            *)
-#                echo "$C_ROUGE$TAB>>> Vous avez arrêté l'exécution du script"
+#                echo "$R_TAB>>> Vous avez arrêté l'exécution du script"
 #                echo "$TAB>>> Abandon $C_RESET"
 #				exit 1
 #                ;;
@@ -117,44 +120,44 @@ detect_root()
 {
     # Si le script n'est pas exécuté en root
     if [ "$EUID" -ne 0 ]; then
-    	echo "$C_ROUGE$TAB>>> Ce script doit être exécuté en tant qu'administrateur (root)."
-    	echo "$TAB>>> Placez sudo devant votre commande :"
-    	echo "$TAB>>> sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
-    	echo "$TAB>>> Abandon"
+    	echo "$R_TAB Ce script doit être exécuté en tant qu'administrateur (root)."
+    	echo "$R_TAB Placez sudo devant votre commande :"
+    	echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
+    	echo "$R_TAB Abandon"
     	echo "$C_RESET"
     	exit 1          # Quitter le programme en cas d'erreur
     fi
 
     # Sinon, si le script est exécuté en root
     script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
-    echo "$C_JAUNE>>> Détection de votre gestionnaire de paquet :$C_RESET"
+    echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
     get_dist_package_manager
     if [ "$OS_FAMILY" = "void" ]; then  # Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
-        echo "$C_ROUGE$TAB>>> ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
-        echo "$TAB>>> Abandon"
+        echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
+        echo "$R_TAB Abandon"
         echo "$C_RESET"
         exit 1
     else
-        echo "$C_VERT$TAB>>> Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
+        echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
     fi
-    echo "$C_JAUNE>>> Assurez-vous d'avoir lu la documentation du script avant de l'exécuter."
-    echo -n "$C_JAUNE>>> Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
+    echo "$J_TAB Assurez-vous d'avoir lu la documentation du script avant de l'exécuter."
+    echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
     read rep
     case ${rep,,} in
         "o" | "oui" | "y" | "yes")
-            echo "$C_VERT$TAB>>> Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"; echo ""
+            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"; echo ""
             install_dir=/tmp/reinstall_tmp.d
             if [ -d "$install_dir" ]; then
                 rm -rf $install_dir
             fi
-            echo "$C_JAUNE>>> Création du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
+            echo "$J_TAB Création du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
             mkdir $install_dir && cd $install_dir
-            echo "$C_VERT$TAB>>> Le dossier d'installation temporaire a été créé avec succès dans \"/tmp\" $C_RESET"; echo ""
+            echo "$V_TAB Le dossier d'installation temporaire a été créé avec succès dans \"/tmp\" $C_RESET"; echo ""
             ;;
         *)
-            echo "$C_ROUGE$TAB>>> Pour lire le script, entrez la commande suivante :"
-            echo "$TAB>>> cat reinstall.sh"
-            echo "$TAB>>> Abandon"
+            echo "$R_TAB Pour lire le script, entrez la commande suivante :"
+            echo "$R_TAB cat reinstall.sh"
+            echo "$R_TAB Abandon"
             echo "$C_RESET"
             exit 1
             ;;
@@ -163,14 +166,13 @@ detect_root()
 
 check_internet_connection()
 {
-	is_not_connected="ERREUR DE CONNEXION À INTERNET !!"
 	script_header "$C_HEADER_LINE VÉRIFICATION DE LA CONNEXION À INTERNET $C_HEADER_LINE"; echo "$C_RESET";
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
-		echo "$C_VERT$TAB>>> Votre ordinateur est connecté à internet$C_RESET"
+		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
 		echo ""
 	else
-		echo "$ERROR_OUTPUT_1$is_not_connected$ERROR_OUTPUT_2"
-		echo "$C_ROUGE$TAB>>> Abandon$C_RESET"
+		echo "$ERROR_OUTPUT_1 ERREUR DE CONNEXION À INTERNET !!.$ERROR_OUTPUT_2"
+		echo "$R_TAB Abandon $C_RESET"
 		exit 1
 	fi
 }
@@ -198,7 +200,7 @@ dist_upgrade()
 			sudo emerge -u world
 			;;
 	esac
-	echo "$C_VERT$TAB>>> Mise à jour du système effectuée avec succès $C_RESET"; echo ""
+	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
@@ -232,7 +234,7 @@ install_for_dist_cmd()
 #		cmd_install="$(get_cmd_install)"
 #	fi
 #    if test $INSTALL_VAL -eq 1; then
-#        echo "$C_JAUNE>>> Installation de : " $package_name "(commande :" $cmd_install $package_name ") $C_RESET"
+#        echo "$J_TAB>>> Installation de : " $package_name "(commande :" $cmd_install $package_name ") $C_RESET"
 #        return
 #    fi
 #    $cmd_install $package_name
@@ -244,7 +246,7 @@ script_install_cmd()
 	$handle_error $cmd_install
     $cmd_install
 	if test $INSTALL_VAL -eq 1; then
-		echo "$C_JAUNE>>> Installation de" $1 "($script_install_cmd)"
+		echo "$J_TAB Installation de" $1 "($script_install_cmd)"
 		return
 	fi
 }
@@ -256,22 +258,22 @@ wget_install()
 
     # Installation de wget si le binaire n'est pas installé
     if [ ! /usr/bin/wget ]; then
-        echo "$C_JAUNE>>> La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_RESET"
+        echo "$J_TAB La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_RESET"
         read wget_rep
         case $wget_rep in
             "o" | "oui" | "y" | "yes")
-                echo "$C_VERT>>> Installation de wget $C_RESET"
+                echo "$V_TAB Installation de wget $C_RESET"
                 $pack_inst wget
-                echo "$C_VERT>>> wget a été installé avec succès $C_RESET"
+                echo "$V_TAB>>> wget a été installé avec succès $C_RESET"
 				echo ""
                 ;;
             *)
-                echo "$C_ROUGE$TAB>>> wget ne sera pas installé $C_RESET"
+                echo "$R_TAB wget ne sera pas installé $C_RESET"
 				echo ""
                 ;;
         esac
     else
-        echo "$C_VERT>>> Le paquet \"wget\" est déjà installé sur votre ordinateur $C_RESET"
+        echo "$V_TAB Le paquet \"wget\" est déjà installé sur votre ordinateur $C_RESET"
 		echo ""
     fi
 }
@@ -282,12 +284,12 @@ software_install_cmd()
     # Installation de Steam
     steam_exe=/usr/games/steam
     if [ ! -f $steam_exe ]; then
-        echo "$C_VERT>>> Téléchargement de Steam $C_RESET"
+        echo "$V_TAB Téléchargement de Steam $C_RESET"
         wget media.steampowered.com/client/installer/steam.deb
-        echo "$C_VERT>>> Décompression de Steam $C_RESET"
+        echo "$V_TAB Décompression de Steam $C_RESET"
         # dpkg -i
     else
-        echo "$C_VERT>>> Steam est déjà installé sur votre ordinateur $C_RESET"
+        echo "$V_TAB Steam est déjà installé sur votre ordinateur $C_RESET"
     fi
 
     # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
@@ -297,7 +299,7 @@ software_install_cmd()
         chmod a+rx $youtube_dl_exe
         # youtube-dl -U # Pour mettre à jour youtube-dl
     else
-        echo "$C_VERT$TAB Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $C_RESET"
+        echo "$V_TAB Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $C_RESET"
     fi
 }
 
@@ -331,7 +333,7 @@ main_install()
 	# Visionneuse ou éditeur de vidéos
 	video="vlc "
 
-	# Pour convertir les appels systèmes des logiciels conçus uniquement pour Windaube en appels systèmes POSIX dès leur utilisation
+	# Pour utiliser des logiciels conçus uniquement pour Windaube en convertissant leurs appels systèmes en appels systèmes POSIX
 	windows="wine mono-complete "
 
 	# Pour travailler avec LAMP (Linux Apache, MySQL, PHP)
@@ -352,11 +354,11 @@ autoremove()
 {
     script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
     echo "$C_RESET"
-	echo "$C_JAUNE>>> Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
+	echo "$J_TAB>>> Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
 	read $autoremove_rep
 	case {$autoremove_rep,,} in
 		"o" | "oui" | "y" | "yes")
-			echo "$C_VERT$TAB>>> Suppresiion des paquets $C_RESET"; echo ""
+			echo "$V_TAB>>> Suppresiion des paquets $C_RESET"; echo ""
     		case "$OS_FAMILY" in
         		opensuse)
             		echo "zypper"
@@ -376,10 +378,10 @@ autoremove()
             		echo "eix-test-obsolete"       # Tester s'il reste des paquets obsolètes
             		;;
 			esac
-			echo "$C_VERT$TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+			echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
 			;;
 		*)
-			echo "$C_VERT$TAB>>> Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
+			echo "$V_TAB>>> Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
 			return
 			;;
 	esac
@@ -388,7 +390,7 @@ autoremove()
 is_installation_done()
 {
 	script_header "$C_HEADER_LINE FIN DE L'INSTALLATION $C_HEADER_LINE"; echo ""
-    echo "$C_VERT$TAB>>> Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
+    echo "$V_TAB Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
     rm -rf $install_dir
 }
 
