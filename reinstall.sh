@@ -9,17 +9,18 @@
 
 ## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
 
-
 ### DÉFINITION DES VARIABLES GLOBALES ###
 
 ## HEADER
-LINE_CHAR="-"		# Si vous souhaitez mettre d'autres caractères à la place d'une ligne
+# Si vous souhaitez mettre d'autres caractères à la place d'une ligne
+LINE_CHAR="-"
 
 ## CHRONOMÈTRE
-# Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape. Pour changer le timer, changer la valeur de "sleep". Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
+# Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape.
+# Pour changer le timer, changer la valeur de "sleep".
+# Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 SLEEP=sleep\ 1.5 # NE PAS SUPPRIMER L'ANTISLASH, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
 
-# File buffer
 INSTALL_VAL=0
 
 ## COULEURS
@@ -33,8 +34,8 @@ C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la 
 # Nombre de chevrons avant les chaînes de caractères vertes et rouges
 TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
-$R_TAB="$ROUGE$TAB>>>>"
-$V_TAB="$VERT$TAB>>>>"
+R_TAB="$C_ROUGE$TAB>>>>"
+V_TAB="$C_VERT$TAB>>>>"
 
 ## GESTION D'ERREURS
 # Codes de sortie d'erreur
@@ -43,9 +44,12 @@ EXIT_ERR_NON_ROOT=67
 ERROR_OUTPUT_1="$R_TAB>>> Une erreur s'est produite lors de l'installation :"
 ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
 
+# Argument 1 d'installation de paquets
+PACK_NAME=$1
+
 ## DÉBUT DE L'INSTALLATION
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
-draw_line()
+draw_header_line()
 {
 	cols=$(tput cols)
 	char=$1
@@ -73,37 +77,14 @@ script_header()
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #    $SLEEP
 	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
-	draw_line $LINE_CHAR
+	draw_header_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
 	echo "##> "$1
-	draw_line $LINE_CHAR
+	draw_header_line $LINE_CHAR
 	echo -ne $color
 	$SLEEP
 }
-
-# Gestion de cas d'erreur lors de l'installation du script
-#handle_error()
-#{
-#    result=$1
-#    error_output="$J_TAB$ERR_OR."
-#    if test $result -eq 0; then
-#        return
-#    if ! test $result -eq 0; then
-#        trap "echo $error_output"
-#        read stop_script
-#        case ${stop_script,,} in
-#            "n" | "non" | "no")
-#				return
-#                ;;
-#            *)
-#                echo "$R_TAB>>> Vous avez arrêté l'exécution du script"
-#                echo "$TAB>>> Abandon $C_RESET"
-#				exit 1
-#                ;;
-#        esac
-#    fi
-#}
 
 # On détecte le gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
@@ -132,7 +113,8 @@ detect_root()
     script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
     echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
     get_dist_package_manager
-    if [ "$OS_FAMILY" = "void" ]; then  # Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
+	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
+    if [ "$OS_FAMILY" = "void" ]; then
         echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
         echo "$R_TAB Abandon"
         echo "$C_RESET"
@@ -140,7 +122,7 @@ detect_root()
     else
         echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
     fi
-    echo "$J_TAB Assurez-vous d'avoir lu la documentation du script avant de l'exécuter."
+    echo "$J_TAB Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."
     echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
     read rep
     case ${rep,,} in
@@ -155,10 +137,8 @@ detect_root()
             echo "$V_TAB Le dossier d'installation temporaire a été créé avec succès dans \"/tmp\" $C_RESET"; echo ""
             ;;
         *)
-            echo "$R_TAB Pour lire le script, entrez la commande suivante :"
-            echo "$R_TAB cat reinstall.sh"
-            echo "$R_TAB Abandon"
-            echo "$C_RESET"
+            echo "$R_TAB Le script ne sera pas exécuté"
+            echo "$R_TAB Abandon $C_RESET"
             exit 1
             ;;
     esac
@@ -171,8 +151,7 @@ check_internet_connection()
 		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
 		echo ""
 	else
-		echo "$ERROR_OUTPUT_1 ERREUR DE CONNEXION À INTERNET !!.$ERROR_OUTPUT_2"
-		echo "$R_TAB Abandon $C_RESET"
+	echo "$ERROR_OUTPUT_1 ERREUR::AUCUNE CONNEXION À INTERNET !!$ERROR_OUTPUT_2"
 		exit 1
 	fi
 }
@@ -181,7 +160,7 @@ check_internet_connection()
 dist_upgrade()
 {
     ## MISE À JOUR DES PAQUETS
-    script_header "$C_HEADER_LINE MISE À JOUR DU SYSTÈME $C_HEADER_LINE"; echo ""
+    script_header "$C_HEADER_LINE MISE À JOUR DU SYSTÈME $C_HEADER_LINE";
     echo "$C_RESET"
     case "$OS_FAMILY" in
 		opensuse)
@@ -203,50 +182,36 @@ dist_upgrade()
 	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
 }
 
-# Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-install_for_dist_cmd()
+get_dist_cmd_install()
 {
-    package_name=$1
-
-    get_cmd_install()
-    {
-        case $OS_FAMILY in
-            opensuse)
-				echo "zypper -y install"
-				;;
-			archlinux)
-				echo "pacman --noconfirm -S"
-				;;
-			fedora)
-				echo "dnf -y install"
-				;;
-			debian)
-				echo "apt-get -y install"
-				;;
-			gentoo)
-				echo "emerge"
-				;;
-		esac
-    }
-
-#    # Si la longueur de la chaîne de caractères est égale à 0
-#    if test -z "$cmd_install"; then
-#		cmd_install="$(get_cmd_install)"
-#	fi
-#    if test $INSTALL_VAL -eq 1; then
-#        echo "$J_TAB>>> Installation de : " $package_name "(commande :" $cmd_install $package_name ") $C_RESET"
-#        return
-#    fi
-#    $cmd_install $package_name
-#	handle_error $?
+	case $OS_FAMILY in
+		opensuse)
+			echo "zypper -y install"
+			;;
+		archlinux)
+			echo "pacman --noconfirm -S"
+			;;
+		fedora)
+			echo "dnf -y install"
+			;;
+		debian)
+			echo "apt-get -y install"
+			;;
+		gentoo)
+			echo "emerge"
+			;;
+	esac
 }
 
-script_install_cmd()
+# Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
+script_install()
 {
-	$handle_error $cmd_install
-    $cmd_install
-	if test $INSTALL_VAL -eq 1; then
-		echo "$J_TAB Installation de" $1 "($script_install_cmd)"
+	if test -z "$cmd_install"; then
+		cmd_install=$(get_dist_cmd_install)
+	fi
+
+	if test $INSTALL_VAL; then
+		echo "Installation de " $PACK_NAME "(commande : " $get_cmd_install $package_name ")"
 		return
 	fi
 }
@@ -254,7 +219,7 @@ script_install_cmd()
 # Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
 wget_install()
 {
-    echo ""; script_header "$C_HEADER_LINE INSTALLATION DE WGET $C_HEADER_LINE"; echo ""
+    script_header "$C_HEADER_LINE INSTALLATION DE WGET $C_HEADER_LINE"; echo ""
 
     # Installation de wget si le binaire n'est pas installé
     if [ ! /usr/bin/wget ]; then
@@ -342,7 +307,7 @@ main_install()
 	# Ainsi, si vous voulez ajouter ou supprimer un paquet, vous n'avez qu'à l'ajouter ou le supprimer à un seul endroit dans la liste ci-dessus
 	paquets_a_installer="$commandes $images $internet $logiciels $modelisation $programmation $video $windows $lamp"
 
-	script_install_cmd "$paquets_a_installer"
+	script_install "$paquets_a_installer"
 
 	####################################################
 	#    FIN DE LA LISTE DES PROGRAMMES À INSTALLER    #
@@ -399,8 +364,6 @@ get_dist_package_manager
 detect_root
 check_internet_connection
 dist_upgrade
-install_for_dist_cmd
-script_install_cmd
 wget_install
 main_install
 autoremove
