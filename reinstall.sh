@@ -12,7 +12,7 @@
 ### DÉFINITION DES VARIABLES GLOBALES ###
 
 ## HEADER
-# Si vous souhaitez mettre d'autres caractères à la place d'une ligne
+# Si vous souhaitez mettre d'autres caractères à la place d'une ligne, changez le caractère entre les double guillemets
 LINE_CHAR="-"
 
 ## CHRONOMÈTRE
@@ -38,19 +38,19 @@ J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB>>>>"
 V_TAB="$C_VERT$TAB>>>>"
 # En cas de mauvaise valeur rentrée avec un "read"
-READ_VAL="$R_TAB Veuillez rentrez une valeur valide [o, oui, y, yes, n, no, non] $C_RESET"
+READ_VAL="$R_TAB Veuillez rentrer une valeur valide [o, oui, y, yes, n, no, non] $C_RESET"
 
 ## GESTION D'ERREURS
 # Codes de sortie d'erreur
 EXIT_ERR_NON_ROOT=67
-# Cas d'erreurs possibles
+# Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
 ERROR_OUTPUT_1="$R_TAB>>> Une erreur s'est produite lors de l'installation :"
 ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
 
 # Argument 1 d'installation de paquets
 PACK_NAME=$1
 
-## DÉBUT DE L'INSTALLATION
+## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 draw_header_line()
 {
@@ -89,21 +89,21 @@ script_header()
 	$SLEEP
 }
 
+## DÉBUT DE L'INSTALLATION
+# Affichage du message de bienvenue, une fois les headers fraîchement définis
+script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
+
 # On détecte le gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
 {
+	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
+
     which zypper &> /dev/null && OS_FAMILY="opensuse"
     which pacman &> /dev/null && OS_FAMILY="archlinux"
     which dnf &> /dev/null && OS_FAMILY="fedora"
     which apt-get &> /dev/null && OS_FAMILY="debian"
     which emerge &> /dev/null && OS_FAMILY="gentoo"
-}
 
-detect_dist_package_manager()
-{
-	script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
-	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
-	get_dist_package_manager
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
 	if [ "$OS_FAMILY" = "void" ]; then
 		echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
