@@ -16,7 +16,7 @@
 LINE_CHAR="-"
 
 ## CHRONOMÈTRE
-# Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape.
+# Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 SLEEP=sleep\ 1.5 # NE PAS SUPPRIMER L'ANTISLASH, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
@@ -31,11 +31,14 @@ C_JAUNE=$(tput setaf 226)   # Jaune clair
 C_RESET=$(tput sgr0)        # Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
 C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici /!\
 
+## AFFICHAGE DE TEXTE
 # Nombre de chevrons avant les chaînes de caractères vertes et rouges
 TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB>>>>"
 V_TAB="$C_VERT$TAB>>>>"
+# En cas de mauvaise valeur rentrée avec un "read"
+READ_VAL="$R_TAB Veuillez rentrez une valeur valide [o, oui, y, yes, n, no, non] $C_RESET"
 
 ## GESTION D'ERREURS
 # Codes de sortie d'erreur
@@ -96,6 +99,22 @@ get_dist_package_manager()
     which emerge &> /dev/null && OS_FAMILY="gentoo"
 }
 
+detect_dist_package_manager()
+{
+	script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
+	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
+	get_dist_package_manager
+	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
+	if [ "$OS_FAMILY" = "void" ]; then
+		echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
+		echo "$R_TAB Abandon"
+		echo "$C_RESET"
+		exit 1
+	else
+		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
+	fi
+}
+
 # Détection du mode super-administrateur (root)
 detect_root()
 {
@@ -110,18 +129,6 @@ detect_root()
     fi
 
     # Sinon, si le script est exécuté en root
-    script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
-    echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
-    get_dist_package_manager
-	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
-    if [ "$OS_FAMILY" = "void" ]; then
-        echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
-        echo "$R_TAB Abandon"
-        echo "$C_RESET"
-        exit 1
-    else
-        echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
-    fi
     echo "$J_TAB Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."
     echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
     read rep
@@ -136,11 +143,14 @@ detect_root()
             mkdir $install_dir && cd $install_dir
             echo "$V_TAB Le dossier d'installation temporaire a été créé avec succès dans \"/tmp\" $C_RESET"; echo ""
             ;;
-        *)
+        "n" | "non" | "no")
             echo "$R_TAB Le script ne sera pas exécuté"
             echo "$R_TAB Abandon $C_RESET"
             exit 1
             ;;
+		*)
+			echo $READ_VAL
+			detect_root
     esac
 }
 
@@ -320,8 +330,8 @@ autoremove()
     script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
     echo "$C_RESET"
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
-	read $autoremove_rep
-	case {$autoremove_rep,,} in
+	read autoremove_rep
+	case ${autoremove_rep,,} in
 		"o" | "oui" | "y" | "yes")
 			echo "$V_TAB>>> Suppresiion des paquets $C_RESET"; echo ""
     		case "$OS_FAMILY" in
@@ -360,7 +370,7 @@ is_installation_done()
 }
 
 get_dist_package_manager
-# handle_error # Supprimer cette ligne quand j'aurai une fonction fonctionnelle à utiliser dans une condition
+detect_dist_package_manager
 detect_root
 check_internet_connection
 dist_upgrade
