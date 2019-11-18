@@ -15,3 +15,8 @@ Clangelogs :
     - Ajout des paquets à installer (les travaux sur la fonction d'installation des paquets sont toujours en cours)
     - Changement du mode d'affichage des erreurs de détection du gestionnaire de paquets et de l'exécution en tant qu'utilisateur normal : $ERROR_OUTPUT_1 erreur $ERROR_OUTPUT_2
     - Léger changement pour le header de bienvenue : BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! ----> BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!
+
+Version : Beta 0.2.1
+
+Changelogs :
+    - Amélioration visuelle de la partie d'installation des logiciels
