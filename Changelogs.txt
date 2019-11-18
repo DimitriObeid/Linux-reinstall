@@ -1,13 +1,10 @@
-Version : Alpha 0.0.1.0
+Version : Bêta 0.1
 
 Changelogs :
-    - Ajout d'une fonction d'auto-suppression des paquets obsolètes à la fin du script
-    - Réorganisation des variables globales du début
-    - Ajout d'un chronomètre pour définir le temps d'affichage des headers
-    - 
-
-Version : Alpha 0.1.0.0
-
-Changelogs :
-    - Suppression de la fonction "handle_error()", appel de la première chaîne de caractères, puis de la deuxième chaîne de caractères spécifique à l'erreur, et de la chaîne de caractères finale. La string entière est finalement écrite en brut.
-    - 
+    - Headers fonctionnels
+    - Détection du mode super-administrateur
+    - Détection de la connexion à Internet
+    - Mises à jour effectuées avec succès
+    - Installation des paquets depuis les dépôts officiels à résoudre
+    - Commande exacte de nettoyage des paquets obsolètes à trouver pour OpenSUSE
+    - Header de fin d'installation

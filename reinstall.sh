@@ -47,9 +47,6 @@ EXIT_ERR_NON_ROOT=67
 ERROR_OUTPUT_1="$R_TAB>>> Une erreur s'est produite lors de l'installation :"
 ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
 
-# Argument 1 d'installation de paquets
-PACK_NAME=$1
-
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 draw_header_line()
@@ -103,7 +100,7 @@ get_dist_package_manager()
     which apt-get &> /dev/null && OS_FAMILY="debian"
     which emerge &> /dev/null && OS_FAMILY="gentoo"
 
-	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours à "void"
+	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
 	if [ "$OS_FAMILY" = "void" ]; then
 		echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
 		echo "$R_TAB Abandon"
@@ -191,45 +188,49 @@ dist_upgrade()
 	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
 }
 
-# Obtention de la commande d'installation selon le gestionnaire de paquets supporté
-get_dist_cmd_install()
-{
-	case $OS_FAMILY in
-		opensuse)
-			echo "zypper -y install"
-			;;
-		archlinux)
-			echo "pacman --noconfirm -S"
-			;;
-		fedora)
-			echo "dnf -y install"
-			;;
-		debian)
-			echo "apt-get -y install"
-			;;
-		gentoo)
-			echo "emerge"
-			;;
-	esac
-}
-
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
 dist_package_install()
 {
-	if test -z "$cmd_install"; then
-		cmd_install=$(get_dist_cmd_install)
-	fi
+	# Argument 1 d'installation de paquets
+	pack_name=$1
+	# Obtention de la commande d'installation selon le gestionnaire de paquets supporté
+	get_dist_cmd_install()
+	{
+		case $OS_FAMILY in
+			opensuse)
+				zypper -y install
+				;;
+			archlinux)
+				pacman --noconfirm -S
+				;;
+			fedora)
+				dnf -y install
+				;;
+			debian)
+				apt-get -y install
+				;;
+			gentoo)
+				emerge
+				;;
+		esac
+	}
 
-	if test $INSTALL_VAL; then
-		echo "Installation de " $PACK_NAME "(commande : " $get_cmd_install $package_name ")"
+	echo "test"
+
+	if test -z $cmd_install; then
+		cmd_install=$get_dist_cmd_install
+	fi
+	if test $INSTALL_VAL -eq 1; then
+		echo "$V_TAB Installation de $1"
+		$cmd_install $pack_name
 		return
 	fi
+#	$cmd_install $pack_name
 }
 
 ## Suppression des paquets obsolètes
 autoremove()
 {
-    script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
     echo "$C_RESET"
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
 	read autoremove_rep
@@ -258,10 +259,14 @@ autoremove()
 			echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
 			;;
 		"n" | "non" | "no")
-			echo "$V_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
+			echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
+			echo "$J_TAB Pour ceux qui ont accidentellement appuyé sur \"n\""
+			echo "$J_TAB Tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"; echo ""
 			;;
 		*)
 			echo $READ_VAL
+			autoremove
+			;;
 	esac
 }
 
@@ -275,7 +280,8 @@ is_installation_done()
 
 
 ################### DÉBUT DU SCRIPT ###################
-## Affichage du header de bienvenue
+## APPEL DES FONCTIONS UTILE
+# Affichage du header de bienvenue
 script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager
@@ -286,9 +292,14 @@ check_internet_connection
 # Mise à jour des paquets actuels
 dist_upgrade
 
+## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
+script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET"; echo""
+dist_package_install valgrind
+
 
 
 # Suppression des paquets obsolètes
+script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
 autoremove
 # Fin de l'installation
 is_installation_done
