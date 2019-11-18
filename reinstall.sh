@@ -89,11 +89,10 @@ script_header()
 	$SLEEP
 }
 
-## DÉBUT DE L'INSTALLATION
-# Affichage du message de bienvenue, une fois les headers fraîchement définis
-script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
+## DÉFINITION DES FONCTIONS D'INSTALLATION
 
-# On détecte le gestionnaire de paquets de la distribution utilisée
+
+# Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
 {
 	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
@@ -192,6 +191,7 @@ dist_upgrade()
 	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
 }
 
+# Obtention de la commande d'installation selon le gestionnaire de paquets supporté
 get_dist_cmd_install()
 {
 	case $OS_FAMILY in
@@ -214,7 +214,7 @@ get_dist_cmd_install()
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-script_install()
+dist_package_install()
 {
 	if test -z "$cmd_install"; then
 		cmd_install=$(get_dist_cmd_install)
@@ -226,105 +226,7 @@ script_install()
 	fi
 }
 
-# Pour installer des paquets directement depuis un site web (DE PRÉFÉRENCE UN SITE OFFICIEL, CONNU ET SÉCURISÉ (exemple : Source Forge, etc...))
-wget_install()
-{
-    script_header "$C_HEADER_LINE INSTALLATION DE WGET $C_HEADER_LINE"; echo ""
-
-    # Installation de wget si le binaire n'est pas installé
-    if [ ! /usr/bin/wget ]; then
-        echo "$J_TAB La commande \"wget\" manque à l'appel, souhaitez vous l'installer ? $C_RESET"
-        read wget_rep
-        case $wget_rep in
-            "o" | "oui" | "y" | "yes")
-                echo "$V_TAB Installation de wget $C_RESET"
-                $pack_inst wget
-                echo "$V_TAB wget a été installé avec succès $C_RESET"
-				echo ""
-                ;;
-            *)
-                echo "$R_TAB wget ne sera pas installé $C_RESET"
-				echo ""
-                ;;
-        esac
-    else
-        echo "$V_TAB Le paquet \"wget\" est déjà installé sur votre ordinateur $C_RESET"
-		echo ""
-    fi
-}
-
-# Pour installer des logiciels disponibles dans la logithèque de la distribution (Steam), indisponibles dans les gestionnaires de paquets et la logithèque (VMware) ou mis à jour plus rapidement ou uniquement sur le site officiel du paquet (youtube-dl).
-software_install_cmd()
-{
-    # Installation de Steam
-    steam_exe=/usr/games/steam
-    if [ ! -f $steam_exe ]; then
-        echo "$V_TAB Téléchargement de Steam $C_RESET"
-        wget media.steampowered.com/client/installer/steam.deb
-        echo "$V_TAB Décompression de Steam $C_RESET"
-        # dpkg -i
-    else
-        echo "$V_TAB Steam est déjà installé sur votre ordinateur $C_RESET"
-    fi
-
-    # Installation de youtube-dl (pour télécharger des vidéos YouTube plus facilement)
-    youtube_dl_exe="/usr/local/bin/youtube-dl"
-    if [ ! -f $youtube_dl_exe ]; then
-        wget https://yt-dl.org/downloads/latest/youtube-dl -O /usr/local/bin
-        chmod a+rx $youtube_dl_exe
-        # youtube-dl -U # Pour mettre à jour youtube-dl
-    else
-        echo "$V_TAB Le paquet \"youtube-dl\" est déjà installé sur votre ordinateur $C_RESET"
-    fi
-}
-
-main_install()
-{
-	script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET"; echo""
-
-	####################################################
-	# ICI COMMENCE LA LISTE DES PROGRAMMES À INSTALLER #
-	####################################################
-	## PAQUETS À INSTALLER DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION SELON LEUR CATÉGORIE
-
-	# Des commandes pratiques... ou bien juste pour le fun
-	commandes="neofetch tree sl "
-
-	# Manipulation d'images
-	images="gimp "
-
-	# Messageries, clients internet, ect...
-	internet="thunderbird "
-
-	# Des logiciels pratiques pour votre ordinateur... ou pour en installer d'autres
-	logiciels="snapd k4dirstat "
-
-	# Pour faire de la modélisation 3D
-	modelisation="blender "
-
-	# Pour bien programmer. Après tout, chaque distribution Linux est le meilleur système d'exploitation pour programmer
-	programmation="atom codeblocks emacs gcc g++ libsfml-dev libcsfml-dev python-pip valgrind "
-
-	# Visionneuse ou éditeur de vidéos
-	video="vlc "
-
-	# Pour utiliser des logiciels conçus uniquement pour Windaube en convertissant leurs appels systèmes en appels systèmes POSIX
-	windows="wine mono-complete "
-
-	# Pour travailler avec LAMP (Linux Apache, MySQL, PHP)
-	lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip "
-
-	# Ainsi, si vous voulez ajouter ou supprimer un paquet, vous n'avez qu'à l'ajouter ou le supprimer à un seul endroit dans la liste ci-dessus
-	paquets_a_installer="$commandes $images $internet $logiciels $modelisation $programmation $video $windows $lamp"
-
-	script_install "$paquets_a_installer"
-
-	####################################################
-	#    FIN DE LA LISTE DES PROGRAMMES À INSTALLER    #
-	####################################################
-}
-
-## Suppression des paquets obsolètes avec "deborphan"
+## Suppression des paquets obsolètes
 autoremove()
 {
     script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
@@ -333,35 +235,37 @@ autoremove()
 	read autoremove_rep
 	case ${autoremove_rep,,} in
 		"o" | "oui" | "y" | "yes")
-			echo "$V_TAB>>> Suppresiion des paquets $C_RESET"; echo ""
+			echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
     		case "$OS_FAMILY" in
         		opensuse)
-            		echo "zypper"
+            		zypper
             		;;
         		archlinux)
-            		echo "pacman -Qdt"
+            		pacman -Qdt
             		;;
         		fedora)
-            		echo "dnf autoremove"
+            		dnf autoremove
             		;;
         		debian)
-            		echo "apt-get autoremove"
+            		apt-get autoremove
             		;;
         		gentoo)
-            		echo "emerge -uDN @world"      # D'abord, vérifier qu'aucune tâche d'installation est active
-            		echo "emerge --depclean -a"    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
-            		echo "eix-test-obsolete"       # Tester s'il reste des paquets obsolètes
+            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
+            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
+            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
             		;;
 			esac
 			echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
 			;;
-		*)
+		"n" | "non" | "no")
 			echo "$V_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET"; echo ""
-			return
 			;;
+		*)
+			echo $READ_VAL
 	esac
 }
 
+# Fin de l'installation
 is_installation_done()
 {
 	script_header "$C_HEADER_LINE FIN DE L'INSTALLATION $C_HEADER_LINE"; echo ""
@@ -369,12 +273,22 @@ is_installation_done()
     rm -rf $install_dir
 }
 
+
+################### DÉBUT DU SCRIPT ###################
+## Affichage du header de bienvenue
+script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
+# Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager
-detect_dist_package_manager
+# Détection du mode super-administrateur (root)
 detect_root
+# Détection de la connexion à Internet
 check_internet_connection
+# Mise à jour des paquets actuels
 dist_upgrade
-wget_install
-main_install
+
+
+
+# Suppression des paquets obsolètes
 autoremove
+# Fin de l'installation
 is_installation_done
