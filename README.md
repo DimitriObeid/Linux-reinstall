@@ -16,7 +16,7 @@ Il vous téléchargera tous les programmes dont vous avez besoin et les installe
 La lecture de la documentation est vivement conseillée, surtout si vous avez besoin d'ajouter ou de supprimer des programmes. Vous saurez ainsi quelle partie du script changer pour l'adapter à vos besoins.
 
 
-## Description des fichiers
+## 2) Description des fichiers
 
 *__Bug tracking.txt :__* Mise à jour des bugs connus.  
 *__Changelogs.txt :__* Contient les changements ayant eu lieu entre deux versions.  
