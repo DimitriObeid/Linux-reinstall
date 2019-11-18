@@ -102,9 +102,7 @@ get_dist_package_manager()
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
 	if [ "$OS_FAMILY" = "void" ]; then
-		echo "$R_TAB ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
-		echo "$R_TAB Abandon"
-		echo "$C_RESET"
+		echo "$ERROR_OUTPUT_1 ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!$ERROR_OUTPUT_2"
 		exit 1
 	else
 		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
@@ -119,7 +117,7 @@ detect_root()
     	echo "$R_TAB Ce script doit être exécuté en tant qu'administrateur (root)."
     	echo "$R_TAB Placez sudo devant votre commande :"
     	echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
-    	echo "$R_TAB Abandon"
+    	echo "$ERROR_OUTPUT_1 ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL !$ERROR_OUTPUT_2"
     	echo "$C_RESET"
     	exit 1          # Quitter le programme en cas d'erreur
     fi
@@ -189,7 +187,7 @@ dist_upgrade()
 }
 
 # Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
-dist_package_install()
+pack_install()
 {
 	# Argument 1 d'installation de paquets
 	pack_name=$1
@@ -279,10 +277,10 @@ is_installation_done()
 }
 
 
-################### DÉBUT DU SCRIPT ###################
-## APPEL DES FONCTIONS UTILE
+################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
+## APPEL DES FONCTIONS DE CONSTRUCTION
 # Affichage du header de bienvenue
-script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!! $C_HEADER_LINE"
+script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!! $C_HEADER_LINE"
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager
 # Détection du mode super-administrateur (root)
@@ -292,11 +290,59 @@ check_internet_connection
 # Mise à jour des paquets actuels
 dist_upgrade
 
+
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
-script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET"; echo""
-dist_package_install valgrind
+script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
 
+# Commandes
+echo "$V_TAB Installation de \"neofetch\", \"tree\" et \"sl\"$C_RESET"
+pack_install neofetch
+pack_install tree
+pack_install sl
 
+# Jeux
+echo "$V_TAB Installation de \"Snake\" et de \"Pacman\"$C_RESET"
+pack_install bsdgames
+pack_install pacman
+
+# Images
+echo "$V_TAB Installation de \"GIMP\"$C_RESET"
+pack_install gimp
+
+# Internet
+echo "$V_TAB Installation de \"Thunderbird\"$C_RESET"
+pack_install thunderbird
+
+# Librairies
+echo "$V_TAB Installation de \"libsfml-dev\", \"libcsfmf-dev\" et \"Python PIP\"$C_RESET"
+pack_install libcsfml-dev
+pack_install libsfml-dev
+pack_install python-pip
+
+# Logiciels
+echo "$V_TAB Installation de \"Snap\" et \"k4dirstat\"$C_RESET"
+pack_install snapd
+pack_install k4dirstat
+
+# Modélisation
+echo "$V_TAB Installation de \"Blender\"$C_RESET"
+pack_install blender
+
+# Programmation
+echo "$V_TAB Installation de \"Atom\", \"Code::Blocks\", \"Emacs\" et \"Valgrind\"$C_RESET"
+pack_install atom
+pack_install codeblocks
+pack_install emacs
+pack_install valgrind
+
+# Vidéo
+echo "$V_TAB Installation de \"VLC\"$C_RESET"
+pack_install vlc
+
+# LAMP
+echo "$V_TAB Installation de \"LAMP\"$C_RESET"
+lamp=apache2\ php\ libapache2-mod-php\ mariadb-server\ php-mysql\ php-curl\ php-gd\ php-intl\ php-json\ php-mbstring\ php-xml\ php-zip
+pack_install $lamp
 
 # Suppression des paquets obsolètes
 script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
