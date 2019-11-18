@@ -190,7 +190,7 @@ dist_upgrade()
 pack_install()
 {
 	# Argument 1 d'installation de paquets
-	pack_name=$1
+	set pack_name
 	# Obtention de la commande d'installation selon le gestionnaire de paquets supporté
 	get_dist_cmd_install()
 	{
@@ -213,8 +213,6 @@ pack_install()
 		esac
 	}
 
-	echo "test"
-
 	if test -z $cmd_install; then
 		cmd_install=$get_dist_cmd_install
 	fi
@@ -229,7 +227,6 @@ pack_install()
 ## Suppression des paquets obsolètes
 autoremove()
 {
-    echo "$C_RESET"
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
 	read autoremove_rep
 	case ${autoremove_rep,,} in
@@ -295,55 +292,56 @@ dist_upgrade
 script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
 
 # Commandes
-echo "$V_TAB Installation de \"neofetch\", \"tree\" et \"sl\"$C_RESET"
+echo "$J_TAB Installation des commandes$C_RESET"
 pack_install neofetch
 pack_install tree
 pack_install sl
 
 # Jeux
-echo "$V_TAB Installation de \"Snake\" et de \"Pacman\"$C_RESET"
+echo "$J_TAB Installation des jeux$C_RESET"
 pack_install bsdgames
 pack_install pacman
 
 # Images
-echo "$V_TAB Installation de \"GIMP\"$C_RESET"
+echo "$J_TAB Installation de GIMP$C_RESET"
 pack_install gimp
 
 # Internet
-echo "$V_TAB Installation de \"Thunderbird\"$C_RESET"
+echo "$J_TAB Installation de Thunderbird$C_RESET"
 pack_install thunderbird
 
 # Librairies
-echo "$V_TAB Installation de \"libsfml-dev\", \"libcsfmf-dev\" et \"Python PIP\"$C_RESET"
+echo "$J_TAB Installation des librairies $C_RESET"
 pack_install libcsfml-dev
 pack_install libsfml-dev
 pack_install python-pip
 
 # Logiciels
-echo "$V_TAB Installation de \"Snap\" et \"k4dirstat\"$C_RESET"
+echo "$J_TAB Installation des logiciels$C_RESET"
 pack_install snapd
 pack_install k4dirstat
 
 # Modélisation
-echo "$V_TAB Installation de \"Blender\"$C_RESET"
+echo "$J_TAB Installation de Blender$C_RESET"
 pack_install blender
 
 # Programmation
-echo "$V_TAB Installation de \"Atom\", \"Code::Blocks\", \"Emacs\" et \"Valgrind\"$C_RESET"
+echo "$J_TAB Installation de outils de développement$C_RESET"
 pack_install atom
 pack_install codeblocks
 pack_install emacs
 pack_install valgrind
 
 # Vidéo
-echo "$V_TAB Installation de \"VLC\"$C_RESET"
+echo "$J_TAB Installation de VLC$C_RESET"
 pack_install vlc
 
 # LAMP
-echo "$V_TAB Installation de \"LAMP\"$C_RESET"
+echo "$J_TAB Installation des paquets nécessaires au bon fonctionnement de LAMP$C_RESET"
 lamp=apache2\ php\ libapache2-mod-php\ mariadb-server\ php-mysql\ php-curl\ php-gd\ php-intl\ php-json\ php-mbstring\ php-xml\ php-zip
 pack_install $lamp
 
+echo ""
 # Suppression des paquets obsolètes
 script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
 autoremove
