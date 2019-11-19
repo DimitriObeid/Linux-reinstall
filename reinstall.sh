@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Pour débugguer ce script, si besoin, taper la commande :
-# <shell utilisé> -x <nom du fichier>
+# Pour débugguer ce script en cas de besoin, taper la commande :
+# sudo <shell utilisé> -x <nom du fichier>
 # Exemple :
-# /bin/bash -x reinstall.sh
+# sudo /bin/bash -x reinstall.sh
 # Ou encore
-# bash -x reinstall.sh
+# sudo bash -x reinstall.sh
 
 ## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
 
@@ -19,9 +19,10 @@ LINE_CHAR="-"
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
-SLEEP=sleep\ 1.5 # NE PAS SUPPRIMER L'ANTISLASH, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-
-INSTALL_VAL=0
+# NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
+SLEEP_TAB=sleep\ 1.5    # Temps d'affichage d'un changement d'étape
+SLEEP_INST=sleep\ .5    # Temps d'affichage lors de l'installation d'un nouveau paquet
+SLEEP_INST_CAT=sleep\ 1 # Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 ## COULEURS
 # Couleurs pour mieux lire les étapes de l'exécution du script
@@ -35,16 +36,14 @@ C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la 
 # Nombre de chevrons avant les chaînes de caractères vertes et rouges
 TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
-R_TAB="$C_ROUGE$TAB>>>>"
-V_TAB="$C_VERT$TAB>>>>"
+R_TAB="$C_ROUGE$TAB$TAB"
+V_TAB="$C_VERT$TAB$TAB"
 # En cas de mauvaise valeur rentrée avec un "read"
 READ_VAL="$R_TAB Veuillez rentrer une valeur valide [o, oui, y, yes, n, no, non] $C_RESET"
 
 ## GESTION D'ERREURS
-# Codes de sortie d'erreur
-EXIT_ERR_NON_ROOT=67
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
-ERROR_OUTPUT_1="$R_TAB>>> Une erreur s'est produite lors de l'installation :"
+ERROR_OUTPUT_1="$R_TAB Une erreur s'est produite lors de l'installation :"
 ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
 
 ## CRÉATION DES HEADERS
@@ -83,7 +82,7 @@ script_header()
 	echo "##> "$1
 	draw_header_line $LINE_CHAR
 	echo -ne $color
-	$SLEEP
+	$SLEEP_TAB
 }
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
@@ -186,42 +185,45 @@ dist_upgrade()
 	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
 }
 
-# Pour installer des paquets directement depuis les dépôts officiels de la distribution utilisée
+# Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
 pack_install()
 {
-	# Argument 1 d'installation de paquets
-	set pack_name
-	# Obtention de la commande d'installation selon le gestionnaire de paquets supporté
-	get_dist_cmd_install()
-	{
-		case $OS_FAMILY in
-			opensuse)
-				zypper -y install
-				;;
-			archlinux)
-				pacman --noconfirm -S
-				;;
-			fedora)
-				dnf -y install
-				;;
-			debian)
-				apt-get -y install
-				;;
-			gentoo)
-				emerge
-				;;
-		esac
-	}
+    package_name=$@
+	case $OS_FAMILY in
+		opensuse)
+			echo "$V_TAB Installation de $package_name$C_RESET"
+			$SLEEP_INST
+			zypper -y install $package_name
+			;;
+		archlinux)
+            echo "$V_TAB Installation de $package_name$C_RESET"
+			$SLEEP_INST
+			pacman --noconfirm -S $package_name
+			;;
+		fedora)
+            echo "$V_TAB Installation de $package_name$C_RESET"
+			$SLEEP_INST
+			dnf -y install $package_name
+			;;
+		debian)
+			echo "$V_TAB Installation de $package_name$C_RESET"
+			$SLEEP_INST
+			apt-get -y install $package_name
+			;;
+		gentoo)
+			echo "$V_TAB Installation de $package_name$C_RESET"
+			$SLEEP_INST
+			emerge $package_name
+			;;
+	esac
+    echo ""
+}
 
-	if test -z $cmd_install; then
-		cmd_install=$get_dist_cmd_install
-	fi
-	if test $INSTALL_VAL -eq 1; then
-		echo "$V_TAB Installation de $1"
-		$cmd_install $pack_name
-		return
-	fi
-#	$cmd_install $pack_name
+# Pour installer
+snap_install()
+{
+    snap_name=$@
+    snap install $snap_name
 }
 
 ## Suppression des paquets obsolètes
@@ -255,8 +257,8 @@ autoremove()
 			;;
 		"n" | "non" | "no")
 			echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
-			echo "$J_TAB Pour ceux qui ont accidentellement appuyé sur \"n\""
-			echo "$J_TAB Tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"; echo ""
+			echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
+			echo ""
 			;;
 		*)
 			echo $READ_VAL
@@ -291,55 +293,75 @@ dist_upgrade
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
 
+# Installations prioritaires
+echo "$J_TAB INSTALLATION DE COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
+pack_install curl
+pack_install snapd
+pack_install wget
+echo ""
+
 # Commandes
-echo "$J_TAB Installation des commandes$C_RESET"
+echo "$J_TAB INSTALLATION DES COMMANDES $C_RESET"; $SLEEP_INST_CAT
 pack_install neofetch
 pack_install tree
 pack_install sl
+echo ""
 
 # Jeux
-echo "$J_TAB Installation des jeux$C_RESET"
+echo "$J_TAB INSTALLATION DES JEUX $C_RESET"; $SLEEP_INST_CAT
 pack_install bsdgames
 pack_install pacman
+pack_install supertux
+pack_install supertuxkart
+echo ""
 
 # Images
-echo "$J_TAB Installation de GIMP$C_RESET"
+echo "$J_TAB INSTALLATION DE GIMP $C_RESET"; $SLEEP_INST_CAT
 pack_install gimp
+echo ""
 
 # Internet
-echo "$J_TAB Installation de Thunderbird$C_RESET"
+echo "$J_TAB INSTALLATION DE CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
+snap_install discord
 pack_install thunderbird
+echo ""
 
 # Librairies
-echo "$J_TAB Installation des librairies $C_RESET"
+echo "$J_TAB INSTALLATION DES LIBRAIRIES $C_RESET"; $SLEEP_INST_CAT
 pack_install libcsfml-dev
 pack_install libsfml-dev
 pack_install python-pip
+echo ""
 
 # Logiciels
-echo "$J_TAB Installation des logiciels$C_RESET"
-pack_install snapd
+echo "$J_TAB INSTALLATION DES LOGICIELS $C_RESET"; $SLEEP_INST_CAT
 pack_install k4dirstat
+echo ""
 
 # Modélisation
-echo "$J_TAB Installation de Blender$C_RESET"
+echo "$J_TAB INSTALLATION DE BLENDER 3D $C_RESET"; $SLEEP_INST_CAT
 pack_install blender
+echo ""
 
 # Programmation
-echo "$J_TAB Installation de outils de développement$C_RESET"
-pack_install atom
+echo "$J_TAB INSTALLATION DES OUTILS DE DÉVELOPPEMENT $C_RESET"; $SLEEP_INST_CAT
+snap_install atom --classic
+snap_install code --classic
 pack_install codeblocks
 pack_install emacs
 pack_install valgrind
+echo ""
 
 # Vidéo
-echo "$J_TAB Installation de VLC$C_RESET"
+echo "$J_TAB INSTALLATION DE VLC $C_RESET"; $SLEEP_INST_CAT
 pack_install vlc
+echo ""
 
 # LAMP
-echo "$J_TAB Installation des paquets nécessaires au bon fonctionnement de LAMP$C_RESET"
-lamp=apache2\ php\ libapache2-mod-php\ mariadb-server\ php-mysql\ php-curl\ php-gd\ php-intl\ php-json\ php-mbstring\ php-xml\ php-zip
+echo "$J_TAB INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP $C_RESET"; $SLEEP_INST_CAT
+lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
 pack_install $lamp
+
 
 echo ""
 # Suppression des paquets obsolètes
