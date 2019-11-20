@@ -6,5 +6,4 @@ _Version Bêta 0.1_
 
 Ici, seront répertoriés tous les bugs connus, jusqu'à leur correction
 
-- Fonction "dist_package_install" : Les programmes à installer ne s'installent pas (du moins, pas encore)
-- Fonction "autoremove()" : Le message d'erreur de réponse à la question apparaît au moment où la question est posée pour la toute première fois
+Aucun bug n'a été repéré, du moins, pas encore
