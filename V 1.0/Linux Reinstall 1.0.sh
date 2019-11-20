@@ -128,13 +128,6 @@ detect_root()
     case ${rep,,} in
         "oui")
             echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"; echo ""
-            install_dir=/tmp/reinstall_tmp.d
-            if [ -d "$install_dir" ]; then
-                rm -rf $install_dir
-            fi
-            echo "$J_TAB Création du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
-            mkdir $install_dir && cd $install_dir
-            echo "$V_TAB Le dossier d'installation temporaire a été créé avec succès dans \"/tmp\" $C_RESET"; echo ""
             ;;
         "non")
             echo "$R_TAB Le script ne sera pas exécuté"
@@ -272,7 +265,7 @@ autoremove()
 is_installation_done()
 {
 	script_header "$C_HEADER_LINE FIN DE L'INSTALLATION $C_HEADER_LINE"; echo ""
-    echo "$V_TAB Installation terminée. Suppression du dossier d'installation temporaire dans \"/tmp\" $C_RESET"
+    echo "$V_TAB Installation terminée. Votre distribution est prête à l'emploi $C_RESET"
     rm -rf $install_dir
 }
 
