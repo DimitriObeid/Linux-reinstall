@@ -21,7 +21,7 @@ La lecture de la documentation est vivement conseillée, surtout si vous avez be
 ### Dossier actuel :
 *__Bug tracking.md :__* Liste tous les bugs connus jusqu'à leur correction.  
 *__Changelogs.md :__* Contient les changements ayant eu lieu entre deux versions.  
-*__Documentation Linux Reinstall Beta.odt :__* La documentation de la version Bêta du projet. Elle est régulièrement mise à jour.  
+*__Documentation Linux Reinstall Bêta.odt :__* La documentation de la version Bêta du projet. Elle est régulièrement mise à jour.  
 *__README.md :__* Le fichier que vous lisez actuellement sur Github.  
 *__reinstall.sh :__* Le fichier de réinstallation. Constamment mis à jour.
 
