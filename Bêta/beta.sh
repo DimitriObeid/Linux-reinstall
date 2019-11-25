@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script de réinstallation minimal pour les cours de BTS SIO
+# Script de réinstallation minimal en Bêta
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -318,6 +318,10 @@ echo ""
 echo "$J_TAB INSTALLATION DES LOGICIELS $C_RESET"; $SLEEP_INST_CAT
 pack_install k4dirstat
 echo ""
+
+# Machines virtuelles
+echo "$J_TAB INSTALLATION DE VMWARE $C_RESET"; $SLEEP_INST_CAT
+wget
 
 # Programmation
 echo "$J_TAB INSTALLATION DES OUTILS DE DÉVELOPPEMENT $C_RESET"; $SLEEP_INST_CAT
