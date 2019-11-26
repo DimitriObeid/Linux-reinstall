@@ -53,3 +53,4 @@ __IMPORTANT LES ANTISLASHS !!! Sinon "Linux", "Reinstall" et "1.0.sh" seront con
 # 5) Ajouts futurs
 
 Téléchargement de VMware
+Ajout de sudo et configuration pour y accéder en tant qu'utilisateur normal pour Debian
