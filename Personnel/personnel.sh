@@ -290,7 +290,7 @@ dist_upgrade
 script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
 
 # Installations prioritaires
-echo "$J_TAB INSTALLATION DE COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
+echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
 pack_install curl
 pack_install snapd
 pack_install wget
@@ -318,7 +318,7 @@ pack_install gimp
 echo ""
 
 # Internet
-echo "$J_TAB INSTALLATION DE CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
+echo "$J_TAB INSTALLATION DES CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
 snap_install discord
 pack_install thunderbird
 echo ""

@@ -246,18 +246,18 @@ software_install()
 set_sudo()
 {
     script_header "$C_HEADER_LINE DÉTECTION DE SUDO $C_HEADER_LINE"; echo ""
-    echo "$V_TAB Détection de sudo $C_RESET"
-    if [ which sudo > /dev/null ]; then
+    echo "$J_TAB Détection de sudo $C_RESET"
+    if ! which sudo > /dev/null ; then
         pack_install sudo
     else
         echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"
     fi
     if [  ]; then
- 
+
         echo "$J_TAB Ajout de l'utilisateur actuel à la liste des sudoers $C_RESET"
         usermod -aG sudo $USER
     else
-        echo "$V_TAB "
+        echo "$V_TAB Vous avez déjà les permissions du mode sudo $C_RESET"
     fi
 	# Récupérer le 'NAME' dans une string, puis vérifier que l'affectation soit bien à Debian
 }
@@ -335,10 +335,11 @@ dist_upgrade
 script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
 
 # Installations prioritaires
-echo "$J_TAB INSTALLATION DE COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
+echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
 pack_install curl
 pack_install snapd
 pack_install wget
+set_sudo
 echo ""
 
 # Commandes
@@ -348,7 +349,7 @@ pack_install tree
 echo ""
 
 # Internet
-echo "$J_TAB INSTALLATION DE CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
+echo "$J_TAB INSTALLATION DES CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
 snap_install discord
 pack_install thunderbird
 echo ""
