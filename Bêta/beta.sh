@@ -217,6 +217,42 @@ snap_install()
     snap install $snap_name
 }
 
+# Installer un paquet (.deb)
+software_install()
+{
+	ops_soft_links=""
+	arc_soft_links=""
+	fed_soft_links=""
+	deb_soft_links=""
+	gen_soft_links=""
+
+	case $OS_FAMILY in
+		opensuse)
+			;;
+		archlinux)
+			;;
+		fedora)
+			;;
+		debian)
+			wget $deb_soft_links
+			dpkg -i $deb_soft_links
+			;;
+		gentoo)
+			;;
+	esac
+}
+
+# Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
+deb_set_sudo()
+{
+	$detect_debian = cat /etc/os-release | grep "NAME=Debian"
+	if [ $detect_debian = "NAME=debian" ]; then
+        pack_install sudo
+        usermod -aG sudo $USER
+	fi
+	# Récupérer le 'NAME' dans une string, puis vérifier que l'affectation soit bien à Debian
+}
+
 ## Suppression des paquets obsolètes
 autoremove()
 {
@@ -321,7 +357,8 @@ echo ""
 
 # Machines virtuelles
 echo "$J_TAB INSTALLATION DE VMWARE $C_RESET"; $SLEEP_INST_CAT
-wget
+echo "Feature en attente"
+# wget
 
 # Programmation
 echo "$J_TAB INSTALLATION DES OUTILS DE DÉVELOPPEMENT $C_RESET"; $SLEEP_INST_CAT
