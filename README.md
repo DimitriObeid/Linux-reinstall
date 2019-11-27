@@ -49,4 +49,5 @@ Lisez le fichier **"Mode d'emploi.odt"** pour voir comment exécuter un des scri
 
 # 5) Ajouts futurs
 
-Téléchargement de VMware
+Téléchargement de VMware  
+Ajout de sudo et configuration pour y accéder en tant qu'utilisateur normal pour Debian
