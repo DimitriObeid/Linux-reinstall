@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Script de réinstallation minimal pour les cours de BTS SIO
+# Test de beta.sh, avec une nouvelle optimisation de l'affichage des headers
+
+# Script de réinstallation minimal en Bêta
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -41,7 +43,7 @@ J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
 # En cas de mauvaise valeur rentrée avec un "read"
-READ_VAL="$R_TAB Veuillez rentrer une valeur valide [oui, non]$C_RESET"
+READ_VAL="$R_TAB Veuillez rentrer une valeur valide [oui, non] $C_RESET"
 
 ## GESTION D'ERREURS
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
@@ -69,21 +71,22 @@ draw_header_line()
 # Affichage du texte des headers
 script_header()
 {
-	color=$2
+    color=$2
 	if test "$color" = ""; then
         # Définition de la couleur des lignes
 		color=$C_HEADER_LINE
 	fi
 
+	echo ""
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
-#    $SLEEP
+#   $SLEEP
 	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
 	draw_header_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
-	echo "##> "$1
+	echo "##> "$1 $color
 	draw_header_line $LINE_CHAR
-	echo -ne $color
+	echo -ne $C_RESET
 	$SLEEP_TAB
 }
 
@@ -217,6 +220,51 @@ snap_install()
     snap install $snap_name
 }
 
+# Installer un paquet (.deb)
+software_install()
+{
+	ops_soft_links=""
+	arc_soft_links=""
+	fed_soft_links=""
+	deb_soft_links=""
+	gen_soft_links=""
+
+	case $OS_FAMILY in
+		opensuse)
+			;;
+		archlinux)
+			;;
+		fedora)
+			;;
+		debian)
+			wget $deb_soft_links
+			dpkg -i $deb_soft_links
+			;;
+		gentoo)
+			;;
+	esac
+}
+
+# Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
+set_sudo()
+{
+    script_header "$C_HEADER_LINE DÉTECTION DE SUDO $C_HEADER_LINE"; echo ""
+    echo "$J_TAB Détection de sudo $C_RESET"
+    if ! which sudo > /dev/null ; then
+        pack_install sudo
+    else
+        echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"
+    fi
+    if [  ]; then
+
+        echo "$J_TAB Ajout de l'utilisateur actuel à la liste des sudoers $C_RESET"
+        usermod -aG sudo $USER
+    else
+        echo "$V_TAB Vous avez déjà les permissions du mode sudo $C_RESET"
+    fi
+	# Récupérer le 'NAME' dans une string, puis vérifier que l'affectation soit bien à Debian
+}
+
 ## Suppression des paquets obsolètes
 autoremove()
 {
@@ -262,7 +310,7 @@ autoremove()
 # Fin de l'installation
 is_installation_done()
 {
-	script_header "$C_HEADER_LINE FIN DE L'INSTALLATION $C_HEADER_LINE"; echo ""
+	script_header "FIN DE L'INSTALLATION"
     echo "$V_TAB Installation terminée. Votre distribution est prête à l'emploi $C_RESET"
     rm -rf $install_dir
 }
@@ -271,29 +319,30 @@ is_installation_done()
 ################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
 ## APPEL DES FONCTIONS DE CONSTRUCTION
 # Affichage du header de bienvenue
-script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!! $C_HEADER_LINE"; echo "$C_RESET"
+script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!"
 echo "$J_TAB Début de l'installation"
 # Détection du gestionnaire de paquets de la distribution utilisée
-script_header "$C_HEADER_LINE DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS $C_HEADER_LINE"; echo "$C_RESET"
+script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 get_dist_package_manager
 # Détection du mode super-administrateur (root)
 detect_root
 # Détection de la connexion à Internet
-script_header "$C_HEADER_LINE VÉRIFICATION DE LA CONNEXION À INTERNET $C_HEADER_LINE"; echo "$C_RESET";
+script_header "VÉRIFICATION DE LA CONNEXION À INTERNET";
 check_internet_connection
 # Mise à jour des paquets actuels
-script_header "$C_HEADER_LINE MISE À JOUR DU SYSTÈME $C_HEADER_LINE"; echo "$C_RESET"
+script_header "MISE À JOUR DU SYSTÈME"
 dist_upgrade
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
-script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
+script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION";
 
 # Installations prioritaires
 echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
 pack_install curl
 pack_install snapd
 pack_install wget
+set_sudo
 echo ""
 
 # Commandes
@@ -319,6 +368,11 @@ echo "$J_TAB INSTALLATION DES LOGICIELS $C_RESET"; $SLEEP_INST_CAT
 pack_install k4dirstat
 echo ""
 
+# Machines virtuelles
+echo "$J_TAB INSTALLATION DE VMWARE $C_RESET"; $SLEEP_INST_CAT
+echo "Feature en attente"
+# wget
+
 # Programmation
 echo "$J_TAB INSTALLATION DES OUTILS DE DÉVELOPPEMENT $C_RESET"; $SLEEP_INST_CAT
 snap_install atom --classic		# Atom IDE
@@ -339,7 +393,7 @@ pack_install $lamp
 
 echo ""
 # Suppression des paquets obsolètes
-script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
+script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 autoremove
 # Fin de l'installation
 is_installation_done
