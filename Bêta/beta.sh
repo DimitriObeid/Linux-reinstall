@@ -243,13 +243,22 @@ software_install()
 }
 
 # Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
-deb_set_sudo()
+set_sudo()
 {
-	$detect_debian = cat /etc/os-release | grep "NAME=Debian"
-	if [ $detect_debian = "NAME=debian" ]; then
+    script_header "$C_HEADER_LINE DÉTECTION DE SUDO $C_HEADER_LINE"; echo ""
+    echo "$V_TAB Détection de sudo $C_RESET"
+    if [ which sudo > /dev/null ]; then
         pack_install sudo
+    else
+        echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"
+    fi
+    if [  ]; then
+ 
+        echo "$J_TAB Ajout de l'utilisateur actuel à la liste des sudoers $C_RESET"
         usermod -aG sudo $USER
-	fi
+    else
+        echo "$V_TAB "
+    fi
 	# Récupérer le 'NAME' dans une string, puis vérifier que l'affectation soit bien à Debian
 }
 
