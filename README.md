@@ -4,8 +4,8 @@
 
 Vous en avez plus qu'assez de vous retaper toutes les étapes de réinstallation de vos logiciels à la main ?
 
-Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"V1.0"** et  
-à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur, 
+Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"V1.1"** et  
+à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur,
 
 
 Il vous téléchargera tous les programmes dont vous avez besoin et les installera à votre place, et bien plus.
@@ -18,12 +18,12 @@ l'adapter à vos besoins.
 ## 2) Description des fichiers du projet
 
 Deux sous-dossiers se trouvent dans ce dépôt Github :  
-  
+
 * *__Bêta :__*
     - Contient le fichier de réinstallation en version Bêta, ainsi que sa documentation. Le contenu est régulièrement  
     mis à jour.
-  
-* *__V 1.0 :__* 
+
+* *__V 1.1 :__*
     - Contient le script minimal dont vous avez besoin pour vos cours de BTS SIO, ainsi que sa documentation.  
     - Contient également mon script de réinstallation personnelle. Vous pouvez le télécharger si vous souhaitez  
     installer les mêmes programmes que moi ou plus que le strict minimum pour le BTS SIO.  
@@ -32,18 +32,18 @@ Deux sous-dossiers se trouvent dans ce dépôt Github :
     programmes supplémentaires.
   
 ## 3) Contenu du dossier actuel et des sous-dossiers
-  
+
 
 * ### 3.a) Dossier _"Bêta"_ :  
     - *__Documentation Bêta.odt :__* La documentation de la version Bêta du projet. Elle est régulièrement mise à jour.  
     - *__beta.sh :__* Le fichier de réinstallation en version Bêta. Il est régulièrement mis à jour.
 
 
-* ### 3.b) Dossier _"V 1.0"_ :
-    - *__Documentation script personnalisé 1.0 :__* La documentation officielle de la version de réinstallation personnalisée  
-    - *__Documentation SIO 1.0 :__* La documentation officielle de la version 1.0 du script.  
-    - *__sio.sh :__* Le fichier de la version 1.0 du script de réinstallation minimal.  
-    - *__personnel.sh :__* Le fichier de la version 1.0 du script de réinstallation personnalisé.  
+* ### 3.b) Dossier _"V 1.1"_ :
+    - *__Documentation script personnalisé 1.1 :__* La documentation officielle de la version de réinstallation personnalisée  
+    - *__Documentation SIO 1.1 :__* La documentation officielle de la version 1.1 du script.  
+    - *__sio.sh :__* Le fichier de la version 1.1 du script de réinstallation minimal.  
+    - *__personnel.sh :__* Le fichier de la version 1.1 du script de réinstallation personnalisé.  
 
 
 * ### 3.c) Dossier actuel :
@@ -55,7 +55,7 @@ Deux sous-dossiers se trouvent dans ce dépôt Github :
 ## 4) Fichiers à télécharger :
 
 - Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle  
-ou ou plus avancée sont les quatre fichiers se trouvant dans le dossier **"V 1.0"**.  
+ou ou plus avancée sont les quatre fichiers se trouvant dans le dossier **"V 1.1"**.  
 - Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à  
 l'élaboration du projet se trouvent dans le dossier **"Bêta"**.  
 
