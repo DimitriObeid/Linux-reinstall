@@ -127,7 +127,7 @@ detect_root()
     # Sinon, si le script est exécuté en root
     echo "$J_TAB Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."
     echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
-	rep_()
+	rep_launch_script()
 	{
 		read rep
 		case ${rep,,} in
@@ -144,7 +144,7 @@ detect_root()
 			*)
 				echo ""
 				echo "$R_TAB Veuillez rentrer une valeur valide (oui/non) $C_RESET"
-				rep_root
+				rep_launch_script
 				;;
 	    esac
 	}
@@ -262,11 +262,11 @@ set_sudo()
         echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; echo ""
     fi
     if [  ]; then
-		echo "$J_TAB Ajout de l'utilisateur actuel à la liste des sudoers $C_RESET"
+		echo "$J_TAB AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
 		echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
 		echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
 		echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
-		echo "des privilèges d'administrateur sans avoir à vous connecter en mode super-utilisateur."; echo ""
+		echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."; echo ""
 		echo "$J_TAB La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne $C_RESET"
 		echo "root    ALL=(ALL) ALL"; echo ""
 		echo "$J_TAB Tapez : $C_RESET"
@@ -279,6 +279,7 @@ set_sudo()
 			case ${visudo_rep,,} in
 				"compris")
 					visudo
+					usermod -aG sudo $USER
 					;;
 				"quitter")
 					return
@@ -292,7 +293,6 @@ set_sudo()
 			esac
 		}
 		read_rep_f
-		usermod -aG sudo $USER
     else
         echo "$V_TAB Vous avez déjà les permissions du mode sudo $C_RESET"
     fi
@@ -303,42 +303,45 @@ set_sudo()
 autoremove()
 {
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
-	read autoremove_rep
-	case ${autoremove_rep,,} in
-		"oui")
-			echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
-    		case "$OS_FAMILY" in
-        		opensuse)
-            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatiques de tous les paquets obsolètes$C_RESET"
-					echo "$J_TAB Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes$C_RESET"
-            		;;
-        		archlinux)
-            		pacman -Qdt
-            		;;
-        		fedora)
-            		dnf autoremove
-            		;;
-        		debian)
-            		apt autoremove
-            		;;
-        		gentoo)
-            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
-            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
-            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
-            		;;
-			esac
-			echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
-			;;
-		"non")
-			echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
-			echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
-			echo ""
-			;;
-		*)
-			echo $READ_VAL
-			autoremove
-			;;
-	esac
+	read_autoremove()
+	{
+		read autoremove_rep
+		case ${autoremove_rep,,} in
+			"oui")
+				echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
+	    		case "$OS_FAMILY" in
+	        		opensuse)
+	            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatiques de tous les paquets obsolètes$C_RESET"
+						echo "$J_TAB Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes$C_RESET"
+	            		;;
+	        		archlinux)
+	            		pacman -Qdt
+	            		;;
+	        		fedora)
+	            		dnf autoremove
+	            		;;
+	        		debian)
+	            		apt autoremove
+	            		;;
+	        		gentoo)
+	            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
+	            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
+	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
+	            		;;
+				esac
+				echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+				;;
+			"non")
+				echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
+				echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
+				echo ""
+				;;
+			*)
+				echo $READ_VAL
+				read_autoremove
+				;;
+		esac
+	}
 }
 
 # Fin de l'installation

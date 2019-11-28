@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# COOLDOWN_3=sleep 1 && echo "3" && sleep 1 && echo "2" && sleep 1 && echo "1" && sleep 1 && echo ""
+
 ## COULEURS
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 196)   # Rouge clair
@@ -15,33 +17,37 @@ J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
 
-echo "$J_TAB Ajout de l'utilisateur actuel à la liste des sudoers $C_RESET"
-echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
-echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
-echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
-echo "des privilèges d'administrateur sans avoir à vous connecter en mode super-utilisateur."; echo ""
-echo "$J_TAB La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne $C_RESET"
-echo "root    ALL=(ALL) ALL"; echo ""
-echo "$J_TAB Tapez : $C_RESET"
-echo "$USER	ALL=(ALL) NOPASSWD:ALL"; echo ""
-echo "$J_TAB Si vous avez bien compris la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
-echo "$J_TAB ou \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
-read_rep_f()
+func()
 {
-	read visudo_rep
-	case ${visudo_rep,,} in
-		"compris")
-			visudo
-			;;
-		"quitter")
-			return
-			;;
-		*)
-			echo ""
-			echo "$R_TAB Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
-			echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard $C_RESET"
-			read_rep_f
-			;;
-	esac
+	echo "$J_TAB Ajout de l'utilisateur actuel à la liste des sudoers $C_RESET"
+	echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
+	echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
+	echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
+	echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."; echo ""
+	echo "$J_TAB La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne $C_RESET"
+	echo "root    ALL=(ALL) ALL"; echo ""
+	echo "$J_TAB Tapez : $C_RESET"
+	echo "$USER	ALL=(ALL) NOPASSWD:ALL"; echo ""
+	echo "$J_TAB Si vous avez bien compris la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
+	echo "$J_TAB ou \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
+	read_rep_f()
+	{
+		read visudo_rep
+		case ${visudo_rep,,} in
+			"compris")
+				visudo
+				;;
+			"quitter")
+				return
+				;;
+			*)
+				echo ""
+				echo "$R_TAB Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
+				echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard $C_RESET"
+				read_rep_f
+				;;
+		esac
+	}
+	read_rep_f
 }
-read_rep_f
+func

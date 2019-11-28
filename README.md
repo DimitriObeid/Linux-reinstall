@@ -32,10 +32,10 @@ Deux sous-dossiers se trouvent dans ce dépôt Github :
 
 
 * ### 3.b) Dossier _"V 1.0"_ :
-    - *__Documentation script personnalisé 1.0 :__* La documentation officielle de ma version de réinstallation personnalisée  
+    - *__Documentation script personnalisé 1.0 :__* La documentation officielle de la version de réinstallation personnalisée  
     - *__Documentation SIO 1.0 :__* La documentation officielle de la version 1.0 du script.  
-    - *__sio.sh :__* LE fichier de la version 1.0 du script de réinstallation minimal.  
-    - *__personnel.sh :__* LE fichier de la version 1.0 du script de réinstallation personnalisé.  
+    - *__sio.sh :__* Le fichier de la version 1.0 du script de réinstallation minimal.  
+    - *__personnel.sh :__* Le fichier de la version 1.0 du script de réinstallation personnalisé.  
 
 
 * ### 3.c) Dossier actuel :
