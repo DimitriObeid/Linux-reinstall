@@ -13,15 +13,13 @@ La lecture de la documentation est vivement conseillée, surtout si vous avez be
 
 ## 2) Description des fichiers du projet
 
-Dans ce dépôt Github se trouvent 
-
-Deux sous-dossiers se trouvent dans ce dépôt :  
-- *Bêta :__* 
-    - Contient 
-
+Deux sous-dossiers se trouvent dans ce dépôt Github :  
   
-- *__V 1.0 :__* 
-    - Contient le strict minimum dont vous avez besoin pour vos cours de BTS SIO.  
+* *__Bêta :__*
+    - Contient le fichier de réinstallation en version Bêta, ainsi que sa documentation. Le contenu est régulièrement mis à jour.
+  
+* *__V 1.0 :__* 
+    - Contient le script minimal dont vous avez besoin pour vos cours de BTS SIO, ainsi que sa documentation.  
     - Contient également mon script de réinstallation personnelle. Vous pouvez le télécharger si vous souhaitez installer les mêmes programmes que moi ou plus que le strict minimum pour le BTS SIO.  
     - Entre les deux scripts, les seuls changements se situent au niveau des logiciels à installer. Le script personnalisé ajoute les mêmes programmes que le script minimal, plus de nombreux programmes supplémentaires.
   
@@ -34,10 +32,10 @@ Deux sous-dossiers se trouvent dans ce dépôt :
 
 
 * ### 3.b) Dossier _"V 1.0"_ :
-    - *__Documentation personnalisée.odt :__* La documentation officielle de ma version de réinstallation personnalisée  
-    - *__Documentation version 1.0.odt :__* La documentation officielle de la version 1.0 du script.  
-    - *__Linux Reinstall 1.0.sh :__* LE fichier de la version 1.0 du script que vous souhaitez exécuter pour réinstaller vos programmes.  
-    - *__personnel.sh :__* Mon fichier de réinstallation personnelle. Il est mis à jour lorsqu'une version stable du fichier de réinstallation bêta sort  
+    - *__Documentation script personnalisé 1.0 :__* La documentation officielle de ma version de réinstallation personnalisée  
+    - *__Documentation SIO 1.0 :__* La documentation officielle de la version 1.0 du script.  
+    - *__sio.sh :__* LE fichier de la version 1.0 du script de réinstallation minimal.  
+    - *__personnel.sh :__* LE fichier de la version 1.0 du script de réinstallation personnalisé.  
 
 
 * ### 3.c) Dossier actuel :
