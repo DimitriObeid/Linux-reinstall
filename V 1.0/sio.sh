@@ -40,8 +40,6 @@ TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
-# En cas de mauvaise valeur rentrée avec un "read"
-READ_VAL="$R_TAB Veuillez rentrer une valeur valide [oui, non]$C_RESET"
 
 ## GESTION D'ERREURS
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
@@ -69,23 +67,25 @@ draw_header_line()
 # Affichage du texte des headers
 script_header()
 {
-	color=$2
+    color=$2
 	if test "$color" = ""; then
         # Définition de la couleur des lignes
 		color=$C_HEADER_LINE
 	fi
 
+	echo ""
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
-#    $SLEEP
+#   $SLEEP
 	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
 	draw_header_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
-	echo "##> "$1
+	echo "##> "$1 $color
 	draw_header_line $LINE_CHAR
-	echo -ne $color
+	echo -ne $C_RESET
 	$SLEEP_TAB
 }
+
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
 
@@ -126,27 +126,36 @@ detect_root()
     # Sinon, si le script est exécuté en root
     echo "$J_TAB Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."
     echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
-    read rep
-    case ${rep,,} in
-        "oui")
-            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET"; echo ""
-            ;;
-        "non")
-            echo "$R_TAB Le script ne sera pas exécuté"
-            echo "$R_TAB Abandon $C_RESET"
-            exit 1
-            ;;
-		*)
-			echo $READ_VAL
-			detect_root
-    esac
+	# Fonction d'entrée de réponse sécurisée et optimisée
+	rep_launch_script()
+	{
+		read rep
+		case ${rep,,} in
+	        "oui")
+				echo ""
+	            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET";
+				return
+	            ;;
+	        "non")
+				echo ""
+	            echo "$R_TAB Le script ne sera pas exécuté"
+	            echo "$R_TAB Abandon $C_RESET"
+	            exit 1
+	            ;;
+			*)
+				echo ""
+				echo "$R_TAB Veuillez rentrer une valeur valide (oui/non) $C_RESET"
+				rep_launch_script
+				;;
+	    esac
+	}
+	rep_launch_script
 }
 
 check_internet_connection()
 {
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
-		echo ""
 	else
 	echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !!$ERROR_OUTPUT_2"
 		exit 1
@@ -156,6 +165,7 @@ check_internet_connection()
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté (ÉTAPE IMPORTANTE, NE PAS MODIFIER, SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 dist_upgrade()
 {
+	echo ""
     case "$OS_FAMILY" in
 		opensuse)
 			zypper -y update
@@ -173,7 +183,7 @@ dist_upgrade()
 			emerge -u world
 			;;
 	esac
-	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
+	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"
 }
 
 # Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
@@ -210,84 +220,86 @@ pack_install()
     echo ""
 }
 
-# Pour installer
+# Pour installer des paquets Snap
 snap_install()
 {
     snap_name=$@
     snap install $snap_name
 }
 
-## Suppression des paquets obsolètes
+# Suppression des paquets obsolètes
 autoremove()
 {
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
-	read autoremove_rep
-	case ${autoremove_rep,,} in
-		"oui")
-			echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
-    		case "$OS_FAMILY" in
-        		opensuse)
-            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatiques de tous les paquets obsolètes$C_RESET"
-					echo "$J_TAB Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes$C_RESET"
-            		;;
-        		archlinux)
-            		pacman -Qdt
-            		;;
-        		fedora)
-            		dnf autoremove
-            		;;
-        		debian)
-            		apt-get autoremove
-            		;;
-        		gentoo)
-            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
-            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
-            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
-            		;;
-			esac
-			echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
-			;;
-		"non")
-			echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
-			echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
-			echo ""
-			;;
-		*)
-			echo $READ_VAL
-			autoremove
-			;;
-	esac
+	read_autoremove()
+	{
+		read autoremove_rep
+		case ${autoremove_rep,,} in
+			"oui")
+				echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
+	    		case "$OS_FAMILY" in
+	        		opensuse)
+	            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes$C_RESET"
+						echo "$J_TAB Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes$C_RESET"
+	            		;;
+	        		archlinux)
+	            		pacman -Qdt
+	            		;;
+	        		fedora)
+	            		dnf autoremove
+	            		;;
+	        		debian)
+	            		apt autoremove
+	            		;;
+	        		gentoo)
+	            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
+	            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
+	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
+	            		;;
+				esac
+				echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+				;;
+			"non")
+				echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
+				echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
+				echo ""
+				;;
+			*)
+				echo $READ_VAL
+				read_autoremove
+				;;
+		esac
+	}
 }
 
 # Fin de l'installation
 is_installation_done()
 {
-	script_header "$C_HEADER_LINE FIN DE L'INSTALLATION $C_HEADER_LINE"; echo ""
+	script_header "FIN DE L'INSTALLATION"
     echo "$V_TAB Installation terminée. Votre distribution est prête à l'emploi $C_RESET"
-    rm -rf $install_dir
 }
 
 
 ################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
 ## APPEL DES FONCTIONS DE CONSTRUCTION
 # Affichage du header de bienvenue
-script_header "$C_HEADER_LINE BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!! $C_HEADER_LINE"; echo "$C_RESET"
+script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!"
 echo "$J_TAB Début de l'installation"
 # Détection du gestionnaire de paquets de la distribution utilisée
-script_header "$C_HEADER_LINE DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS $C_HEADER_LINE"; echo "$C_RESET"
+script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 get_dist_package_manager
 # Détection du mode super-administrateur (root)
 detect_root
 # Détection de la connexion à Internet
-script_header "$C_HEADER_LINE VÉRIFICATION DE LA CONNEXION À INTERNET $C_HEADER_LINE"; echo "$C_RESET";
+script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 check_internet_connection
 # Mise à jour des paquets actuels
-script_header "$C_HEADER_LINE MISE À JOUR DU SYSTÈME $C_HEADER_LINE"; echo "$C_RESET"
+script_header "MISE À JOUR DU SYSTÈME";
 dist_upgrade
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
-script_header "$C_HEADER_LINE INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
+script_header " INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION $C_HEADER_LINE"; echo "$C_RESET";
 
 # Installations prioritaires
 echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
@@ -297,7 +309,7 @@ pack_install wget
 echo ""
 
 # Commandes
-echo "$J_TAB INSTALLATION DES COMMANDES $C_RESET"; $SLEEP_INST_CAT
+echo "$J_TAB INSTALLATION DES COMMANDES PRATIQUES $C_RESET"; $SLEEP_INST_CAT
 pack_install neofetch
 pack_install tree
 echo ""
@@ -337,9 +349,8 @@ lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd ph
 pack_install $lamp
 
 
-echo ""
 # Suppression des paquets obsolètes
-script_header "$C_HEADER_LINE AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES $C_HEADER_LINE"; echo ""
+script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 autoremove
 # Fin de l'installation
 is_installation_done

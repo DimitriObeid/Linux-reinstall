@@ -46,7 +46,7 @@ V_TAB="$C_VERT$TAB$TAB"
 ## GESTION D'ERREURS
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
 ERROR_OUTPUT_1="$R_TAB Une erreur s'est produite lors de l'installation -->"
-ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
+ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation $C_RESET"
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -127,11 +127,14 @@ detect_root()
     # Sinon, si le script est exécuté en root
     echo "$J_TAB Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."
     echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
+
+	# Fonction d'entrée de réponse sécurisée et optimisée
 	rep_launch_script()
 	{
 		read rep
 		case ${rep,,} in
 	        "oui")
+				echo ""
 	            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET";
 				return
 	            ;;
@@ -148,7 +151,7 @@ detect_root()
 				;;
 	    esac
 	}
-	rep_root
+	rep_launch_script
 }
 
 check_internet_connection()
@@ -182,7 +185,7 @@ dist_upgrade()
 			emerge -u world
 			;;
 	esac
-	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"; echo ""
+	echo "$V_TAB Mise à jour du système effectuée avec succès $C_RESET"
 }
 
 # Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
@@ -219,21 +222,22 @@ pack_install()
     echo ""
 }
 
-# Pour installer
+# Pour installer des paquets Snap
 snap_install()
 {
     snap_name=$@
     snap install $snap_name
 }
 
-# Installer un paquet (.deb)
-software_install()
+# Installer un paquet depuis un PPA (gestionnaire de paquets privé)
+# pour télécharger des paquets absents des dépôts officiels
+PPA_install()
 {
-	ops_soft_links=""
-	arc_soft_links=""
-	fed_soft_links=""
-	deb_soft_links=""
-	gen_soft_links=""
+	suse_ppa=""
+	arch_ppa=""
+	fedora_ppa=""
+	debian_ppa=""
+	gentoo_ppa=""
 
 	case $OS_FAMILY in
 		opensuse)
@@ -243,8 +247,6 @@ software_install()
 		fedora)
 			;;
 		debian)
-			wget $deb_soft_links
-			dpkg -i $deb_soft_links
 			;;
 		gentoo)
 			;;
@@ -273,6 +275,8 @@ set_sudo()
 		echo "$USER	ALL=(ALL) NOPASSWD:ALL"; echo ""
 		echo "$J_TAB Si vous avez bien compris la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
 		echo "$J_TAB ou \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
+
+		# Fonction d'entrée de réponse sécurisée et optimisée
 		read_rep_f()
 		{
 			read visudo_rep
@@ -296,10 +300,9 @@ set_sudo()
     else
         echo "$V_TAB Vous avez déjà les permissions du mode sudo $C_RESET"
     fi
-	# Récupérer le 'NAME' dans une string, puis vérifier que l'affectation soit bien à Debian
 }
 
-## Suppression des paquets obsolètes
+# Suppression des paquets obsolètes
 autoremove()
 {
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
@@ -311,7 +314,7 @@ autoremove()
 				echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
 	    		case "$OS_FAMILY" in
 	        		opensuse)
-	            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatiques de tous les paquets obsolètes$C_RESET"
+	            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes$C_RESET"
 						echo "$J_TAB Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes$C_RESET"
 	            		;;
 	        		archlinux)
@@ -349,7 +352,6 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
     echo "$V_TAB Installation terminée. Votre distribution est prête à l'emploi $C_RESET"
-    rm -rf $install_dir
 }
 
 
@@ -382,7 +384,7 @@ pack_install wget
 set_sudo
 
 # Commandes
-echo "$J_TAB INSTALLATION DES COMMANDES $C_RESET"; $SLEEP_INST_CAT
+echo "$J_TAB INSTALLATION DES COMMANDES PRATIQUES $C_RESET"; $SLEEP_INST_CAT
 pack_install neofetch
 pack_install tree
 
