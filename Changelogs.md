@@ -37,8 +37,8 @@
 # Prochaine version : 1.1
 
 * Changelogs :
-    - Placement des conditions "case" d'attente de réponse de l'utilisateur dans des sous-fonctions
-    - Correction de fautes d'orthographe mineures
+    - Placement des conditions **"case"** d'attente de réponse de l'utilisateur dans des sous-fonctions.
+    - Correction de fautes d'orthographe mineures.
     - Optimisation de la fonction **"script_header"**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
 
 
@@ -46,6 +46,6 @@
 # Version future : 2.0
 
 * Changelogs :
-    - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian). Chantier en cours sur cette fonction.
+    - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian).
     - Téléchargement des paquets de la logithèque de la distribution depuis les PPA
     
