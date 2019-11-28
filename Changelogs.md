@@ -25,7 +25,7 @@
     - autoremove() : Correction du bug d'affichage de la chaîne de caractères de mauvaise réponse avant que la question ne soit posée pour la première fois.
 
 
-# Version actuelle : 1.0
+# Version ancienne : 1.0
 
 * Changelogs :
     - Mise en fonctionnement de la fonction d'installation des paquets venant des dépôts officiels.
@@ -34,7 +34,7 @@
     - Légères modifications appliquées sur les commentaires.
 
 
-# Prochaine version : 1.1
+# Version actuelle : 1.1
 
 * Changelogs :
     - Placement des conditions **"case"** d'attente de réponse de l'utilisateur dans des sous-fonctions.
@@ -42,6 +42,10 @@
     - Optimisation de la fonction **"script_header"**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
 
 
+# Prochaine version : 1.2
+
+* Changelogs :
+    - ...
 
 # Version future : 2.0
 
