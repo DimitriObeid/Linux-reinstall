@@ -98,8 +98,7 @@ handle_error()
 	else
 		line "#" $C_RED
 		line "#" $C_YELLOW
-		echo -en $C_RED"[Erreur]"$C_RST" lors de l'installation, voulez-vous arreter le script ? [O/n]  "
-		read stop_script
+		echo -en $C_RED"[Erreur]"$C_RST" lors de l'installation : $result, voulez-vous arreter le script ? [O/n]  "
 fi
 }
 
@@ -233,9 +232,15 @@ pack_install()
 			dnf -y install $package_name
 			;;
 		debian)
-			command -v $package_name >/dev/null 2>&1 || (echo >&1 "$V_TAB $package_name est déjà installé $C_RESET") || (echo >&2 "$J_TAB $package_name n'est pas installé"; echo $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
-			$SLEEP_INST
-			apt -y install $package_name
+			if [ command -v $package_name >/dev/null ]; then
+				echo "$V_TAB $package_name est déjà installé $C_RESET";
+				return
+			elif [ command -v $package_name >/dev/null ]; then
+				echo "$J_TAB $package_name n'est pas installé";
+				echo "$V_TAB Installation de $package_name $C_RESET";
+				apt -y install $package_name
+				$SLEEP_INST
+			fi
 			;;
 		gentoo)
 			command -v $package_name >/dev/null 2>&1 || (echo >&2 "$J_TAB $package_name n'est pas installé"; echo $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
@@ -300,8 +305,8 @@ set_sudo()
 		echo "root    ALL=(ALL) ALL"; echo $VOID
 		echo "$J_TAB Tapez : $C_RESET"
 		echo "$USER	ALL=(ALL) NOPASSWD:ALL"; echo $VOID
-		echo "$J_TAB Si vous avez bien compris la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
-		echo "$J_TAB ou \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
+		echo "$J_TAB Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
+		echo "$J_TAB Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
 
 		# Fonction d'entrée de réponse sécurisée et optimisée
 		read_visudo()
