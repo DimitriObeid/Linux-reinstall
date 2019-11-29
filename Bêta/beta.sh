@@ -10,7 +10,7 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-# Ou débugguer sur GBD Online : https://www.onlinegdb.com/
+# Ou débugguer sur Shell Check : https://www.shellcheck.net/
 
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
@@ -111,11 +111,11 @@ get_dist_package_manager()
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
 
-    which zypper &> /dev/null && OS_FAMILY="opensuse"
-    which pacman &> /dev/null && OS_FAMILY="archlinux"
-    which dnf &> /dev/null && OS_FAMILY="fedora"
-    which apt &> /dev/null && OS_FAMILY="debian"
-    which emerge &> /dev/null && OS_FAMILY="gentoo"
+    command -v zypper &> /dev/null && OS_FAMILY="opensuse"
+    command -v pacman &> /dev/null && OS_FAMILY="archlinux"
+    command -v dnf &> /dev/null && OS_FAMILY="fedora"
+    command -v apt &> /dev/null && OS_FAMILY="debian"
+    command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
 	if [ "$OS_FAMILY" = "void" ]; then
@@ -283,7 +283,7 @@ set_sudo()
 {
     script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS";
     echo "$J_TAB Détection de sudo $C_RESET"
-    if ! which sudo > /dev/null ; then
+    if ! command -v sudo > /dev/null ; then
         pack_install sudo
     else
         echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; $VOID
