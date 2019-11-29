@@ -10,7 +10,7 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-# Ou débugguer sur Shell Check : https://www.shellcheck.net/
+# Ou débugguer sur GBD Online : https://www.onlinegdb.com/
 
 
 ### DÉFINITION DES VARIABLES GLOBALES ###

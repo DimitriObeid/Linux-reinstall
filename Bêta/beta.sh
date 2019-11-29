@@ -10,7 +10,7 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-# Ou débugguer sur Shell Check : https://www.shellcheck.net/
+# Ou débugguer sur GBD Online : https://www.onlinegdb.com/
 
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
@@ -217,28 +217,28 @@ pack_install()
     package_name=$@
 	case $OS_FAMILY in
 		opensuse)
-			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
+			command -v $package_name >/dev/null 2>&1 || (echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
 			$SLEEP_INST
 			zypper -y install $package_name
 			;;
 		archlinux)
-			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
+			command -v $package_name >/dev/null 2>&1 || (echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
 			$SLEEP_INST
 			pacman --noconfirm -S $package_name
 			;;
 		fedora)
-			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
+			command -v $package_name >/dev/null 2>&1 || (echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
 			$SLEEP_INST
 			dnf -y install $package_name
 			;;
 		debian)
-			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
+			command -v $package_name >/dev/null 2>&1 || (echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
 			echo "$V_TAB Installation de $package_name$C_RESET"
 			$SLEEP_INST
 			apt -y install $package_name
 			;;
 		gentoo)
-			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
+			command -v $package_name >/dev/null 2>&1 || (echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET")
 			echo "$V_TAB Installation de $package_name$C_RESET"
 			$SLEEP_INST
 			emerge $package_name
