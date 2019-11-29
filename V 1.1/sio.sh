@@ -159,7 +159,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
 	else
-	echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !!$ERROR_OUTPUT_2"
+	echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !$ERROR_OUTPUT_2"
 		exit 1
 	fi
 }

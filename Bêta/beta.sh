@@ -175,7 +175,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
 	else
-	echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !!$ERROR_OUTPUT_2"
+	echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !$ERROR_OUTPUT_2"
 		exit 1
 	fi
 }
@@ -232,12 +232,12 @@ pack_install()
 			dnf -y install $package_name
 			;;
 		debian)
-			if [ command -v $package_name >/dev/null ]; then
-				echo "$V_TAB $package_name est déjà installé $C_RESET";
+			if command -v $package_name >/dev/null >&1; then
+				echo "$V_TAB $package_name est déjà installé $C_RESET"
 				return
-			elif [ command -v $package_name >/dev/null ]; then
-				echo "$J_TAB $package_name n'est pas installé";
-				echo "$V_TAB Installation de $package_name $C_RESET";
+			elif command -v $package_name >/dev/null >&2; then
+				echo "$J_TAB $package_name n'est pas installé"
+				echo "$V_TAB Installation de $package_name $C_RESET"
 				apt -y install $package_name
 				$SLEEP_INST
 			fi
@@ -295,7 +295,7 @@ set_sudo()
 	# Si l'utilisateur ne bénéficie pas des privilèges root
 
 	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
-    if [  ]; then
+    if [ $USER != sudoers ]; then
 		echo "$J_TAB AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
 		echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
 		echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
@@ -402,20 +402,21 @@ get_dist_package_manager
 # Détection du mode super-administrateur (root)
 detect_root
 # Détection de la connexion à Internet
-check_internet_connection
+#check_internet_connection
 # Mise à jour des paquets actuels
 dist_upgrade
-
+# Téléchargement de Sudo et ajout de l'utilisateur à la liste des sudoers
+set_sudo
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION";
 
 # Installations prioritaires
 echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
+pack_install adwaita-qt
 pack_install curl
 pack_install snapd
 pack_install wget
-set_sudo
 
 # Commandes
 echo "$J_TAB INSTALLATION DES COMMANDES PRATIQUES $C_RESET"; $SLEEP_INST_CAT
