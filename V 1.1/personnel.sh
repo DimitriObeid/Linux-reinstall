@@ -269,10 +269,10 @@ autoremove()
 				;;
 			*)
 				echo $READ_VAL
-				read_autoremove
 				;;
 		esac
 	}
+	read_autoremove
 }
 
 # Fin de l'installation
