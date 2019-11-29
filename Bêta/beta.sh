@@ -94,6 +94,7 @@ script_header()
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
 {
+	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
 
     which zypper &> /dev/null && OS_FAMILY="opensuse"
@@ -156,6 +157,8 @@ detect_root()
 
 check_internet_connection()
 {
+	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
+
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
 	else
@@ -167,6 +170,8 @@ check_internet_connection()
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté (ÉTAPE IMPORTANTE, NE PAS MODIFIER, SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 dist_upgrade()
 {
+	script_header "MISE À JOUR DU SYSTÈME"
+
 	echo ""
     case "$OS_FAMILY" in
 		opensuse)
@@ -263,6 +268,9 @@ set_sudo()
     else
         echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; echo ""
     fi
+	# Si l'utilisateur ne bénéficie pas des privilèges root
+
+	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
     if [  ]; then
 		echo "$J_TAB AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
 		echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
@@ -277,13 +285,17 @@ set_sudo()
 		echo "$J_TAB ou \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
 
 		# Fonction d'entrée de réponse sécurisée et optimisée
-		read_rep_f()
+		read_visudo()
 		{
 			read visudo_rep
 			case ${visudo_rep,,} in
 				"compris")
 					visudo
 					usermod -aG sudo $USER
+					# SI USERMOD = MODIFIÉ; ALORS
+					#	AFFICHER "sudoers modifié"
+					# SINON
+					#	AFFICHER "sudoers non modifié"
 					;;
 				"quitter")
 					return
@@ -296,7 +308,7 @@ set_sudo()
 					;;
 			esac
 		}
-		read_rep_f
+		read_visudo
     else
         echo "$V_TAB Vous avez déjà les permissions du mode sudo $C_RESET"
     fi
@@ -306,6 +318,8 @@ set_sudo()
 autoremove()
 {
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
+
+	# Fonction d'entrée de réponse sécurisée et optimisée
 	read_autoremove()
 	{
 		read autoremove_rep
@@ -361,15 +375,12 @@ is_installation_done()
 script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!"
 echo "$J_TAB Début de l'installation"
 # Détection du gestionnaire de paquets de la distribution utilisée
-script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 get_dist_package_manager
 # Détection du mode super-administrateur (root)
 detect_root
 # Détection de la connexion à Internet
-script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 check_internet_connection
 # Mise à jour des paquets actuels
-script_header "MISE À JOUR DU SYSTÈME"
 dist_upgrade
 
 

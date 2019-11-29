@@ -93,12 +93,13 @@ script_header()
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
 {
+	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
 
     which zypper &> /dev/null && OS_FAMILY="opensuse"
     which pacman &> /dev/null && OS_FAMILY="archlinux"
     which dnf &> /dev/null && OS_FAMILY="fedora"
-    which apt-get &> /dev/null && OS_FAMILY="debian"
+    which apt &> /dev/null && OS_FAMILY="debian"
     which emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
@@ -154,6 +155,8 @@ detect_root()
 
 check_internet_connection()
 {
+	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
+
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à internet $C_RESET"
 	else
@@ -165,8 +168,10 @@ check_internet_connection()
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté (ÉTAPE IMPORTANTE, NE PAS MODIFIER, SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 dist_upgrade()
 {
+	script_header "MISE À JOUR DU SYSTÈME"
 	echo ""
-    case "$OS_FAMILY" in
+
+	case "$OS_FAMILY" in
 		opensuse)
 			zypper -y update
 			;;
@@ -177,7 +182,7 @@ dist_upgrade()
 			dnf -y update
 			;;
 		debian)
-			apt-get -y update; apt-get -y upgrade
+			apt -y update; apt -y upgrade
 			;;
 		gentoo)
 			emerge -u world
@@ -209,7 +214,7 @@ pack_install()
 		debian)
 			echo "$V_TAB Installation de $package_name$C_RESET"
 			$SLEEP_INST
-			apt-get -y install $package_name
+			apt -y install $package_name
 			;;
 		gentoo)
 			echo "$V_TAB Installation de $package_name$C_RESET"
@@ -286,15 +291,12 @@ is_installation_done()
 script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!"
 echo "$J_TAB Début de l'installation"
 # Détection du gestionnaire de paquets de la distribution utilisée
-script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 get_dist_package_manager
 # Détection du mode super-administrateur (root)
 detect_root
 # Détection de la connexion à Internet
-script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 check_internet_connection
 # Mise à jour des paquets actuels
-script_header "MISE À JOUR DU SYSTÈME"
 dist_upgrade
 
 
