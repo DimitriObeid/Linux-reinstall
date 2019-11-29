@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Test de beta.sh, avec une nouvelle optimisation de l'affichage des headers
-
 # Script de réinstallation minimal en Bêta
 # Version Bêta 1.2
 
@@ -12,7 +10,8 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
+# Ou débugguer sur Shell Check : https://www.shellcheck.net/
+
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
 ## HEADER
@@ -42,6 +41,8 @@ TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
+ECHO_OUTPUT="echo \"\""
+VOID=$(echo "")
 
 ## GESTION D'ERREURS
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
@@ -75,7 +76,7 @@ script_header()
 		color=$C_HEADER_LINE
 	fi
 
-	echo ""
+	$VOID
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
 	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
@@ -121,7 +122,7 @@ get_dist_package_manager()
 		echo "$ERROR_OUTPUT_1 ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!$ERROR_OUTPUT_2"
 		exit 1
 	else
-		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo ""
+		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; $VOID
 	fi
 }
 
@@ -140,7 +141,7 @@ detect_root()
 
     # Sinon, si le script est exécuté en root
     echo "$J_TAB Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."
-    echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo ""
+    echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; $VOID
 
 	# Fonction d'entrée de réponse sécurisée et optimisée
 	rep_launch_script()
@@ -148,18 +149,18 @@ detect_root()
 		read rep
 		case ${rep,,} in
 	        "oui")
-				echo ""
+				$VOID
 	            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET";
 				return
 	            ;;
 	        "non")
-				echo ""
+				$VOID
 	            echo "$R_TAB Le script ne sera pas exécuté"
 	            echo "$R_TAB Abandon $C_RESET"
 	            exit 1
 	            ;;
 			*)
-				echo ""
+				$VOID
 				echo "$R_TAB Veuillez rentrer une valeur valide (oui/non) $C_RESET"
 				rep_launch_script
 				;;
@@ -185,7 +186,7 @@ dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	echo ""
+	$VOID
     case "$OS_FAMILY" in
 		opensuse)
 			zypper -y update
@@ -209,29 +210,35 @@ dist_upgrade()
 # Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
 pack_install()
 {
+#	Exemples de command -v
+#	$ command -v foo >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+#	$ type foo >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+#	$ hash foo 2>/dev/null || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
     package_name=$@
 	case $OS_FAMILY in
 		opensuse)
-			echo "$V_TAB Installation de $package_name$C_RESET"
+			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
 			$SLEEP_INST
 			zypper -y install $package_name
 			;;
 		archlinux)
-            echo "$V_TAB Installation de $package_name$C_RESET"
+			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
 			$SLEEP_INST
 			pacman --noconfirm -S $package_name
 			;;
 		fedora)
-            echo "$V_TAB Installation de $package_name$C_RESET"
+			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
 			$SLEEP_INST
 			dnf -y install $package_name
 			;;
 		debian)
+			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
 			echo "$V_TAB Installation de $package_name$C_RESET"
 			$SLEEP_INST
 			apt -y install $package_name
 			;;
 		gentoo)
+			command -v $package_name >/dev/null 2>&1 || {echo >&2 "$J_TAB $package_name n'est pas installé"; $VOID; echo "$V_TAB Installation de $package_name $C_RESET"}
 			echo "$V_TAB Installation de $package_name$C_RESET"
 			$SLEEP_INST
 			emerge $package_name
@@ -279,7 +286,7 @@ set_sudo()
     if ! which sudo > /dev/null ; then
         pack_install sudo
     else
-        echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; echo ""
+        echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; $VOID
     fi
 	# Si l'utilisateur ne bénéficie pas des privilèges root
 
@@ -289,11 +296,11 @@ set_sudo()
 		echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
 		echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
 		echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
-		echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."; echo ""
+		echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."; $VOID
 		echo "$J_TAB La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne $C_RESET"
-		echo "root    ALL=(ALL) ALL"; echo ""
+		echo "root    ALL=(ALL) ALL"; $VOID
 		echo "$J_TAB Tapez : $C_RESET"
-		echo "$USER	ALL=(ALL) NOPASSWD:ALL"; echo ""
+		echo "$USER	ALL=(ALL) NOPASSWD:ALL"; $VOID
 		echo "$J_TAB Si vous avez bien compris la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
 		echo "$J_TAB ou \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
 
@@ -314,7 +321,7 @@ set_sudo()
 					return
 					;;
 				*)
-					echo ""
+					$VOID
 					echo "$R_TAB Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
 					echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard $C_RESET"
 					read_rep_f
@@ -338,7 +345,7 @@ autoremove()
 		read autoremove_rep
 		case ${autoremove_rep,,} in
 			"oui")
-				echo "$V_TAB Suppression des paquets $C_RESET"; echo ""
+				echo "$V_TAB Suppression des paquets $C_RESET"; $VOID
 	    		case "$OS_FAMILY" in
 	        		opensuse)
 	            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes$C_RESET"
@@ -359,12 +366,12 @@ autoremove()
 	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
 	            		;;
 				esac
-				echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+				echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; $VOID
 				;;
 			"non")
 				echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
 				echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
-				echo ""
+				$VOID
 				;;
 			*)
 				echo $READ_VAL
@@ -428,7 +435,7 @@ pack_install k4dirstat
 
 # Machines virtuelles
 echo "$J_TAB INSTALLATION DE VMWARE $C_RESET"; $SLEEP_INST_CAT
-echo "Feature en attente"; echo ""
+echo "Feature en attente"; $VOID
 # wget
 
 # Programmation
