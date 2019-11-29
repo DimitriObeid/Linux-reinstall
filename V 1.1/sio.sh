@@ -10,7 +10,8 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
+# Ou débugguer sur Shell Check : https://www.shellcheck.net/
+
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
 ## HEADER

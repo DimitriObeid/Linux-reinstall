@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation personalisée
-# Version : 1.1
+# Version personnelle 1.1
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -10,7 +10,8 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
+# Ou débugguer sur Shell Check : https://www.shellcheck.net/
+
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
 ## HEADER
