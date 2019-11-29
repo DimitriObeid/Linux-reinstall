@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation personalisée
-# Version personnelle 1.1
+# Version personnelle 1.2
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -45,7 +45,7 @@ V_TAB="$C_VERT$TAB$TAB"
 ## GESTION D'ERREURS
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
 ERROR_OUTPUT_1="$R_TAB Une erreur s'est produite lors de l'installation -->"
-ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation$C_RESET"
+ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation $C_RESET"
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -95,11 +95,11 @@ get_dist_package_manager()
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 	echo "$J_TAB Détection de votre gestionnaire de paquet :$C_RESET"
 
-    which zypper &> /dev/null && OS_FAMILY="opensuse"
-    which pacman &> /dev/null && OS_FAMILY="archlinux"
-    which dnf &> /dev/null && OS_FAMILY="fedora"
-    which apt &> /dev/null && OS_FAMILY="debian"
-    which emerge &> /dev/null && OS_FAMILY="gentoo"
+    command -v zypper &> /dev/null && OS_FAMILY="opensuse"
+    command -v pacman &> /dev/null && OS_FAMILY="archlinux"
+    command -v dnf &> /dev/null && OS_FAMILY="fedora"
+    command -v apt &> /dev/null && OS_FAMILY="debian"
+    command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
 	if [ "$OS_FAMILY" = "void" ]; then
@@ -260,12 +260,11 @@ autoremove()
 	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
 	            		;;
 				esac
-				echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"; echo ""
+				echo "$V_TAB Auto-suppression des paquets obsolètes effectuée avec succès $C_RESET"
 				;;
 			"non")
 				echo "$R_TAB Les paquets obsolètes ne seront pas supprimés $C_RESET";
 				echo "$J_TAB Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets $C_RESET"
-				echo ""
 				;;
 			*)
 				echo $READ_VAL

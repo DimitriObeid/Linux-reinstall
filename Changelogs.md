@@ -1,4 +1,4 @@
-# Version ancienne : Bêta 0.1
+# Ancienne version : Bêta 0.1
 
 * Changelogs :
     - Headers fonctionnels.
@@ -10,7 +10,7 @@
     - Header de fin d'installation.
 
 
-# Version ancienne : Bêta 0.2
+# Ancienne version : Bêta 0.2
 
 * Changelogs :
     - Ajout des paquets à installer (les travaux sur la fonction d'installation des paquets sont toujours en cours).
@@ -18,14 +18,14 @@
     - Léger changement pour le header de bienvenue : **BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!!** ---> **BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!**
 
 
-# Version ancienne : Bêta 0.2.1
+# Ancienne version : Bêta 0.2.1
 
 * Changelogs :
     - Amélioration visuelle de la partie d'installation des logiciels.
-    - autoremove() : Correction du bug d'affichage de la chaîne de caractères de mauvaise réponse avant que la question ne soit posée pour la première fois.
+    - **autoremove()** : Correction du bug d'affichage de la chaîne de caractères de mauvaise réponse avant que la question ne soit posée pour la première fois.
 
 
-# Version ancienne : 1.0
+# Ancienne version : 1.0
 
 * Changelogs :
     - Mise en fonctionnement de la fonction d'installation des paquets venant des dépôts officiels.
@@ -34,7 +34,7 @@
     - Légères modifications appliquées sur les commentaires.
 
 
-# Version actuelle : 1.1
+# Ancienne version : 1.1
 
 * Changelogs :
     - Placement des conditions **"case"** d'attente de réponse de l'utilisateur dans des sous-fonctions.
@@ -42,14 +42,20 @@
     - Optimisation de la fonction **"script_header"**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
 
 
-# Prochaine version : 1.2
+# Version actuelle : 1.2
 
 * Changelogs :
-    - ...
+    - **get_dist_package_manager()** et **pack_install()** : Remplacement des commandes *__which__* par *__command -v__*
+    - Correction d'un bug affichant l'étape d'autoremove sans interaction possible
 
-# Version future : 2.0
+
+# Prochaine version : 1.3
+
+* Changelogs :
+    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé
+
+# Future version : 2.0
 
 * Changelogs :
     - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian).
-    - Téléchargement des paquets de la logithèque de la distribution depuis les PPA
-    
+    - Téléchargement des paquets de la logithèque de la distribution depuis les PPA.
