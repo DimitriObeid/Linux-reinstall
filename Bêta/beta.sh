@@ -3,6 +3,7 @@
 # Test de beta.sh, avec une nouvelle optimisation de l'affichage des headers
 
 # Script de réinstallation minimal en Bêta
+# Version Bêta 1.2
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -14,7 +15,6 @@
 ## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
-
 ## HEADER
 # Si vous souhaitez mettre d'autres caractères à la place d'une ligne, changez le caractère entre les double guillemets
 LINE_CHAR="-"
@@ -88,9 +88,22 @@ script_header()
 	$SLEEP_TAB
 }
 
+# Fonction de gestion d'erreurs
+handle_error()
+{
+	result=$1
+	if test $result -eq 0; then
+		return
+	else
+		line "#" $C_RED
+		line "#" $C_YELLOW
+		echo -en $C_RED"[Erreur]"$C_RST" lors de l'installation, voulez-vous arreter le script ? [O/n]  "
+		read stop_script
+fi
+}
+
+
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
-
-
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
 {
@@ -224,7 +237,6 @@ pack_install()
 			emerge $package_name
 			;;
 	esac
-    echo ""
 }
 
 # Pour installer des paquets Snap
@@ -238,6 +250,7 @@ snap_install()
 # pour télécharger des paquets absents des dépôts officiels
 PPA_install()
 {
+	script_header "AJOUT DE DÉPÔTS PPA ET TÉLÉCHARGEMENT DE PAQUETS DEPUIS CES DÉPÔTS"
 	suse_ppa=""
 	arch_ppa=""
 	fedora_ppa=""
@@ -261,7 +274,7 @@ PPA_install()
 # Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
 set_sudo()
 {
-    script_header "DÉTECTION DE SUDO";
+    script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS";
     echo "$J_TAB Détection de sudo $C_RESET"
     if ! which sudo > /dev/null ; then
         pack_install sudo
