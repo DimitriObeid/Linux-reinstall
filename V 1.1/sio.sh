@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation minimal pour les cours de BTS SIO
+# Version 1.1
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -12,7 +13,6 @@
 ## Ce script sert à réinstaller tous les programmes Linux tout en l'exécutant.
 
 ### DÉFINITION DES VARIABLES GLOBALES ###
-
 ## HEADER
 # Si vous souhaitez mettre d'autres caractères à la place d'une ligne, changez le caractère entre les double guillemets
 LINE_CHAR="-"
@@ -88,8 +88,6 @@ script_header()
 
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
-
-
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager()
 {
@@ -222,7 +220,6 @@ pack_install()
 			emerge $package_name
 			;;
 	esac
-    echo ""
 }
 
 # Pour installer des paquets Snap
