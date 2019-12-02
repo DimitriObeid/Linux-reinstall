@@ -13,7 +13,7 @@
 # Ou débugguer sur Shell Check : https://www.shellcheck.net/
 
 
-### DÉFINITION DES VARIABLES GLOBALES ###
+### DÉFINITION DES VARIABLES ###
 ## HEADER
 # Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets
 LINE_CHAR="-"
