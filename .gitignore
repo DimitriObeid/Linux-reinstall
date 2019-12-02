@@ -1,8 +1,7 @@
 install
-tests.sh
-Bêta/.~lock.Documentation Bêta.odt#
-V 1.0/.~lock.Documentation script personnalis\303\251 1.0.odt#
-V 1.0/.~lock.Documentation SIO 1.0.odt#
+Alpha/.~lock.Documentation Alpha.odt#
+V 1.2/.~lock.Documentation Bêta.odt#
+V 1.2/.~lock.Documentation Stable.odt#
 .directory
 .old/
-test_2.sh
+tests.sh
