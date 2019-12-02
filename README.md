@@ -14,7 +14,7 @@ Lisez le fichier **"Mode d'emploi.odt"** pour :
     * Savoir à quels moments le script aura besoin de votre permission pour modifier des fichiers,  
     * Savoir quoi faire en cas d'erreur,  
     * Quels programmes sont ajoutés par le script de réinstallation choisi.  
-  
+
 
 La lecture de la documentation du script que vous souhaitez installer est vivement conseillée si vous  
 avez besoin d'ajouter ou de supprimer des programmes. Vous saurez ainsi quelle partie du script  
@@ -23,7 +23,7 @@ changer pour l'adapter à vos besoins.
 ## 2) Mode d'emploi
 
 Lisez le fichier **"Mode d'emploi.odt"** pour voir comment exécuter un des scripts.
-  
+
 ## 3) Description des fichiers du projet
 
 Deux sous-dossiers se trouvent dans ce dépôt Github :  
@@ -39,7 +39,7 @@ Deux sous-dossiers se trouvent dans ce dépôt Github :
     - Entre les deux scripts, les seuls changements se situent au niveau des logiciels à installer.  
     Le script personnalisé ajoute les mêmes programmes que le script minimal, plus de nombreux  
     programmes supplémentaires.
-  
+
 ## 4) Contenu du dossier actuel et des sous-dossiers
 
 * ### 4.a) Dossier _"Bêta"_ :  
@@ -48,7 +48,7 @@ Deux sous-dossiers se trouvent dans ce dépôt Github :
 
 
 * ### 4.b) Dossier _"V 1.1"_ :
-    - *__Documentation script personnalisé 1.1 :__* La documentation officielle de la version de réinstallation personnalisée  
+    - *__Documentation script personnalisé 1.1 :__* La documentation officielle de la version de réinstallation personnalisée.  
     - *__Documentation SIO 1.1 :__* La documentation officielle de la version 1.1 du script.  
     - *__sio.sh :__* Le fichier de la version 1.1 du script de réinstallation minimal.  
     - *__personnel.sh :__* Le fichier de la version 1.1 du script de réinstallation personnalisé.  
@@ -57,7 +57,7 @@ Deux sous-dossiers se trouvent dans ce dépôt Github :
 * ### 4.c) Dossier actuel :
     - *__Bug tracking.md :__* Liste tous les bugs connus jusqu'à leur correction.  
     - *__Changelogs.md :__* Contient les changements ayant eu lieu entre deux versions.  
-    - *__Mode d'emploi.odt :__* Mode d'emploi d'exécution de chaque script
+    - *__Mode d'emploi.odt :__* Mode d'emploi d'exécution de chaque script.
     - *__README.md :__* Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
 ## 5) Fichiers à télécharger :
@@ -69,6 +69,7 @@ l'élaboration du projet se trouvent dans le dossier **"Bêta"**.
 
 ## 6) Ajouts futurs
 
-- Téléchargement de VMware  
-- Ajout de PPA pour télécharger des paquets supplémentaires
-- Ajout de sudo et configuration pour y accéder en tant qu'utilisateur normal pour Debian.
+- Téléchargement de VMware.  
+- Ajout de PPA pour télécharger des paquets supplémentaires (**exemple** : Steam).  
+- Ajout de sudo et configuration pour y accéder en tant qu'utilisateur normal pour Debian.  
+- Proposition d'installation d'un environnement graphique si aucun environnement graphique n'est détecté.  
