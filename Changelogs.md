@@ -45,14 +45,17 @@
 # Version actuelle : 1.2
 
 * Changelogs :
-    - **get_dist_package_manager()** et **pack_install()** : Remplacement des commandes *__which__* par *__command -v__*
-    - Correction d'un bug affichant l'étape d'autoremove sans interaction possible
+    - **get_dist_package_manager()** et **pack_install()** : Remplacement des commandes *__which__* par *__command -v__*, commande recommandée pour vérifier qu'un paquet est déjà installé.
+    - Correction d'un bug affichant l'étape d'autoremove sans interaction possible.
+    - Toujours dans l'étape d'autoremove : La fonction **"read_autoremove"** se répète désormais en cas de réponse inattendue.
+    - Léger changement de la chaîne de caractères à afficher en cas de réponse inattendue dans les fonctions **"read_launch_script()"** et **"read_autoremove()"**. Passage de *__"Veuillez rentrer une valeur valide (oui/non)"__* à *__"Veuillez répondre EXACTEMENT par "oui" ou par "non" "__*
+    - **detect_root()** : Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__* à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*.
 
 
 # Prochaine version : 1.3
 
 * Changelogs :
-    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé
+    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
 
 # Future version : 2.0
 
