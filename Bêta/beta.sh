@@ -431,8 +431,8 @@ script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE D
 
 # Installations prioritaires
 echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $C_RESET"; $SLEEP_INST_CAT
-pack_install adwaita-qt
 pack_install curl
+pack_install git
 pack_install snapd
 pack_install wget
 echo $VOID

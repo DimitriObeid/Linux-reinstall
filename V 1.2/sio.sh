@@ -352,6 +352,7 @@ echo ""
 echo "$J_TAB INSTALLATION DES OUTILS DE DÉVELOPPEMENT $C_RESET"; $SLEEP_INST_CAT
 snap_install atom --classic		# Atom IDE
 snap_install code --classic		# Visual Studio Code
+pack_install emacs
 pack_install valgrind
 echo ""
 
