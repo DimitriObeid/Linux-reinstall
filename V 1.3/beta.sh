@@ -95,6 +95,7 @@ script_header()
 	$SLEEP_TAB
 }
 
+# Fonction de gestion d'erreurs
 handle_error()
 {
 	error_result=$1
@@ -144,10 +145,10 @@ detect_root()
     if [ "$EUID" -ne 0 ]; then
     	echo "$R_TAB Ce script doit être exécuté en tant qu'administrateur (root)."
     	echo "$R_TAB Placez sudo devant votre commande :"
-    	echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
+    	echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0). S'il est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
     	handle_error "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
     	echo "$C_RESET"
-    	exit 1          # Quitter le programme en cas d'erreur
+    	exit 1
     fi
 
     # Sinon, si le script est exécuté en root

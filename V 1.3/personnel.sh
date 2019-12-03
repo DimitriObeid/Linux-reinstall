@@ -44,12 +44,6 @@ R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
 VOID=""
 
-## GESTION D'ERREURS
-# Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
-ERROR_OUTPUT_1="$R_TAB Une erreur s'est produite lors de l'installation -->"
-ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation $C_RESET"
-
-
 
 ### DÉFINITION DES FONCTIONS
 
@@ -57,33 +51,33 @@ ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation $C_RESET"
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 draw_header_line()
 {
-	cols=$(tput cols)
-	char=$1
-	color=$2
+	line_cols=$(tput cols)
+	line_char=$1
+	line_color=$2
 
 	# Pour définir la couleur de la ligne du caractère souhaité
-	if test "$color" != ""; then
-		echo -ne "$color"
+	if test "$line_color" != ""; then
+		echo -ne "$line_color"
 	fi
 
 	# Pour afficher le caractère souhaité sur toute la ligne
-	for i in $(eval echo "{1..$cols}"); do
-		echo -n "$char"
+	for i in $(eval echo "{1..$line_cols}"); do
+		echo -n "$line_char"
 	done
 
 	# Pour définir la couleur de ce qui suit le dernier caractère
-	if test "$color" != ""; then
-		echo -ne "$color"
+	if test "$line_color" != ""; then
+		echo -ne "$line_color"
 	fi
 }
 
 # Affichage du texte des headers
 script_header()
 {
-    color=$2
+    header_color=$2
 
 	# Pour définir la couleur de la ligne du caractère souhaité
-	if test "$color" = ""; then
+	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne
 		color=$C_HEADER_LINE
 	fi
@@ -91,14 +85,35 @@ script_header()
 	echo "$VOID"
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
-	echo -ne "$color"     # Afficher la ligne du haut selon la couleur de la variable $color
+	echo -ne "$header_color"     # Afficher la ligne du haut selon la couleur de la variable $color
 	draw_header_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
-	echo "##> $1 $color"
+	echo "##> $1 $header_color"
 	draw_header_line $LINE_CHAR
 	echo -ne "$C_RESET"
 	$SLEEP_TAB
+}
+
+# Fonction de gestion d'erreurs
+handle_error()
+{
+	error_result=$1
+	error_color=$2
+
+	if test "$error_color" = ""; then
+		error_color=$C_RED
+	fi
+
+	echo "$VOID"
+	echo -ne $error_color
+	draw_header_line $LINE_CHAR $error_color
+	echo "##> $1"
+	draw_header_line $LINE_CHAR $error_color
+
+	echo -en "$R_TAB Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation $C_RESET"
+	echo $VOID
+	exit 1
 }
 
 
@@ -116,9 +131,8 @@ get_dist_package_manager()
     command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
-	if [ "$OS_FAMILY" = "void" ]; then
-		echo "$ERROR_OUTPUT_1 ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!$ERROR_OUTPUT_2"
-		exit 1
+	if test "$OS_FAMILY" = "void"; then
+		handle_error "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo "$VOID"
 	fi
@@ -131,10 +145,10 @@ detect_root()
     if [ "$EUID" -ne 0 ]; then
     	echo "$R_TAB Ce script doit être exécuté en tant qu'administrateur (root)."
     	echo "$R_TAB Placez sudo devant votre commande :"
-    	echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
-    	echo "$ERROR_OUTPUT_1 ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL !$ERROR_OUTPUT_2"
+		echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0). S'il est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
+    	handle_error "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
     	echo "$C_RESET"
-    	exit 1          # Quitter le programme en cas d'erreur
+    	exit 1
     fi
 
     # Sinon, si le script est exécuté en root
@@ -174,7 +188,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à Internet $C_RESET"
 	else
-		echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !$ERROR_OUTPUT_2"
+		handle_error "ERREUR : AUCUNE CONNEXION À INTERNET"
 		exit 1
 	fi
 }
