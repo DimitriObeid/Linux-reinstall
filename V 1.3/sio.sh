@@ -63,17 +63,17 @@ draw_header_line()
 
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$color" != ""; then
-		echo -ne $color
+		echo -ne "$color"
 	fi
 
 	# Pour afficher le caractère souhaité sur toute la ligne
 	for i in $(eval echo "{1..$cols}"); do
-		echo -n $char
+		echo -n "$char"
 	done
 
 	# Pour définir la couleur de ce qui suit le dernier caractère
 	if test "$color" != ""; then
-		echo -ne $color
+		echo -ne "$color"
 	fi
 }
 
@@ -88,16 +88,16 @@ script_header()
 		color=$C_HEADER_LINE
 	fi
 
-	echo $VOID
+	echo "$VOID"
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
-	echo -ne $color    # Afficher la ligne du haut selon la couleur de la variable $color
+	echo -ne "$color"     # Afficher la ligne du haut selon la couleur de la variable $color
 	draw_header_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
-	echo "##> "$1 $color
+	echo "##> $1 $color"
 	draw_header_line $LINE_CHAR
-	echo -ne $C_RESET
+	echo -ne "$C_RESET"
 	$SLEEP_TAB
 }
 
@@ -120,7 +120,7 @@ get_dist_package_manager()
 		echo "$ERROR_OUTPUT_1 ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!$ERROR_OUTPUT_2"
 		exit 1
 	else
-		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo $VOID
+		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo "$VOID"
 	fi
 }
 
@@ -139,25 +139,25 @@ detect_root()
 
     # Sinon, si le script est exécuté en root
 	echo "$J_TAB Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
-    echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo $VOID
+    echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo "$VOID"
 	# Fonction d'entrée de réponse sécurisée et optimisée
 	read_launch_script()
 	{
-		read rep
-		case ${rep,,} in
+		read -r rep_launch
+		case ${rep_launch,,} in
 	        "oui")
-				echo $VOID
+				echo "$VOID"
 	            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET";
 				return
 	            ;;
 	        "non")
-				echo $VOID
+				echo "$VOID"
 	            echo "$R_TAB Le script ne sera pas exécuté"
 	            echo "$R_TAB Abandon $C_RESET"
 	            exit 1
 	            ;;
 			*)
-				echo $VOID
+				echo "$VOID"
 				echo "$R_TAB Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\" $C_RESET"
 				read_launch_script
 				;;
@@ -185,7 +185,7 @@ dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	echo $VOID
+	echo "$VOID"
 	case "$OS_FAMILY" in
 		opensuse)
 			zypper -y update
@@ -212,34 +212,34 @@ pack_install()
 	package_name=$@
 	case $OS_FAMILY in
 		opensuse)
-			echo "$V_TAB Installation de $package_name$C_RESET"
+			echo "$V_TAB Installation de $package_name $C_RESET"
 			$SLEEP_INST
-			zypper -y install $package_name
-			echo $VOID
+			zypper -y install "$package_name"
+			echo "$VOID"
 			;;
 		archlinux)
-			echo "$V_TAB Installation de $package_name$C_RESET"
+			echo "$V_TAB Installation de $package_name $C_RESET"
 			$SLEEP_INST
-			pacman --noconfirm -S $package_name
-			echo $VOID
+			pacman --noconfirm -S "$package_name"
+			echo "$VOID"
 			;;
 		fedora)
-			echo "$V_TAB Installation de $package_name$C_RESET"
+			echo "$V_TAB Installation de $package_name $C_RESET"
 			$SLEEP_INST
-			dnf -y install $package_name
-			echo $VOID
+			dnf -y install "$package_name"
+			echo "$VOID"
 			;;
 		debian)
-			echo "$V_TAB Installation de $package_name$C_RESET"
+			echo "$V_TAB Installation de $package_name $C_RESET"
 			$SLEEP_INST
-			apt -y install $package_name
-			echo $VOID
+			apt -y install "$package_name"
+			echo "$VOID"
 			;;
 		gentoo)
-			echo "$V_TAB Installation de $package_name$C_RESET"
+			echo "$V_TAB Installation de $package_name $C_RESET"
 			$SLEEP_INST
-			emerge $package_name
-			echo $VOID
+			emerge "$package_name"
+			echo "$VOID"
 			;;
 	esac
 }
@@ -248,7 +248,7 @@ pack_install()
 snap_install()
 {
     snap_name=$@
-    snap install $snap_name
+    snap install "$snap_name"
 }
 
 # Suppression des paquets obsolètes
@@ -257,10 +257,10 @@ autoremove()
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
 	read_autoremove()
 	{
-		read autoremove_rep
+		read -r autoremove_rep
 		case ${autoremove_rep,,} in
 			"oui")
-				echo "$V_TAB Suppression des paquets $C_RESET"; echo $VOID
+				echo "$V_TAB Suppression des paquets $C_RESET"; echo "$VOID"
 	    		case "$OS_FAMILY" in
 	        		opensuse)
 	            		echo "$J_TAB Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes$C_RESET"
@@ -329,30 +329,30 @@ echo "$J_TAB INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS $
 pack_install curl
 pack_install snapd
 pack_install wget
-echo $VOID
+echo "$VOID"
 
 # Commandes
 echo "$J_TAB INSTALLATION DES COMMANDES PRATIQUES $C_RESET"; $SLEEP_INST_CAT
 pack_install neofetch
 pack_install tree
-echo $VOID
+echo "$VOID"
 
 # Internet
 echo "$J_TAB INSTALLATION DES CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
 snap_install discord
 pack_install thunderbird
-echo $VOID
+echo "$VOID"
 
 # Librairies
 echo "$J_TAB INSTALLATION DES LIBRAIRIES $C_RESET"; $SLEEP_INST_CAT
 pack_install python3.7
 pack_install python-pip
-echo $VOID
+echo "$VOID"
 
 # Logiciels
 echo "$J_TAB INSTALLATION DES LOGICIELS $C_RESET"; $SLEEP_INST_CAT
 pack_install k4dirstat
-echo $VOID
+echo "$VOID"
 
 # Programmation
 echo "$J_TAB INSTALLATION DES OUTILS DE DÉVELOPPEMENT $C_RESET"; $SLEEP_INST_CAT
@@ -360,17 +360,17 @@ snap_install atom --classic		# Atom IDE
 snap_install code --classic		# Visual Studio Code
 pack_install emacs
 pack_install valgrind
-echo $VOID
+echo "$VOID"
 
 # Vidéo
 echo "$J_TAB INSTALLATION DE VLC $C_RESET"; $SLEEP_INST_CAT
 pack_install vlc
-echo $VOID
+echo "$VOID"
 
 # LAMP
 echo "$J_TAB INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP $C_RESET"; $SLEEP_INST_CAT
 lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
-pack_install $lamp
+pack_install "$lamp"
 
 
 # Suppression des paquets obsolètes

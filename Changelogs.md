@@ -42,7 +42,7 @@
     - Optimisation de la fonction **"script_header"**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
 
 
-# Version actuelle : 1.2
+# Ancienne version : 1.2
 
 * Changelogs :
     - **get_dist_package_manager()** et **pack_install()** : Remplacement des commandes *__which__* par *__command -v__*, commande mieux recommandée que *__which__* pour vérifier qu'un paquet est déjà installé.
@@ -56,8 +56,15 @@
 
 * Changelogs :
     - Ajout d'une variable **$VOID** pour rendre le script un peu plus clair. Au lieu de taper *__echo ""__* à chaque fois que l'on souhaite sauter une ligne, on tape *__echo $VOID__*.
-    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
+    - Débogage et renforcement de l'intégrité du script grâce au débogueur en ligne Shell Check --> https://www.shellcheck.net/.
+    - **detect_root()** : Changement du nom de la variable **"rep"** par **"rep_launch"**.
 
+
+# Prochaine version : 1.4
+
+* Changelogs :
+    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
+    - Remise en place de la fonction **"handle_errors()"** une fonction de sortie d'erreurs, abandonnée pendant les touts premiers tests des versions pré-alpha du script, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
 
 # Future version : 2.0
 
