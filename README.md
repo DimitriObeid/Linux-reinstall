@@ -4,61 +4,50 @@
 
 Vous en avez plus qu'assez de vous retaper toutes les étapes de réinstallation de vos logiciels à la main ?
 
-Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des trois scripts du dossier **"V1.4"** et à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur.
+Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"Stable"** et à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur.
 
 Il vous téléchargera tous les programmes dont vous avez besoin et les installera à votre place, et bien plus.
 
 Lisez le fichier **"Mode d'emploi.odt"** pour :  
-    * Voir comment exécuter un des scripts,  
-    * Savoir à quels moments le script aura besoin de votre permission pour modifier des fichiers,  
-    * Savoir quoi faire en cas d'erreur,  
-    * Quels programmes sont ajoutés par le script de réinstallation choisi.  
+<ul>
+    <li> Voir comment exécuter un des scripts,  </li>
+    <li> Savoir à quels moments le script aura besoin de votre permission pour modifier des fichiers,  </li>  
+    <li> Savoir quoi faire en cas d'erreur,  </li>
+    <li> Savoir quels programmes sont ajoutés par le script de réinstallation choisi.  </li>  
+</ul>
 
-La lecture de la documentation du script que vous souhaitez installer est vivement conseillée si vous avez besoin d'ajouter ou de supprimer des programmes. Vous saurez ainsi quelle partie du script changer pour l'adapter à vos besoins.
+La lecture de la documentation du script que vous souhaitez installer est vivement conseillée si vous avez besoin d'ajouter ou de supprimer des programmes. Vous saurez ainsi quelle partie du script est à changer pour l'adapter à vos besoins.
 
-## 2) Mode d'emploi
+## 2) Description des fichiers du projet
 
-Lisez le fichier **"Mode d'emploi.odt"** pour voir comment exécuter un des scripts, que faire en cas d'erreurs et la liste des programmes installés par chaque script.
+Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3 sous-dossiers :  
 
-## 3) Description des fichiers du projet
+* *__2.1) Dossier actuel :__*
+    * **Bug tracking.md :** Liste tous les bugs connus jusqu'à leur correction.    
+    * **Changelogs.md :** Contient les changements ayant eu lieu entre deux versions.    
+    * **Mode d'emploi.odt :** Mode d'emploi d'exécution de chaque script.  
+    * **README.md :** Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
-Deux sous-dossiers se trouvent dans ce dépôt Github :  
+* *__2.2) Alpha :__*
+    - **alpha.sh :** Le fichier exécutable de la version Alpha. Il est régulièrement mis à jour.  
+    - **Documentation Alpha.odt :** La documentation de la version Alpha du projet. Elle est mise à jour dès que possible.  
 
-* *__Alpha :__*
-    - Contient le fichier de réinstallation en version Alpha 2.0, ainsi que sa documentation. Le contenu de ce sous-dossier est régulièrement mis à jour.
+* *__2.3) Bêta :__*
+    - **beta.sh :** Le fichier exécutable de la version Bêta du script de réinstallation SIO.
+    - **Documentation Bêta.odt :** La documentation officielle de la version Bêta.
 
-* *__V 1.4 :__*
-    - Contient le script de réinstallation minimal en version Bêta.
-    - Contient le script de réinstallation minimal dont vous avez besoin pour vos cours de BTS SIO.  
-    - Contient également le script de réinstallation personnelle. Vous pouvez le télécharger si vous souhaitez installer les mêmes programmes que moi ou plus que le strict minimum pour le BTS SIO.  
-    - Contient la documentation pour chaque script en version stable, ainsi que celle du script de la version Bêta.
-
-## 4) Contenu du dossier actuel et des sous-dossiers
-
-* ### 4.a) Dossier _"Alpha"_ :  
-    - *__Documentation Alpha.odt :__* La documentation de la version Alpha du projet. Elle est mise à jour dès que possible.  
-    - *__alpha.sh :__* Le fichier exécutable de la version Alpha. Il est régulièrement mis à jour.  
-
-* ### 4.b) Dossier _"V 1.4"_ :
-    - *__Documentation Bêta :__* La documentation officielle de la version Bêta 1.5.  
-    - *__Documentation Stable :__* La documentation officielle de la version 1.4 des scripts SIO et personnel.  
-    - *__beta.sh :__* Le fichier exécutable de la version Bêta 1.5 du script de réinstallation SIO.
-    - *__personnel.sh :__* Le fichier exécutable de la version stable 1.4 du script de réinstallation personnalisé.  
-    - *__sio.sh :__* Le fichier exécutable de la version stable 1.4 du script de réinstallation SIO.  
+* *__2.4) Stable :__*
+    - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.
+    - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
+    - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.
 
 
-* ### 4.c) Dossier actuel :
-    - *__Bug tracking.md :__* Liste tous les bugs connus jusqu'à leur correction.  
-    - *__Changelogs.md :__* Contient les changements ayant eu lieu entre deux versions.  
-    - *__Mode d'emploi.odt :__* Mode d'emploi d'exécution de chaque script.
-    - *__README.md :__* Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
+## 3) Fichiers à télécharger :
 
-## 5) Fichiers à télécharger :
+- Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle ou plus avancée sont au moins deux des trois fichiers de la version 1.4 (*__Documentation Stable.odt__* _(si vous souhaitez modifier le script)_, plus *__sio.sh__* ou *__personnel.sh__*) se trouvant dans le dossier **"Stable"**.  
+- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Alpha"** (si vous êtes déterminé) ou dans le sous-dossier **"Bêta"** (si vous voulez donner un petit coup de main).  
 
-- Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle ou plus avancée sont au moins deux des trois fichiers de la version 1.4 (*__Documentation Stable.odt__* _(si vous souhaitez modifier le script)_, plus *__sio.sh__* ou *__personnel.sh__*) se trouvant dans le dossier **"V 1.4"**.  
-- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le dossier **"Alpha"** (si vous êtes déterminé), ou les deux fichiers de la version 1.5 (*__Documentation Bêta.odt__* plus *__beta.sh__*) se trouvant dans le dossier **V 1.4**.  
-
-## 6) Ajouts futurs
+## 4) Ajouts futurs
 
 - Téléchargement de VMware.  
 - Ajout de PPA pour télécharger des paquets supplémentaires (**exemple** : Steam).  
