@@ -52,7 +52,7 @@ draw_header_line()
 	line_char=$1
 	line_color=$2
 
-	# Pour définir la couleur de la ligne du caractère souhaité
+	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
 		echo -ne "$line_color"
 	fi

@@ -55,7 +55,7 @@ draw_header_line()
 	line_char=$1
 	line_color=$2
 
-	# Pour définir la couleur de la ligne du caractère souhaité
+	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
 		echo -ne "$line_color"
 	fi
@@ -79,7 +79,7 @@ script_header()
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne
-		color=$C_HEADER_LINE
+		header_color=$C_HEADER_LINE
 	fi
 
 	echo "$VOID"
@@ -136,7 +136,8 @@ get_dist_package_manager()
 	else
 		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo "$VOID"
 	fi
-}
+}	# Pour définir la couleur de la ligne du caractère souhaité
+
 
 # Détection du mode super-administrateur (root)
 detect_root()

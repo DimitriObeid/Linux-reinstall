@@ -55,7 +55,7 @@ draw_header_line()
 	line_char=$1
 	line_color=$2
 
-	# Pour définir la couleur de la ligne du caractère souhaité
+	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
 		echo -ne "$line_color"
 	fi
@@ -67,7 +67,7 @@ draw_header_line()
 
 	# Pour définir la couleur de ce qui suit le dernier caractère
 	if test "$line_color" != ""; then
-		echo -ne "$line_color"
+		echo -n -e "$line_color"
 	fi
 }
 
@@ -78,20 +78,20 @@ script_header()
 
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
-        # Définition de la couleur de la ligne
-		color=$C_HEADER_LINE
+        # Définition de la couleur de la ligne. Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
+		header_color=$C_HEADER_LINE
 	fi
 
 	echo "$VOID"
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
-	echo -ne "$header_color"     # Afficher la ligne du haut selon la couleur de la variable $color
+	echo -n -e "$header_color"     # Afficher la ligne du haut selon la couleur de la variable $color
 	draw_header_line $LINE_CHAR
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
-	echo "##> $1 $header_color"
+	echo "##> $1"
 	draw_header_line $LINE_CHAR
-	echo -ne "$C_RESET"
+	echo -n -e "$C_RESET"
 	$SLEEP_TAB
 }
 
@@ -106,12 +106,12 @@ handle_error()
 	fi
 
 	echo "$VOID"
-	echo -ne $error_color
+	echo -n -e $error_color
 	draw_header_line $LINE_CHAR $error_color
 	echo "##> $1"
 	draw_header_line $LINE_CHAR $error_color
 
-	echo -en "$R_TAB Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation $C_RESET"
+	echo -n -e "$R_TAB Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation $C_RESET"
 	echo $VOID
 	exit 1
 }
@@ -153,7 +153,7 @@ detect_root()
 
     # Sinon, si le script est exécuté en root
 	echo "$J_TAB Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
-    echo -n "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET"; echo "$VOID"
+    echo -e "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET";
 	# Fonction d'entrée de réponse sécurisée et optimisée
 	read_launch_script()
 	{

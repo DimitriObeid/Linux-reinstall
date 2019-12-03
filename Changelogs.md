@@ -60,7 +60,7 @@
     - **detect_root()** : Changement du nom de la variable **"rep"** par **"rep_launch"**.
 
 
-# Version actuelle : 1.4 (mardi 3 décembre 2019, ~16h)
+# Ancienne version : 1.4 (mardi 3 décembre 2019, ~16h)
 
 * Changelogs :
     - Remise en place de la fonction **"handle_errors()"**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
@@ -68,11 +68,19 @@
     - Précision plus importante sur l'argument **$0** de la fonction **detect_root()**
     - Pas d'oubli de rajouter les changements stables du ficher beta.sh dans le fichiers shell SIO et personnel. Avec le développement facile des ajouts de cette version, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
 
+
+# Version actuelle : 1.4.1 (mardi 3 décembre 2019)
+
+Changelogs :
+    - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.4. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **'$'** placé où il n'en fallait pas.
+
+
 # Prochaine version : 1.5
 
 * Changelogs :
     - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
-    - Séparation des options multiples pour éviter la confusion chez un débutant qui lit et veut modifier le script.
+    - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
+
 
 # Future version : Alpha 2.0
 
