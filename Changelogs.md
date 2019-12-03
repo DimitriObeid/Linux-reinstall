@@ -52,7 +52,7 @@
     - **detect_root()** : Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__* à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.
 
 
-# Prochaine version : 1.3
+# Version actuelle : 1.3
 
 * Changelogs :
     - Ajout d'une variable **$VOID** pour rendre le script un peu plus clair. Au lieu de taper *__echo ""__* à chaque fois que l'on souhaite sauter une ligne, on tape *__echo $VOID__*.
@@ -65,6 +65,7 @@
 * Changelogs :
     - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
     - Remise en place de la fonction **"handle_errors()"** une fonction de sortie d'erreurs, abandonnée pendant les touts premiers tests des versions pré-alpha du script, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
+    - Modification des noms des variables locales d'une fonction, pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
 
 # Future version : 2.0
 
