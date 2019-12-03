@@ -52,7 +52,7 @@
     - **detect_root()** : Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__* à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.
 
 
-# Ancienne version : 1.3 (mardi 3 décembre 2019)
+# Ancienne version : 1.3 (mardi 3 décembre 2019, ~14h)
 
 * Changelogs :
     - Ajout d'une variable **$VOID** pour rendre le script un peu plus clair. Au lieu de taper *__echo ""__* à chaque fois que l'on souhaite sauter une ligne, on tape *__echo $VOID__*.
@@ -60,18 +60,19 @@
     - **detect_root()** : Changement du nom de la variable **"rep"** par **"rep_launch"**.
 
 
-# Version actuelle : 1.4 (mardi 3 décembre 2019)
+# Version actuelle : 1.4 (mardi 3 décembre 2019, ~16h)
 
 * Changelogs :
     - Remise en place de la fonction **"handle_errors()"**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
     - Modification des noms des variables locales d'une fonction, pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
     - Précision plus importante sur l'argument **$0** de la fonction **detect_root()**
-    - Pas d'oubli de rajouter les changements stables du ficher beta.sh dans le fichiers shell SIO et personnel, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
+    - Pas d'oubli de rajouter les changements stables du ficher beta.sh dans le fichiers shell SIO et personnel. Avec le développement facile des ajouts de cette version, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
 
 # Prochaine version : 1.5
 
 * Changelogs :
     - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
+    - Séparation des options multiples pour éviter la confusion chez un débutant qui lit et veut modifier le script.
 
 # Future version : Alpha 2.0
 
