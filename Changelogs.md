@@ -1,4 +1,4 @@
-# Ancienne version : Bêta 0.1
+# Ancienne version : Bêta 0.1 (mercredi 18 novembre 2019)
 
 * Changelogs :
     - Headers fonctionnels.
@@ -10,7 +10,7 @@
     - Header de fin d'installation.
 
 
-# Ancienne version : Bêta 0.2
+# Ancienne version : Bêta 0.2 (mercredi 18 novembre 2019)
 
 * Changelogs :
     - Ajout des paquets à installer (les travaux sur la fonction d'installation des paquets sont toujours en cours).
@@ -18,14 +18,14 @@
     - Léger changement pour le header de bienvenue : **BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!!** ---> **BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!**
 
 
-# Ancienne version : Bêta 0.2.1
+# Ancienne version : Bêta 0.2.1 (mercredi 18 novembre 2019)
 
 * Changelogs :
     - Amélioration visuelle de la partie d'installation des logiciels.
     - **autoremove()** : Correction du bug d'affichage de la chaîne de caractères de mauvaise réponse avant que la question ne soit posée pour la première fois.
 
 
-# Ancienne version : 1.0
+# Ancienne version : 1.0 (vendredi 20 novembre 2019)
 
 * Changelogs :
     - Mise en fonctionnement de la fonction d'installation des paquets venant des dépôts officiels.
@@ -34,7 +34,7 @@
     - Légères modifications appliquées sur les commentaires.
 
 
-# Ancienne version : 1.1
+# Ancienne version : 1.1 (jeudi 28 novembre 2019)
 
 * Changelogs :
     - Placement des conditions **"case"** d'attente de réponse de l'utilisateur dans des sous-fonctions.
@@ -42,7 +42,7 @@
     - Optimisation de la fonction **"script_header"**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
 
 
-# Ancienne version : 1.2
+# Ancienne version : 1.2 (lundi 2 décembre 2019)
 
 * Changelogs :
     - **get_dist_package_manager()** et **pack_install()** : Remplacement des commandes *__which__* par *__command -v__*, commande mieux recommandée que *__which__* pour vérifier qu'un paquet est déjà installé.
