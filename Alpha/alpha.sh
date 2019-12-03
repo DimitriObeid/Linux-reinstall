@@ -76,7 +76,7 @@ script_header()
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne
-		color=$C_HEADER_LINE
+		header_color=$C_HEADER_LINE
 	fi
 
 	echo "$VOID"
@@ -103,10 +103,10 @@ handle_error()
 	fi
 
 	echo "$VOID"
-	echo -ne $error_color
-	draw_header_line $LINE_CHAR $error_color
+	echo -ne "$error_color"
+	draw_header_line $LINE_CHAR "$error_color"
 	echo "##> $1"
-	draw_header_line $LINE_CHAR $error_color
+	draw_header_line $LINE_CHAR "$error_color"
 
 	echo -en "$R_TAB Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation $C_RESET"
 	echo "$VOID"
@@ -155,8 +155,8 @@ detect_root()
 	# Fonction d'entrée de réponse sécurisée et optimisée
 	read_launch_script()
 	{
-		read rep
-		case ${rep,,} in
+		read -r rep_launch
+		case ${rep_launch,,} in
 	        "oui")
 				echo "$VOID"
 	            echo "$V_TAB Vous avez confirmé vouloir exécuter ce script. C'est parti !!! $C_RESET";
@@ -260,7 +260,7 @@ pack_install()
 snap_install()
 {
     snap_name=$@
-    snap install $snap_name
+    snap install "$snap_name"
 }
 
 # Installer un paquet depuis un PPA (gestionnaire de paquets privé)
@@ -317,7 +317,7 @@ set_sudo()
 		# Fonction d'entrée de réponse sécurisée et optimisée
 		read_visudo()
 		{
-			read visudo_rep
+			read -r visudo_rep
 			case ${visudo_rep,,} in
 				"compris")
 					visudo
@@ -352,7 +352,7 @@ autoremove()
 	# Fonction d'entrée de réponse sécurisée et optimisée
 	read_autoremove()
 	{
-		read autoremove_rep
+		read -r autoremove_rep
 		case ${autoremove_rep,,} in
 			"oui")
 				echo "$V_TAB Suppression des paquets $C_RESET"; echo "$VOID"
@@ -469,7 +469,7 @@ echo "$VOID"
 # LAMP
 echo "$J_TAB INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP $C_RESET"; $SLEEP_INST_CAT
 lamp="apache2 php libapache2-mod-php mariadb-server php-mysql php-curl php-gd php-intl php-json php-mbstring php-xml php-zip"
-pack_install $lamp
+pack_install "$lamp"
 echo "$VOID"
 
 
