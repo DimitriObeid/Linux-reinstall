@@ -6,5 +6,5 @@ _Version Bêta 0.1_
 
 Ici, seront répertoriés tous les bugs connus, jusqu'à leur correction
 
-- **Version Bêta 1.1** :
-    * L'ajout de l'utilisateur normal à la liste des sudoers n'est pas encore au point
+- **Version 1.4** :
+    * L'affichage des couleurs des headers ne marche pas correctement
