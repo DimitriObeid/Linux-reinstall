@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation minimal pour les cours de BTS SIO en version Bêta
-# Version Bêta 1.3
+# Version Bêta 1.4
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -43,12 +43,6 @@ J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
 VOID=""
-
-## GESTION D'ERREURS
-# Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
-ERROR_OUTPUT_1="$R_TAB Une erreur s'est produite lors de l'installation -->"
-ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation $C_RESET"
-
 
 
 ### DÉFINITION DES FONCTIONS
@@ -101,6 +95,25 @@ script_header()
 	$SLEEP_TAB
 }
 
+handle_error()
+{
+	result=$1
+	err_color=$2
+
+	if test "$color" = ""; then
+		err_color=$C_RED
+	fi
+
+	echo "$VOID"
+	echo -ne $err_color
+	draw_header_line $LINE_CHAR $err_color
+	echo "##> $1"
+	draw_header_line $LINE_CHAR $err_color
+
+	echo -en "$R_TAB Une erreur s'est produite lors de l'installation -->$result Arrêt de l'installation $C_RESET"
+	exit 1
+}
+
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
 # Détection du gestionnaire de paquets de la distribution utilisée
@@ -116,9 +129,8 @@ get_dist_package_manager()
     command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
-	if [ "$OS_FAMILY" = "void" ]; then
-		echo "$ERROR_OUTPUT_1 ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!$ERROR_OUTPUT_2"
-		exit 1
+	if test "$OS_FAMILY" = "void"; then
+		handle_error "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ !!!"
 	else
 		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo "$VOID"
 	fi
@@ -132,7 +144,7 @@ detect_root()
     	echo "$R_TAB Ce script doit être exécuté en tant qu'administrateur (root)."
     	echo "$R_TAB Placez sudo devant votre commande :"
     	echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0)
-    	echo "$ERROR_OUTPUT_1 ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL !$ERROR_OUTPUT_2"
+    	handle_error "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL !"
     	echo "$C_RESET"
     	exit 1          # Quitter le programme en cas d'erreur
     fi
@@ -174,7 +186,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à Internet $C_RESET"
 	else
-		echo "$ERROR_OUTPUT_1 ERREUR : AUCUNE CONNEXION À INTERNET !$ERROR_OUTPUT_2"
+		handle_error "ERREUR : AUCUNE CONNEXION À INTERNET !"
 		exit 1
 	fi
 }
