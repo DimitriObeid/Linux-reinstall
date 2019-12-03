@@ -14,6 +14,7 @@
 
 
 ### DÉFINITION DES VARIABLES ###
+
 ## HEADER
 # Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets
 LINE_CHAR="-"
@@ -46,6 +47,10 @@ V_TAB="$C_VERT$TAB$TAB"
 # Pour les cas d'erreurs possibles (la raison est mise entre les deux chaînes de caractères au moment où l'erreur se produit)
 ERROR_OUTPUT_1="$R_TAB Une erreur s'est produite lors de l'installation -->"
 ERROR_OUTPUT_2="$C_ROUGE Arrêt de l'installation $C_RESET"
+
+
+
+### DÉFINITION DES FONCTIONS
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
