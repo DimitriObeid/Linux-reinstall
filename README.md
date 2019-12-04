@@ -1,10 +1,10 @@
-# Reinstall Linux : Le programme qui va vous simplifier la réinstallation sur Linux
+# Linux Reinstall : Le programme qui va vous simplifier la réinstallation sur votre distribution Linux
 
 ## 1) Description du projet
 
 Vous en avez plus qu'assez de vous retaper toutes les étapes de réinstallation de vos logiciels à la main ?
 
-Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"Stable"** et à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur.
+Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"Stable"** et à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur (familles Debian, Arch Linux, Fedora, Gentoo et SUSE).
 
 Il vous téléchargera tous les programmes dont vous avez besoin et les installera à votre place, et bien plus.
 
