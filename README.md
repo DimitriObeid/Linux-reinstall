@@ -2,7 +2,7 @@
 
 ## 1) Description du projet
 
-Vous en avez plus qu'assez de vous retaper toutes les étapes de réinstallation de vos logiciels à la main ?
+Vous en avez plus qu'assez de repasser encore et encore par toutes les étapes de réinstallation de vos logiciels à la main ? Ou bien souhaitez-vous vous simplifier la vie lors de l'installation des programmes que vous souhaitez ?
 
 Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"Stable"** et à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur (familles Debian, Arch Linux, Fedora, Gentoo et SUSE).
 
@@ -10,6 +10,7 @@ Il vous téléchargera tous les programmes dont vous avez besoin et les installe
 
 Lisez le fichier **"Mode d'emploi.odt"** pour :  
 <ul>
+    <li> Voir quelle est la différence entre les deux scripts,  </li>
     <li> Voir comment exécuter un des scripts,  </li>
     <li> Savoir à quels moments le script aura besoin de votre permission pour modifier des fichiers,  </li>  
     <li> Savoir quoi faire en cas d'erreur,  </li>
@@ -18,7 +19,12 @@ Lisez le fichier **"Mode d'emploi.odt"** pour :
 
 La lecture de la documentation du script que vous souhaitez installer est vivement conseillée si vous avez besoin d'ajouter ou de supprimer des programmes. Vous saurez ainsi quelle partie du script est à changer pour l'adapter à vos besoins.
 
-## 2) Description des fichiers du projet
+## 2) Fichiers à télécharger :
+
+- Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle ou plus avancée sont au moins deux des trois fichiers de la version 1.4 (*__Documentation Stable.odt__* _(si vous souhaitez modifier le script)_, plus *__sio.sh__* ou *__personnel.sh__*) se trouvant dans le dossier **"Stable"**.  
+- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Alpha"** (si vous êtes déterminé) ou dans le sous-dossier **"Bêta"** (si vous voulez donner un petit coup de main).  
+
+## 3) Description des fichiers du projet
 
 Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3 sous-dossiers :  
 
@@ -42,12 +48,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
     - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.
 
 
-## 3) Fichiers à télécharger :
-
-- Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle ou plus avancée sont au moins deux des trois fichiers de la version 1.4 (*__Documentation Stable.odt__* _(si vous souhaitez modifier le script)_, plus *__sio.sh__* ou *__personnel.sh__*) se trouvant dans le dossier **"Stable"**.  
-- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Alpha"** (si vous êtes déterminé) ou dans le sous-dossier **"Bêta"** (si vous voulez donner un petit coup de main).  
-
-## 4) Ajouts futurs
+## 4) Ajouts futurs (version 2.0 et au-delà)
 
 - Téléchargement de VMware.  
 - Ajout de PPA pour télécharger des paquets supplémentaires (**exemple** : Steam).  
