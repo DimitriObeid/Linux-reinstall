@@ -37,7 +37,7 @@ C_RESET=$(tput sgr0)        # Restaurer la couleur originale du texte affiché s
 C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici /!\
 
 ## AFFICHAGE DE TEXTE
-# Nombre de chevrons avant les chaînes de caractères vertes et rouges
+# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges, et saut de ligne
 TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
