@@ -69,13 +69,13 @@
     - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
 
 
-# Ancienne version : 1.4.1 (mardi 3 décembre 2019, ~22h)
+# Version actuelle : 1.4.1 (mardi 3 décembre 2019, ~22h)
 
 * Changelogs :  
     - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.4. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **$** placé où il ne fallait pas.
 
 
-# Version actuelle : 1.5
+# Prochaine version : 1.5
 
 * Changelogs :
     - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git.
@@ -88,10 +88,12 @@
     - **pack_install()** : Changement du tableau d'argument (**$@**) en premier argument (**$1**).
     - **snap_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**). Création d'une variable contenant l'option de téléchargement du paquet passée en deuxième argument (**$2**).
 
+
 # Prochaine version : 1.6
 
-* Changelogs :  
-        - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
+* Changelogs :
+    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
+
 
 # Future version : Alpha 2.0
 
