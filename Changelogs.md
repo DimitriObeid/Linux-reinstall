@@ -14,7 +14,7 @@
 
 * Changelogs :
     - Ajout des paquets à installer (les travaux sur la fonction d'installation des paquets sont toujours en cours).
-    - Changement du mode d'affichage des erreurs de détection du gestionnaire de paquets et de l'exécution en tant qu'utilisateur normal : **$ERROR_OUTPUT_1 ---> Erreur s'étant produite $ERROR_OUTPUT_2**.
+    - Changement du mode d'affichage des erreurs de détection du gestionnaire de paquets et de l'exécution en tant qu'utilisateur normal : **$ERROR_OUTPUT_1 ---> Erreur s'étant produite $ERROR_OUTPUT_2**. Abandon de la fonction **handle_errors()**, restaurée à partir de la version 1.2.
     - Léger changement pour le header de bienvenue : **BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES LINUX !!!!!** ---> **BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!**
 
 
@@ -29,8 +29,8 @@
 
 * Changelogs :
     - Mise en fonctionnement de la fonction d'installation des paquets venant des dépôts officiels.
-    - Ajout de la fonction **"snap_install()"** pour télécharger des paquets depuis les dépôts de Snap.
-    - Suppression de Zypper de la fonction **"autoremove()"**. Se référer à la documentation pour supprimer les paquets obsolètes sur OpenSUSE.
+    - Ajout de la fonction **snap_install()** pour télécharger des paquets depuis les dépôts de Snap.
+    - Suppression de Zypper de la fonction **autoremove()**. Se référer à la documentation pour supprimer les paquets obsolètes sur OpenSUSE.
     - Légères modifications appliquées sur les commentaires.
 
 
@@ -39,7 +39,7 @@
 * Changelogs :
     - Placement des conditions **"case"** d'attente de réponse de l'utilisateur dans des sous-fonctions.
     - Correction de fautes d'orthographe mineures.
-    - Optimisation de la fonction **"script_header"**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
+    - Optimisation de la fonction **script_header()**. Désormais, il n'y a plus besoin de remettre la couleur de base du texte du terminal juste après le texte du header, ni de rajouer un **echo ""** juste après, car le saut de ligne est automatique.
 
 
 # Ancienne version : 1.2 (lundi 2 décembre 2019)
@@ -47,8 +47,8 @@
 * Changelogs :
     - **get_dist_package_manager()** et **pack_install()** : Remplacement des commandes *__which__* par *__command -v__*, commande mieux recommandée que *__which__* pour vérifier qu'un paquet est déjà installé.
     - Correction d'un bug affichant l'étape d'autoremove sans interaction possible.
-    - Toujours dans l'étape d'autoremove : La fonction **"read_autoremove"** se répète désormais en cas de réponse inattendue.
-    - Léger changement de la chaîne de caractères à afficher en cas de réponse inattendue dans les fonctions **"read_launch_script()"** et **"read_autoremove()"**. Passage de *__"Veuillez rentrer une valeur valide (oui/non)"__* à *__"Veuillez répondre EXACTEMENT par "oui" ou par "non" "__*
+    - Toujours dans l'étape d'autoremove : La fonction **read_autoremove()** se répète désormais en cas de réponse inattendue.
+    - Léger changement de la chaîne de caractères à afficher en cas de réponse inattendue dans les fonctions **read_launch_script()** et **read_autoremove()**. Passage de *__"Veuillez rentrer une valeur valide (oui/non)"__* à *__"Veuillez répondre EXACTEMENT par "oui" ou par "non" "__*
     - **detect_root()** : Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__* à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.
 
 
@@ -63,10 +63,10 @@
 # Ancienne version : 1.4 (mardi 3 décembre 2019, ~16h)
 
 * Changelogs :
-    - Remise en place de la fonction **"handle_errors()"**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
+    - Remise en place de la fonction **handle_errors()**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
     - Modification des noms des variables locales d'une fonction, pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
     - Précision plus importante sur l'argument **$0** de la fonction **detect_root()** en commentaire.
-    - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
+    - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour lesquelles cette version est sortie près de deux heures après la version 1.3.
 
 
 # Version actuelle : 1.4.1 (mardi 3 décembre 2019, ~22h)
@@ -78,15 +78,17 @@
 # Prochaine version : 1.5
 
 * Changelogs :
-    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git.
+    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git
     - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
     - Séparation des éléments de la fonction **detect_root()**. Dans cette fonction ne reste que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
     - Création de trois nouvelles petites fonctions d'affichage de texte plus propre, sans avoir à définir les couleurs au début et à la fin du texte :
         - **j_echo()** : Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
         - **r_echo()** : Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
         - **v_echo()** : Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
-    - **pack_install()** : Changement du tableau d'argument (**$@**) en premier argument (**$1**).
+    - **pack_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
     - **snap_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**). Création d'une variable contenant l'option de téléchargement du paquet passée en deuxième argument (**$2**).
+    - **Installation des paquets de LAMP** : Avec la modification ci-dessus de la fonction **pack_install()**, les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
+    - **Installation des paquets Snap** : Avec la modification ci-dessus de la fonction **snap_install()**, tous les paquets Snap doivent être ajoutés avec une option, même ceux dont aucune option n'est obligatoire (rajouter l'option **- -stable** pour ajouter ces paquets).
 
 
 # Prochaine version : 1.6

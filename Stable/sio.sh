@@ -96,7 +96,7 @@ script_header()
 }
 
 # Fonction de gestion d'erreurs
-handle_error()
+handle_errors()
 {
 	error_result=$1
 	error_color=$2
@@ -132,7 +132,7 @@ get_dist_package_manager()
 
 	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
 	if test "$OS_FAMILY" = "void"; then
-		handle_error "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
+		handle_errors "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		echo "$V_TAB Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY) $C_RESET"; echo "$VOID"
 	fi
@@ -146,7 +146,7 @@ detect_root()
     	echo "$R_TAB Ce script doit être exécuté en tant qu'administrateur (root)."
     	echo "$R_TAB Placez sudo devant votre commande :"
 		echo "$R_TAB sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0). S'il est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	handle_error "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+    	handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
     	echo "$C_RESET"
     	exit 1
     fi
@@ -188,7 +188,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		echo "$V_TAB Votre ordinateur est connecté à Internet $C_RESET"
 	else
-		handle_error "ERREUR : AUCUNE CONNEXION À INTERNET"
+		handle_errors "ERREUR : AUCUNE CONNEXION À INTERNET"
 		exit 1
 	fi
 }
