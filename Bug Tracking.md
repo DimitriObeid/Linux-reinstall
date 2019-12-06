@@ -6,5 +6,5 @@ _Version Bêta 0.1_
 
 Ici, seront répertoriés tous les bugs connus, jusqu'à leur correction
 
-- **Version 1.4** :
-    * L'affichage des couleurs des headers ne marche pas correctement
+- **Version 1.4.1** :
+    * L'affichage de la couleur des headers d'erreur ne marche pas correctement
