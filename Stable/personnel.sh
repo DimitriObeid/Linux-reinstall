@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation personalisée
-# Version personnelle 1.2
+# Version personnelle 1.4.1
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -269,6 +269,8 @@ snap_install()
 # Suppression des paquets obsolètes
 autoremove()
 {
+	script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
+
 	echo "$J_TAB Souhaitez vous supprimer les paquets obsolètes ? (oui/non) $C_RESET"
 	read_autoremove()
 	{
@@ -412,7 +414,6 @@ pack_install $lamp
 
 
 # Suppression des paquets obsolètes
-script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 autoremove
 # Fin de l'installation
 is_installation_done

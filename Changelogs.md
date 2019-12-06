@@ -65,22 +65,33 @@
 * Changelogs :
     - Remise en place de la fonction **"handle_errors()"**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
     - Modification des noms des variables locales d'une fonction, pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
-    - Précision plus importante sur l'argument **$0** de la fonction **detect_root()**
-    - Pas d'oubli de rajouter les changements stables du ficher beta.sh dans le fichiers shell SIO et personnel. Avec le développement facile des ajouts de cette version, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
+    - Précision plus importante sur l'argument **$0** de la fonction **detect_root()** en commentaire.
+    - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour laquelle cette version est sortie près de deux heures après la version 1.3.
 
 
-# Version actuelle : 1.4.1 (mardi 3 décembre 2019)
+# Ancienne version : 1.4.1 (mardi 3 décembre 2019, ~22h)
 
-Changelogs :
-    - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.4. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **'$'** placé où il n'en fallait pas.
+* Changelogs :  
+    - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.4. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **$** placé où il ne fallait pas.
 
 
-# Prochaine version : 1.5
+# Version actuelle : 1.5
 
 * Changelogs :
-    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
+    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git.
     - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
+    - Séparation des éléments de la fonction **detect_root()**. Dans cette fonction ne reste que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
+    - Création de trois nouvelles petites fonctions d'affichage de texte plus propre, sans avoir à définir les couleurs au début et à la fin du texte :
+        - **j_echo()** : Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
+        - **r_echo()** : Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
+        - **v_echo()** : Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
+    - **pack_install()** : Changement du tableau d'argument (**$@**) en premier argument (**$1**).
+    - **snap_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**). Création d'une variable contenant l'option de téléchargement du paquet passée en deuxième argument (**$2**).
 
+# Prochaine version : 1.6
+
+* Changelogs :  
+        - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
 
 # Future version : Alpha 2.0
 
