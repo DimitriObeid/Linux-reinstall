@@ -64,7 +64,7 @@
 
 * Changelogs :
     - Remise en place de la fonction **handle_errors()**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
-    - Modification des noms des variables locales d'une fonction, pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
+    - Modification des noms des variables déclarées dans chaque fonction pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
     - Précision plus importante sur l'argument **$0** de la fonction **detect_root()** en commentaire.
     - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour lesquelles cette version est sortie près de deux heures après la version 1.3.
 
@@ -78,7 +78,7 @@
 # Prochaine version : 1.5
 
 * Changelogs :
-    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git
+    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git <-- Mettre à jour la liste des programmes dans le mode d'emploi
     - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
     - Séparation des éléments de la fonction **detect_root()**. Dans cette fonction ne reste que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
     - Création de trois nouvelles petites fonctions d'affichage de texte plus propre, sans avoir à définir les couleurs au début et à la fin du texte :
@@ -86,9 +86,10 @@
         - **r_echo()** : Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
         - **v_echo()** : Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
     - **pack_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
-    - **snap_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**). Création d'une variable contenant l'option de téléchargement du paquet passée en deuxième argument (**$2**).
     - **Installation des paquets de LAMP** : Avec la modification ci-dessus de la fonction **pack_install()**, les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
-    - **Installation des paquets Snap** : Avec la modification ci-dessus de la fonction **snap_install()**, tous les paquets Snap doivent être ajoutés avec une option, même ceux dont aucune option n'est obligatoire (rajouter l'option **- -stable** pour ajouter ces paquets).
+    - **handle_errors()** : Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
+    - Optimisation de la fonction **pack_install()**. Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
+    - Déclaration de la variable **$OS_FAMILY** avec les autres variables, au lieu d'être déclarée et directement définie dans la fonction **get_dist_package_manager()**.
 
 
 # Prochaine version : 1.6
@@ -101,4 +102,5 @@
 
 * Changelogs :
     - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian), avec obtention du nom de l'utilisateur normal au moment de lancer le script via un appel système **"read"**.
+    - Pour l'instant : Demander à l'utilisateur d'écrire son nom via read
     - Téléchargement des paquets de la logithèque de la distribution depuis les PPA.
