@@ -44,6 +44,11 @@ R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
 VOID=""
 
+## GESTION DE PAQUETS
+# Variable contenant le nom de la famille de distributions du gestionnaire de paquets supporté.
+# Si la chaîne de caractères de la variable est toujours vide après la définition de la variable,
+# Alors le gestionnaire de paquets n'est pas supporté.
+OS_FAMILY=""
 
 ################### DÉFINITION DES FONCTIONS ###################
 
@@ -52,8 +57,8 @@ VOID=""
 draw_header_line()
 {
 	line_cols=$(tput cols)
-	line_char=$1
-	line_color=$2
+	line_char=$1	# Premier argument
+	line_color=$2	# Deuxième argument
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
@@ -90,7 +95,8 @@ script_header()
     # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
 #    echo -ne $C_RESET
 	echo "##> $header_string"
-	draw_header_line $LINE_CHAR "$C_RESET"
+	draw_header_line $LINE_CHAR "$header_color"
+	echo $C_RESET
 	$SLEEP_TAB
 }
 
@@ -101,7 +107,7 @@ handle_error()
 	error_color=$2
 
 	if test "$error_color" = ""; then
-		error_color=$C_RED
+		error_color=$C_ROUGE
 	fi
 
 	echo "$VOID"
@@ -111,16 +117,21 @@ handle_error()
 	draw_header_line $LINE_CHAR
 	echo -n -e "$C_RESET"
 
+	echo "$VOID"
+	echo "$VOID"
 	echo -n -e "$R_TAB Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation $C_RESET"
+	echo "$VOID"
 	echo "$VOID"
 	exit 1
 }
 
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage de texte en jaune, rouge et vert
+# Affichage de texte en jaune
 j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
+# Affichage de texte en rouge
 r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
+# Affichage de texte en vert
 v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 
 
@@ -129,7 +140,7 @@ v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 detect_root()
 {
     # Si le script n'est pas exécuté en root
-    if [ "$EUID" -ne 0 ]; then
+    if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
     	r_echo "$C_RESET	sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0). S'il est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
@@ -145,6 +156,7 @@ detect_root()
 get_dist_package_manager()
 {
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
+
 	j_echo " Détection de votre gestionnaire de paquet"
 
     command -v zypper &> /dev/null && OS_FAMILY="opensuse"
@@ -166,7 +178,8 @@ get_dist_package_manager()
 launch_script()
 {
 	echo "$J_TAB Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
-    echo -e "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non) $C_RESET";
+    j_echo "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non";
+
 	# Fonction d'entrée de réponse sécurisée et optimisée
 	read_launch_script()
 	{
@@ -240,40 +253,38 @@ dist_upgrade()
 # Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
 pack_install()
 {
-	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments, remplacez le '$1' du dessous par '$@'
-	# et enlevez les doubles guillemets "" entourant chaque variable $package_name après la commande d'installation
-	# de la ou des distributions de votre choix
+	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le'$1'
+	# du dessous par '$@' et enlevez les doubles guillemets "" entourant chaque variable $package_name après la commande
+	# d'installation de la ou des distributions de votre choix.
 	package_name=$1
+
+	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
+	cmd_args_f()
+	{
+		# Tableau dynamique d'arguments permettant d'appeler la commande d'installation complète de chaque gestionnaire de paquets
+		cmd_args=$@
+
+		v_echo "Installation de $package_name"
+		$SLEEP_INST
+		$cmd_args
+		echo "$VOID"
+	}
+
 	case $OS_FAMILY in
 		opensuse)
-			v_echo "Installation de $package_name"
-			$SLEEP_INST
-			zypper -y install "$package_name"
-			echo "$VOID"
+			cmd_args_f zypper -y install "$package_name"
 			;;
 		archlinux)
-			v_echo "Installation de $package_name"
-			$SLEEP_INST
-			pacman --noconfirm -S "$package_name"
-			echo "$VOID"
+			cmd_args_f pacman --noconfirm -S "$package_name"
 			;;
 		fedora)
-			v_echo "Installation de $package_name"
-			$SLEEP_INST
-			dnf -y install "$package_name"
-			echo "$VOID"
+			cmd_args_f dnf -y install "$package_name"
 			;;
 		debian)
-			v_echo "Installation de $package_name"
-			$SLEEP_INST
-			apt -y install "$package_name"
-			echo "$VOID"
+			cmd_args_f apt -y install "$package_name"
 			;;
 		gentoo)
-			v_echo "Installation de $package_name"
-			$SLEEP_INST
-			emerge "$package_name"
-			echo "$VOID"
+			cmd_args_f emerge "$package_name"
 			;;
 	esac
 }
@@ -281,9 +292,28 @@ pack_install()
 # Pour installer des paquets Snap
 snap_install()
 {
-    snap_name=$1
-	snap_opts=$2
-    snap install "$snap_name $snap_opts"
+    snap_name=$@	# Tableau dynamique d'arguments
+    snap install $@
+}
+
+# Installer un paquet depuis un PPA (Private Package Manager ; Gestionnaire de Paquets Privé)
+ppa_install()
+{
+	script_header "AJOUT DE DÉPÔTS PPA ET TÉLÉCHARGEMENT DE PAQUETS DEPUIS CES DÉPÔTS"
+	case $OS_FAMILY in
+		opensuse)
+			;;
+		archlinux)
+
+			;;
+		fedora)
+			;;
+		debian)
+
+			;;
+		gentoo)
+			;;
+	esac
 }
 
 # Suppression des paquets obsolètes
@@ -292,18 +322,15 @@ autoremove()
 	script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 
 	j_echo "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
+
 	read_autoremove()
 	{
-		read -r autoremove_rep
+		read -r autoremove_repcommand
 		case ${autoremove_rep,,} in
 			"oui")
 				v_echo "Suppression des paquets"; echo "$VOID"
 	    		case "$OS_FAMILY" in
 	        		opensuse)
-	            		j_echo "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
-						j_echo "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
-	            		;;
-	        		archlinux)
 	            		pacman -Qdt
 	            		;;
 	        		fedora)
@@ -399,6 +426,9 @@ j_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"; $SLEEP_INST_CAT
 snap_install atom --classic		# Atom IDE
 snap_install code --classic		# Visual Studio Code
 pack_install emacs
+pack_install g++
+pack_install gcc
+pack_install git
 pack_install valgrind
 echo "$VOID"
 
