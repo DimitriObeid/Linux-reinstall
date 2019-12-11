@@ -293,7 +293,7 @@ pack_install()
 snap_install()
 {
     snap_name=$@	# Tableau dynamique d'arguments
-    snap install $@
+    snap install $snap_name
 }
 
 # Installer un paquet depuis un PPA (Private Package Manager ; Gestionnaire de Paquets Privé)
