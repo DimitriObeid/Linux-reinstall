@@ -56,7 +56,10 @@
 
 * Changelogs :
     - Ajout d'une variable **$VOID** pour rendre le script un peu plus clair. Au lieu de taper *__echo ""__* à chaque fois que l'on souhaite sauter une ligne, on tape *__echo $VOID__*.
-    - Débogage et renforcement de l'intégrité du script grâce au débogueur en ligne Shell Check --> https://www.shellcheck.net/.
+    - Débogage et renforcement de l'intégrité du script grâce au débogueur en ligne Shell Check --> https://www.shellcheck.net/.  Ajout de double guillemets aux appels de variables contenant des chaînes de caractères pour éviter la séparation des mots des chaînes de caractères et le globbing.
+        - Fonctionnalité des systèmes UNIX permettant l'utilisation d'un wildcard **(ou joker, ou encore métacaractère)** pour rechercher plus rapidement un ou des fichiers selon ce que l'on cherche.  
+        Par exemple, sous Windows, pour rechercher une partie d'un nom de fichier, on écrit **%fichier%**, tandis que sous tout système UNIX, on écrit **\*fichier***.  
+
     - **detect_root()** : Changement du nom de la variable **"rep"** par **"rep_launch"**.
 
 
@@ -72,7 +75,7 @@
 # Version actuelle : 1.4.1 (mardi 3 décembre 2019, ~22h)
 
 * Changelogs :  
-    - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.4. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **$** placé où il ne fallait pas.
+    - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.3. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **$** placé où il ne fallait pas, ajouté accidentellement lors de l'ajout des double guillemets afin de renforcer l'intégrité du script **(ajout conseillé par le débogueur de Shell Check)**.
 
 
 # Prochaine version : 1.5
@@ -90,6 +93,8 @@
     - **handle_errors()** : Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
     - Optimisation de la fonction **pack_install()**. Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
     - Déclaration de la variable **$OS_FAMILY** avec les autres variables, au lieu d'être déclarée et directement définie dans la fonction **get_dist_package_manager()**.*
+    - Simplification de la liste de définition des variables.
+    - Ajout d'une variable nommée **$COLS**, destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
 
 
 # Prochaine version : 1.6
