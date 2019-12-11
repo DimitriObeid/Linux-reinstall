@@ -15,11 +15,8 @@
 
 ################### DÉFINITION DES VARIABLES ###################
 
-## HEADER
-# Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets
-LINE_CHAR="-"
-
 ## CHRONOMÈTRE
+
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
@@ -29,14 +26,20 @@ SLEEP_INST=sleep\ .5    # Temps d'affichage lors de l'installation d'un nouveau 
 SLEEP_INST_CAT=sleep\ 1 # Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 ## COULEURS
+
 # Couleurs pour mieux lire les étapes de l'exécution du script
 C_ROUGE=$(tput setaf 196)   # Rouge clair
 C_VERT=$(tput setaf 82)     # Vert clair
 C_JAUNE=$(tput setaf 226)   # Jaune clair
 C_RESET=$(tput sgr0)        # Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
-C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de couleurs du header qu'ici ET SEULEMENT ici /!\
+C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de la couleur du header qu'ici ET SEULEMENT ici /!\
 
 ## AFFICHAGE DE TEXTE
+
+# Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets
+HEADER_LINE_CHAR="-"
+# Affichage de colonnes
+COLS=$(tput cols)
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges, et saut de ligne
 TAB=">>>>"
 J_TAB="$C_JAUNE$TAB"
@@ -45,10 +48,12 @@ V_TAB="$C_VERT$TAB$TAB"
 VOID=""
 
 ## GESTION DE PAQUETS
+
 # Variable contenant le nom de la famille de distributions du gestionnaire de paquets supporté.
 # Si la chaîne de caractères de la variable est toujours vide après la définition de la variable,
 # Alors le gestionnaire de paquets n'est pas supporté.
 OS_FAMILY=""
+
 
 ################### DÉFINITION DES FONCTIONS ###################
 
@@ -56,7 +61,6 @@ OS_FAMILY=""
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 draw_header_line()
 {
-	line_cols=$(tput cols)
 	line_char=$1	# Premier argument
 	line_color=$2	# Deuxième argument
 
@@ -66,7 +70,7 @@ draw_header_line()
 	fi
 
 	# Pour afficher le caractère souhaité sur toute la ligne
-	for i in $(eval echo "{1..$line_cols}"); do
+	for i in $(eval echo "{1..$COLS}"); do
 		echo -n "$line_char"
 	done
 
@@ -74,6 +78,12 @@ draw_header_line()
 	if test "$line_color" != ""; then
 		echo -n -e "$line_color"
 	fi
+}
+
+center_header_text()
+{
+	title=$1
+	printf "%*s" $(((${#title}+$COLS)/2)) "$title"
 }
 
 # Affichage du texte des headers
@@ -92,11 +102,12 @@ script_header()
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
 	draw_header_line $LINE_CHAR "$header_color"
-    # Commenter la ligne du dessous pour que le prompt "##>" soit de la même couleur que la ligne du dessus
+    # Décommenter la ligne du dessous pour que le prompt "##>" ne soit plus de la même couleur que la ligne du dessus, mais de la couleur par défaut des paramètres du terminal
 #    echo -ne $C_RESET
-	echo "##> $header_string"
+	center_header_text "$header_string"
 	draw_header_line $LINE_CHAR "$header_color"
-	echo $C_RESET
+	echo "$C_RESET"
+	echo "$VOID"
 	$SLEEP_TAB
 }
 
@@ -180,24 +191,26 @@ launch_script()
 	echo "$J_TAB Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
     j_echo "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non";
 
-	# Fonction d'entrée de réponse sécurisée et optimisée
+	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
 	read_launch_script()
 	{
 		read -r rep_launch
 		case ${rep_launch,,} in
 	        "oui")
 				echo "$VOID"
+
 	            v_echo "Vous avez confirmé vouloir exécuter ce script. C'est parti !!!"
 				return
 	            ;;
 	        "non")
 				echo "$VOID"
+
 	            r_echo "Le script ne sera pas exécuté"
 	            r_echo "Abandon"
+				echo "$VOID"
 	            exit 1
 	            ;;
 			*)
-				echo "$VOID"
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				read_launch_script
 				;;
@@ -228,7 +241,6 @@ dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	echo "$VOID"
 	case "$OS_FAMILY" in
 		opensuse)
 			zypper -y update
@@ -261,12 +273,13 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	cmd_args_f()
 	{
-		# Tableau dynamique d'arguments permettant d'appeler la commande d'installation complète de chaque gestionnaire de paquets
-		cmd_args=$@
+		# Concaténation d'arguments : La commande d'installation de chaque gestionnaire de paquets avec ses paramètres
+		cmd_args=$*
 
 		v_echo "Installation de $package_name"
 		$SLEEP_INST
 		$cmd_args
+
 		echo "$VOID"
 	}
 
@@ -292,14 +305,17 @@ pack_install()
 # Pour installer des paquets Snap
 snap_install()
 {
-    snap_name=$@	# Tableau dynamique d'arguments
-    snap install $snap_name
+    snap_name=$*	# Tableau dynamique d'arguments
+    snap install "$snap_name"
+
+	echo "$VOID"
 }
 
 # Installer un paquet depuis un PPA (Private Package Manager ; Gestionnaire de Paquets Privé)
 ppa_install()
 {
 	script_header "AJOUT DE DÉPÔTS PPA ET TÉLÉCHARGEMENT DE PAQUETS DEPUIS CES DÉPÔTS"
+
 	case $OS_FAMILY in
 		opensuse)
 			;;
@@ -323,14 +339,22 @@ autoremove()
 
 	j_echo "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
 
+	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
 	read_autoremove()
 	{
-		read -r autoremove_repcommand
+		read -r autoremove_rep
+
 		case ${autoremove_rep,,} in
 			"oui")
-				v_echo "Suppression des paquets"; echo "$VOID"
+				echo "$VOID"
+				j_echo "Suppression des paquets"
+
 	    		case "$OS_FAMILY" in
 	        		opensuse)
+	            		j_echo "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
+						j_echo "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
+	            		;;
+	        		archlinux)
 	            		pacman -Qdt
 	            		;;
 	        		fedora)
@@ -345,10 +369,13 @@ autoremove()
 	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
 	            		;;
 				esac
+
+				echo "$VOID"
 				v_echo "Auto-suppression des paquets obsolètes effectuée avec succès"
 				return
 				;;
 			"non")
+				echo "$VOID"
 				j_echo "Les paquets obsolètes ne seront pas supprimés"
 				j_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
 				return
@@ -367,8 +394,9 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
-}
 
+	echo "$VOID"
+}
 
 ################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
 
@@ -417,7 +445,7 @@ pack_install python-pip
 echo "$VOID"
 
 # Logiciels
-j_echo "INSTALLATION DES LOGICIELS"; $SLEEP_INST_CAT
+j_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"; $SLEEP_INST_CAT
 pack_install k4dirstat
 echo "$VOID"
 
@@ -433,7 +461,7 @@ pack_install valgrind
 echo "$VOID"
 
 # Vidéo
-j_echo "INSTALLATION DE VLC"; $SLEEP_INST_CAT
+j_echo "INSTALLATION DES LOGICIELS VIDÉO"; $SLEEP_INST_CAT
 pack_install vlc
 echo "$VOID"
 
@@ -442,7 +470,7 @@ j_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"; $S
 pack_install apache2			# Apache
 pack_install php				# PHP
 pack_install libapache2-mod-php
-pack_install mariadb-server		# Un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez par mysql-server)
+pack_install mariadb-server		# Un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par mysql-server)
 pack_install php-mysql
 pack_install php-curl
 pack_install php-gd
@@ -451,6 +479,8 @@ pack_install php-json
 pack_install php-mbstring
 pack_install php-xml
 pack_install php-zip
+
+v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVAEC SUCCÈS ! FIN DE L'INSTALLATION"
 
 
 # Suppression des paquets obsolètes
