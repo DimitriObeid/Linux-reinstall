@@ -99,6 +99,7 @@
         - **$SCRIPT_VERSION** : Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
     - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
     - Changement du nom de la variable **$SLEEP_TAB** par **$SLEEP_HEADER**.
+    - Refonte de certaines parties du script pour une lecture et une compréhension plus facile, ainsi qu'un affichage des étapes plus agréable lors de l'exécution.
 
 
 # Prochaine version : 1.6
