@@ -268,28 +268,29 @@ pack_install()
 	cmd_args_f()
 	{
 		$SLEEP_INST
-		$@    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+		"$@"    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 
 		echo "$VOID"
 	}
-	$ command -v $package_name >/dev/null 2>&1 || { v_echo >&2 "Installation de $package_name";}
-	case $OS_FAMILY in
-		opensuse)
-			cmd_args_f zypper -y install "$package_name"
-			;;
-		archlinux)
-			cmd_args_f pacman --noconfirm -S "$package_name"
-			;;
-		fedora)
-			cmd_args_f dnf -y install "$package_name"
-			;;
-		debian)
-			cmd_args_f apt -y install "$package_name"
-			;;
-		gentoo)
-			cmd_args_f emerge "$package_name"
-			;;
-	esac
+	$ command -v "$package_name" >/dev/null 2>&1 && { v_echo >&1 "Le paquet $package_name est déjà installé";} || {
+		case $OS_FAMILY in
+			opensuse)
+				cmd_args_f zypper -y install "$package_name"
+				;;
+			archlinux)
+				cmd_args_f pacman --noconfirm -S "$package_name"
+				;;
+			fedora)
+				cmd_args_f dnf -y install "$package_name"
+				;;
+			debian)
+				cmd_args_f apt -y install "$package_name"
+				;;
+			gentoo)
+				cmd_args_f emerge "$package_name"
+				;;
+		esac
+	}
 }
 
 # Pour installer des paquets Snap
