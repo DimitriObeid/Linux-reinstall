@@ -81,7 +81,7 @@
 # Prochaine version : 1.5
 
 * Changelogs :
-    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git <-- Mettre à jour la liste des programmes dans le mode d'emploi
+    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git
     - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
     - Séparation des éléments de la fonction **detect_root()**. Dans cette fonction ne reste que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
     - Création de trois nouvelles petites fonctions d'affichage de texte plus propre, sans avoir à définir les couleurs au début et à la fin du texte :
