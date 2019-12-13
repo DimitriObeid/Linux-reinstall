@@ -262,13 +262,12 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	cmd_args_f()
 	{
-		v_echo "Installation de $package_name"
 		$SLEEP_INST
 		$@    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 
 		echo "$VOID"
 	}
-
+	$ command -v $package_name >/dev/null 2>&1 || { v_echo >&2 "Installation de $package_name";}
 	case $OS_FAMILY in
 		opensuse)
 			cmd_args_f zypper -y install "$package_name"
