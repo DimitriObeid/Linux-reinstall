@@ -93,8 +93,10 @@
     - **handle_errors()** : Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
     - Optimisation de la fonction **pack_install()**. Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
     - Déclaration de la variable **$OS_FAMILY** avec les autres variables, au lieu d'être déclarée et directement définie dans la fonction **get_dist_package_manager()**.*
-    - Simplification de la liste de définition des variables.
-    - Ajout d'une variable nommée **$COLS**, destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
+    - Réorganisation et structuration de la liste de définition des variables.
+    - Ajout de plusieurs variables :
+        - **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
+        - **$SCRIPT_VERSION** : Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue.
     - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
     - Changement du nom de la variable **$SLEEP_TAB** par **$SLEEP_HEADER**.
 
