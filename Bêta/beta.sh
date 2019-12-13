@@ -21,22 +21,23 @@
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-SLEEP_TAB=sleep\ 1.5    # Temps d'affichage d'un changement d'étape
-SLEEP_INST=sleep\ .5    # Temps d'affichage lors de l'installation d'un nouveau paquet
-SLEEP_INST_CAT=sleep\ 1 # Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
+SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un changement d'étape
+SLEEP_INST=sleep\ .5    	# Temps d'affichage lors de l'installation d'un nouveau paquet
+SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 ## COULEURS
 
 # Couleurs pour mieux lire les étapes de l'exécution du script
-C_ROUGE=$(tput setaf 196)   # Rouge clair
-C_VERT=$(tput setaf 82)     # Vert clair
-C_JAUNE=$(tput setaf 226)   # Jaune clair
-C_RESET=$(tput sgr0)        # Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
-C_HEADER_LINE=$(tput setaf 6)      # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de la couleur du header qu'ici ET SEULEMENT ici /!\
+C_HEADER_LINE=$(tput setaf 6)   # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de la couleur du header qu'ici ET SEULEMENT ici /!\
+C_JAUNE=$(tput setaf 226) 		# Jaune clair
+C_RESET=$(tput sgr0)        	# Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
+C_ROUGE=$(tput setaf 196)   	# Rouge clair
+C_VERT=$(tput setaf 82)     	# Vert clair
 
 ## AFFICHAGE DE TEXTE
 
-# Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets
+# Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets.
+# Ne mettez pas plus de deux caractères si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes.
 HEADER_LINE_CHAR="-"
 # Affichage de colonnes
 COLS=$(tput cols)
@@ -57,12 +58,20 @@ OS_FAMILY=""
 
 ################### DÉFINITION DES FONCTIONS ###################
 
+## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
+# Affichage de texte en jaune avec des chevrons
+j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
+# Affichage de texte en rouge avec des chevrons
+r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
+# Affichage de texte en vert avec des chevrons
+v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
+
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 draw_header_line()
 {
-	line_char=$1	# Premier argument
-	line_color=$2	# Deuxième argument
+	line_char=$1	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
+	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
@@ -76,21 +85,14 @@ draw_header_line()
 
 	# Pour définir la couleur de ce qui suit le dernier caractère
 	if test "$line_color" != ""; then
-		echo -n -e "$line_color"
+		echo -n -e "$C_RESET"		# La couleur de ce qui suit est déjà définie avec les paramètres des chaînes de caractères suivantes
 	fi
-}
-
-center_header_text()
-{
-	title=$1
-	printf "%*s" $(((${#title}+$COLS)/2)) "$title"
 }
 
 # Affichage du texte des headers
 script_header()
 {
 	header_string=$1
-    header_color=$2
 
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
@@ -101,49 +103,35 @@ script_header()
 	echo "$VOID"
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
-	draw_header_line $LINE_CHAR "$header_color"
-    # Décommenter la ligne du dessous pour que le prompt "##>" ne soit plus de la même couleur que la ligne du dessus, mais de la couleur par défaut des paramètres du terminal
-#    echo -ne $C_RESET
-	center_header_text "$header_string"
-	draw_header_line $LINE_CHAR "$header_color"
-	echo "$C_RESET"
-	echo "$VOID"
-	$SLEEP_TAB
+	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
+	echo "$header_color" "##>" "$header_string"
+	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
+	echo "$VOID" "$VOID"
+
+	$SLEEP_HEADER
 }
 
 # Fonction de gestion d'erreurs
 handle_error()
 {
 	error_result=$1
-	error_color=$2
 
 	if test "$error_color" = ""; then
 		error_color=$C_ROUGE
 	fi
 
 	echo "$VOID"
-	echo -n -e "$error_color"
-	draw_header_line $LINE_CHAR
-	echo "##> $error_result"
-	draw_header_line $LINE_CHAR
-	echo -n -e "$C_RESET"
+	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
+#   $SLEEP
+	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
+	echo "$error_color" "##> $error_result"		# Pour afficher une autre couleur pour le texte, remplacer l'appel de variable "$error_color" par ce que vous souhaitez
+	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
 
 	echo "$VOID"
-	echo "$VOID"
-	echo -n -e "$R_TAB Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation $C_RESET"
-	echo "$VOID"
+	r_echo "Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation"
 	echo "$VOID"
 	exit 1
 }
-
-
-## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage de texte en jaune
-j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
-# Affichage de texte en rouge
-r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
-# Affichage de texte en vert
-v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 
 
 ## DÉFINITION DES FONCTIONS D'EXÉCUTION
@@ -188,13 +176,14 @@ get_dist_package_manager()
 # Lancement du script s'il a bien été exécuté en tant que root
 launch_script()
 {
-	echo "$J_TAB Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
-    j_echo "$J_TAB Êtes-vous sûr de savoir ce que vous faites ? (oui/non";
+	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
+    j_echo "Êtes-vous sûr de savoir ce que vous faites ? (oui/non)"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
 	read_launch_script()
 	{
 		read -r rep_launch
+
 		case ${rep_launch,,} in
 	        "oui")
 				echo "$VOID"
@@ -273,12 +262,9 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	cmd_args_f()
 	{
-		# Concaténation d'arguments : La commande d'installation de chaque gestionnaire de paquets avec ses paramètres
-		cmd_args=$*
-
 		v_echo "Installation de $package_name"
 		$SLEEP_INST
-		$cmd_args
+		$@    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 
 		echo "$VOID"
 	}
@@ -305,8 +291,7 @@ pack_install()
 # Pour installer des paquets Snap
 snap_install()
 {
-    snap_name=$*	# Tableau dynamique d'arguments
-    snap install "$snap_name"
+    snap install "$@"    # Tableau dynamique d'arguments
 
 	echo "$VOID"
 }
@@ -348,6 +333,7 @@ autoremove()
 			"oui")
 				echo "$VOID"
 				j_echo "Suppression des paquets"
+				echo "$VOID"
 
 	    		case "$OS_FAMILY" in
 	        		opensuse)
