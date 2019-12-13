@@ -55,6 +55,10 @@ VOID=""
 # Alors le gestionnaire de paquets n'est pas supporté.
 OS_FAMILY=""
 
+## VERSION
+# Version actuelle du script
+SCRIPT_VERSION="2.0"
+
 
 ################### DÉFINITION DES FONCTIONS ###################
 
@@ -389,7 +393,7 @@ is_installation_done()
 # Détection du mode super-administrateur (root)
 detect_root
 # Affichage du header de bienvenue
-script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX !!!!!"
+script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX VERSION $SCRIPT_VERSION !!!!!"
 v_echo "Début de l'installation"
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager
