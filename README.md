@@ -57,5 +57,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
 - Ajout de PPA pour télécharger des paquets supplémentaires (**exemple** : Steam).  
 - Ajout de sudo et configuration pour y accéder en tant qu'utilisateur normal pour Debian.  
 - Proposition d'installation d'un environnement graphique si aucun environnement graphique n'est détecté.  
-- Ajout d'une possibilité d'appel d'arguments lors de l'appel du fichier exécutable
+- Ajout d'une possibilité d'appel d'arguments lors de l'appel du fichier exécutable.
 - Création d'une manpage pour y lister ces arguments et y écrire le mode d'emploi.
+- Parmi ces options, une qui servira à supprimer les paquets installés par le script
+    - Pour cela, je pense mettre le nom des paquets installés par le script (s'ils n'étaient pas déjà installés) dans u fichier, et si l'option est appelée, récupérer ces paquets et appeler la commande de suppression adaptée à la distribution de l'utilisateur.
