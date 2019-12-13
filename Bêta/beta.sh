@@ -251,6 +251,7 @@ dist_upgrade()
 			emerge -u world
 			;;
 	esac
+	echo "$VOID"
 	v_echo "Mise à jour du système effectuée avec succès"
 }
 
