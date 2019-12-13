@@ -95,6 +95,8 @@
     - Déclaration de la variable **$OS_FAMILY** avec les autres variables, au lieu d'être déclarée et directement définie dans la fonction **get_dist_package_manager()**.*
     - Simplification de la liste de définition des variables.
     - Ajout d'une variable nommée **$COLS**, destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
+    - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
+    - Changement du nom de la variable **$SLEEP_TAB** par **$SLEEP_HEADER**.
 
 
 # Prochaine version : 1.6
