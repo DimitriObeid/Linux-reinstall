@@ -124,12 +124,13 @@ handle_error()
 		error_color=$C_ROUGE
 	fi
 
-	echo "$VOID"
+	echo "$VOID" "$VOID"
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
 #   $SLEEP
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
 	echo "$error_color" "##> $error_result"		# Pour afficher une autre couleur pour le texte, remplacer l'appel de variable "$error_color" par ce que vous souhaitez
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
+	echo "$VOID"
 
 	echo "$VOID"
 	r_echo "Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation"
@@ -151,7 +152,6 @@ detect_root()
 		r_echo "Et tapez cette commande :"
 		r_echo "$C_RESET	$0"
 		handle_error "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
-    	exit 1
     fi
 }
 
@@ -168,7 +168,7 @@ get_dist_package_manager()
     command -v apt &> /dev/null && OS_FAMILY="debian"
     command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
-	# Si, après l'appel de la fonction, la string contenue dans la variable $OS_FAMILY est toujours nulle
+	# Si, après l'appel de la fonction, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle
 	if test "$OS_FAMILY" = ""; then
 		handle_error "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
@@ -224,7 +224,6 @@ check_internet_connection()
 		v_echo "Votre ordinateur est connecté à Internet"
 	else
 		handle_error "ERREUR : AUCUNE CONNEXION À INTERNET"
-		exit 1
 	fi
 }
 
@@ -267,12 +266,13 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	cmd_args_f()
 	{
-		$SLEEP_INST
-		"$@"    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-
+		$SLEEP_INST; "$@"    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 		echo "$VOID"
 	}
-	$ command -v "$package_name" >/dev/null 2>&1 && { v_echo >&1 "Le paquet $package_name est déjà installé";} || {
+
+	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque. Si c'est le cas, le programme affiche que le paquet
+	# est déjà installé, sinon, on l'installe
+	command -v "$package_name" >/dev/null 2>&1 && { v_echo >&1 "Le paquet \"$package_name\" est déjà installé";} || {
 		case $OS_FAMILY in
 			opensuse)
 				cmd_args_f zypper -y install "$package_name"
@@ -297,7 +297,6 @@ pack_install()
 snap_install()
 {
     snap install "$@"    # Tableau dynamique d'arguments
-
 	echo "$VOID"
 }
 
@@ -471,7 +470,7 @@ pack_install php-mbstring
 pack_install php-xml
 pack_install php-zip
 
-v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVAEC SUCCÈS ! FIN DE L'INSTALLATION"
+v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 
 
 # Suppression des paquets obsolètes
