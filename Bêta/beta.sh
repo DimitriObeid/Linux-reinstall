@@ -56,6 +56,7 @@ VOID=""
 OS_FAMILY=""
 
 ## VERSION
+
 # Version actuelle du script
 SCRIPT_VERSION="2.0"
 
@@ -116,7 +117,7 @@ script_header()
 }
 
 # Fonction de gestion d'erreurs
-handle_error()
+handle_errors()
 {
 	error_result=$1
 
@@ -151,7 +152,7 @@ detect_root()
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
 		r_echo "$C_RESET	$0"
-		handle_error "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
     fi
 }
 
@@ -170,11 +171,46 @@ get_dist_package_manager()
 
 	# Si, après l'appel de la fonction, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle
 	if test "$OS_FAMILY" = ""; then
-		handle_error "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
+		handle_errors "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY)"
 		echo "$VOID"
 	fi
+}
+
+# Demande à l'utilisateur s'il souhaite une interface graphique pour mieux visualiser l'installation
+ask_for_gui()
+{
+	echo "$VOID"
+	j_echo "Souhaitez-vous obtenir une interface graphique pour mieux visualiser l'installation ? (oui/non)"
+
+	read_ask_for_gui()
+	{
+		read -r rep_gui
+
+		case ${rep_gui,,} in
+			"oui")
+				echo "$VOID"
+				j_echo "Ouverture de l'interface graphique"
+				if test ! -f gui.elf; then
+					handle_errors "ERREUR : FICHIER EXÉCUTABLE \"gui.elf\" MANQUANT"
+				else
+                    # Exécution du fichier binaire d'ouverture de GUI
+                    ./gui.elf
+                fi
+				;;
+			"non")
+				echo "$VOID"
+				j_echo "L'exécution du script continue en lignes de commandes"
+				return
+				;;
+			*)
+				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				read_ask_for_gui
+				;;
+		esac
+	}
+	read_ask_for_gui
 }
 
 # Lancement du script s'il a bien été exécuté en tant que root
@@ -191,13 +227,12 @@ launch_script()
 		case ${rep_launch,,} in
 	        "oui")
 				echo "$VOID"
-
 	            v_echo "Vous avez confirmé vouloir exécuter ce script. C'est parti !!!"
+				ask_for_gui
 				return
 	            ;;
 	        "non")
 				echo "$VOID"
-
 	            r_echo "Le script ne sera pas exécuté"
 	            r_echo "Abandon"
 				echo "$VOID"
@@ -223,7 +258,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com >/dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 	else
-		handle_error "ERREUR : AUCUNE CONNEXION À INTERNET"
+		handle_errors "ERREUR : AUCUNE CONNEXION À INTERNET"
 	fi
 }
 
@@ -273,6 +308,7 @@ pack_install()
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque. Si c'est le cas, le programme affiche que le paquet
 	# est déjà installé, sinon, on l'installe
 	command -v "$package_name" >/dev/null 2>&1 && { v_echo >&1 "Le paquet \"$package_name\" est déjà installé";} || {
+		>&2
 		case $OS_FAMILY in
 			opensuse)
 				cmd_args_f zypper -y install "$package_name"
@@ -298,27 +334,6 @@ snap_install()
 {
     snap install "$@"    # Tableau dynamique d'arguments
 	echo "$VOID"
-}
-
-# Installer un paquet depuis un PPA (Private Package Manager ; Gestionnaire de Paquets Privé)
-ppa_install()
-{
-	script_header "AJOUT DE DÉPÔTS PPA ET TÉLÉCHARGEMENT DE PAQUETS DEPUIS CES DÉPÔTS"
-
-	case $OS_FAMILY in
-		opensuse)
-			;;
-		archlinux)
-
-			;;
-		fedora)
-			;;
-		debian)
-
-			;;
-		gentoo)
-			;;
-	esac
 }
 
 # Suppression des paquets obsolètes
