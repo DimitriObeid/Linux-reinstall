@@ -1,0 +1,69 @@
+# Cet algorithme sert à visualiser l'objectif du programme de réinstallation avec une GUI (Graphical User Interface ; Interface Graphique Utilisateur)
+
+# Langage utilisé : C
+# Librairie graphique utilisée : Gnome ToolKit+ 3 (GTK+3)
+
+# Ceci se passe dans le fichier exécutable de l'interface, après l'avoir exécuté suivant le choix de l'utilisateur dans le fichier bash
+
+VARIABLES :
+    # INTERFACE GRAPHIQUE
+    
+    $gui_main               # Fenêtre de la GUI principale
+    
+    # PAQUETS
+    
+    $pack_list              # Liste des paquets installés par la version personnalisée ou SIO
+
+    # PPAs
+    
+    $ppa_btn_ajout_confirm  # Bouton de confirmation d'ajout d'une commande d'ajout de PPAs
+    $ppa_btn_ajout_depots   # Bouton d'ajouts de dépôts PPA
+    $ppa_btn_modifier       # Bouton de modification de la commande d'ajouts de PPAs
+    $ppa_case_ajout_depot   # Case rectangulaire de zone de texte où l'utilisateur rentre le lien du dépôt à ajouter
+    $ppa_cmd_ajout          # Commande d'ajout de PPAs
+    $ppa_cmd_case_rect      # Case où est écrite la commande d'ajout de PPAs de la distribution
+    $ppa_cmd_fenetre        # Fenêtre d'ajout de commandes d'ajout de PPAs
+    $ppa_lien_depot         # Lien vers le dépôt PPA que l'utilisateur souhaite ajouter
+    $ppa_nombre             # Nombre de dépôts PPA ajoutés par l'utilisateur
+    
+
+DÉBUT :
+    OUVRIR $gui_main
+    
+    ###### PREMIÈRE CATÉGORIE : AJOUTS POSSIBLES DE PPAs ######
+    
+    AFFICHER $ppa_btn_ajout_depots (bouton : symbole '+' en vert, suivi du texte "Ajouter un PPA")
+    
+    SI $ppa_btn_ajout_depots == clic
+
+        SI $ppa_nombre == 0
+            OUVRIR $ppa_fenetre
+            AFFICHER "Aucune commande d'ajout de PPA n'a été rentrée. Saisissez la commande d'ajout de PPAs de votre distribution.\n Pour la connaître, veuillez vous rendre sur ce site -> https://lien.nomdedomaine"
+            AFFICHER -> Case rectangulaire de zone de texte
+            SAISIR $ppa_cmd_ajout
+
+            SI $ppa_btn_ajout_confirm == clic
+                CRÉER case rectangulaire 
+                ÉCRIRE $ppa_cmd_ajout DANS case rectangulaire
+                AJOUTER $ppa_btn_modifier -> Droite # Bouton permettant de modifier la commande d'ajout de PPAs, ajouté à droite de la case créée
+                FERMER $ppa_cmd_fenetre
+                
+            FIN SI $ppa_btn_ajout_confirm == clic
+            
+        FIN SI $ppa_nombre == 0
+
+        CRÉER $ppa_case_ajout_depot
+        BOUGER $ppa_btn_ajout_depots d'une case vers le bas
+        AFFICHER "Entrez le lien du PPA à ajouter"
+        SAISIR $ppa_lien_depot
+        
+        SI l'utilisateur confirme
+            AJOUTER $ppa_nombre + 1
+        
+        FIN SI
+        
+    FIN SI $ppa_btn_ajout_depots == clic
+    
+    ###### DEUXIÈME CATÉGORIE ######
+    AFFICHER -> liste des programmes selon la version du script exécuté (personnalisée ou SIO)
+    SCANNER $pack_list 
