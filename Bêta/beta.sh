@@ -378,7 +378,6 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
-
 	echo "$VOID"
 }
 
