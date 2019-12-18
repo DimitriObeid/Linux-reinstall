@@ -109,13 +109,12 @@ script_header()
 	fi
 
 	echo "$VOID"
-
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
-	# $SLEEP
+#   $SLEEP
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
 	echo "$header_color" "##>" "$header_string"
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
-	echo "$VOID" "$VOID"	# Parce que l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n') affiche toujours un saut de ligne à la fin)
+	echo "$VOID" "$VOID"
 
 	$SLEEP_HEADER
 }
@@ -130,19 +129,16 @@ handle_errors()
 	fi
 
 	echo "$VOID" "$VOID"
-
 	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
-	# $SLEEP
+#   $SLEEP
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
 	echo "$error_color" "##> $error_result"		# Pour afficher une autre couleur pour le texte, remplacer l'appel de variable "$error_color" par ce que vous souhaitez
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
 	echo "$VOID"
 
 	echo "$VOID"
-
 	r_echo "Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation"
 	echo "$VOID"
-
 	exit 1
 }
 
@@ -185,6 +181,41 @@ get_dist_package_manager()
 	fi
 }
 
+# Demande à l'utilisateur s'il souhaite une interface graphique pour mieux visualiser l'installation
+ask_for_gui()
+{
+	echo "$VOID"
+	j_echo "Souhaitez-vous obtenir une interface graphique pour mieux visualiser l'installation ? (oui/non)"
+
+	read_ask_for_gui()
+	{
+		read -r rep_gui
+
+		case ${rep_gui,,} in
+			"oui")
+				echo "$VOID"
+				j_echo "Ouverture de l'interface graphique"
+				if test ! -f gui.elf; then
+					handle_errors "ERREUR : FICHIER EXÉCUTABLE \"gui.elf\" MANQUANT"
+				else
+                    # Exécution du fichier binaire d'ouverture de GUI
+                    ./gui.elf
+                fi
+				;;
+			"non")
+				echo "$VOID"
+				j_echo "L'exécution du script continue en lignes de commandes"
+				return
+				;;
+			*)
+				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				read_ask_for_gui
+				;;
+		esac
+	}
+	read_ask_for_gui
+}
+
 # Lancement du script s'il a bien été exécuté en tant que root
 launch_script()
 {
@@ -199,18 +230,16 @@ launch_script()
 		case ${rep_launch,,} in
 	        "oui")
 				echo "$VOID"
-
-				v_echo "Vous avez confirmé vouloir exécuter ce script. C'est parti !!!"
+	            v_echo "Vous avez confirmé vouloir exécuter ce script. C'est parti !!!"
+				ask_for_gui
 				return
 	            ;;
 	        "non")
 				echo "$VOID"
-
-				r_echo "Le script ne sera pas exécuté"
+	            r_echo "Le script ne sera pas exécuté"
 	            r_echo "Abandon"
 				echo "$VOID"
-
-				exit 1
+	            exit 1
 	            ;;
 			*)
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
@@ -259,9 +288,7 @@ dist_upgrade()
 			emerge -u world
 			;;
 	esac
-
 	echo "$VOID"
-
 	v_echo "Mise à jour du système effectuée avec succès"
 }
 
@@ -327,7 +354,6 @@ autoremove()
 		case ${autoremove_rep,,} in
 			"oui")
 				echo "$VOID"
-
 				j_echo "Suppression des paquets"
 				echo "$VOID"
 
@@ -353,13 +379,11 @@ autoremove()
 				esac
 
 				echo "$VOID"
-
 				v_echo "Auto-suppression des paquets obsolètes effectuée avec succès"
 				return
 				;;
 			"non")
 				echo "$VOID"
-
 				j_echo "Les paquets obsolètes ne seront pas supprimés"
 				j_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
 				return
