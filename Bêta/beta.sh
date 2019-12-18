@@ -1,22 +1,19 @@
 #!/bin/bash
 
 # Script de réinstallation minimal pour les cours de BTS SIO en version Bêta
-# Version Bêta 2.0
+# Version Bêta 1.5
 
-# Si vous souhaitez ajouter ou supprimer des programmes, vous pouvez plus facilement le faire
-# en exécutant le fichier d'interface graphique livré avec le script -> gui.elf
-
-# Pour débugguer ce script en cas de besoin, taper la commande :
+# Pour débugguer ce script en cas de besoin, tapez la commande :
 # sudo <shell utilisé> -x <nom du fichier>
 # Exemple :
 # sudo /bin/bash -x reinstall.sh
 # Ou encore
 # sudo bash -x reinstall.sh
 
-# Ou débugguer sur Shell Check : https://www.shellcheck.net/
+# Ou débugguez le en utilisant Shell Check : https://www.shellcheck.net/
 
 
-################### DÉFINITION DES VARIABLES ###################
+################### DÉCLARATION DES VARIABLES ET AFFECTATION DE LEURS VALEURS ###################
 
 ## CHRONOMÈTRE
 
@@ -28,14 +25,16 @@ SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un changement d'étape
 SLEEP_INST=sleep\ .5    	# Temps d'affichage lors de l'installation d'un nouveau paquet
 SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
+
 ## COULEURS
 
-# Couleurs pour mieux lire les étapes de l'exécution du script
-C_HEADER_LINE=$(tput setaf 6)   # Bleu cyan. Définition de l'encodage de la couleur du texte du header. /!\ Ne modifier l'encodage de la couleur du header qu'ici ET SEULEMENT ici /!\
-C_JAUNE=$(tput setaf 226) 		# Jaune clair
+# Encodage des couleurs pour mieux lire les étapes de l'exécution du script
+C_HEADER_LINE=$(tput setaf 6)   # Bleu cyan    --> Couleur des headers.
+C_JAUNE=$(tput setaf 226) 		# Jaune clair  --> Annonce d'une nouvelle sous-étape
 C_RESET=$(tput sgr0)        	# Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
-C_ROUGE=$(tput setaf 196)   	# Rouge clair
-C_VERT=$(tput setaf 82)     	# Vert clair
+C_ROUGE=$(tput setaf 196)   	# Rouge clair  --> Affichage des messages d'erreur
+C_VERT=$(tput setaf 82)     	# Vert clair   --> Affichage de chaque succès de sous-étape
+
 
 ## AFFICHAGE DE TEXTE
 
