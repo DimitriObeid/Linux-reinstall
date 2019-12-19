@@ -78,10 +78,13 @@
     - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.3. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **$** placé où il ne fallait pas, ajouté accidentellement lors de l'ajout des double guillemets afin de renforcer l'intégrité du script **(ajout conseillé par le débogueur de Shell Check)**.
 
 
-# Prochaine version : 1.5
+# Prochaine version : 2.0
 
 * Changelogs :
-    - Ajout du paquet **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git
+    - Utilisation des redirections pour vérifier qu'un paquet est déjà installé.
+    - Ajout des paquets :
+        - **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git
+        - **"make"** pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande. 
     - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
     - Séparation des éléments de la fonction **detect_root()**. Dans cette fonction ne reste que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
     - Création de trois nouvelles petites fonctions d'affichage de texte plus propre, sans avoir à définir les couleurs au début et à la fin du texte :
@@ -92,7 +95,6 @@
     - **Installation des paquets de LAMP** : Avec la modification ci-dessus de la fonction **pack_install()**, les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
     - **handle_errors()** : Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
     - Optimisation de la fonction **pack_install()**. Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
-    - Déclaration de la variable **$OS_FAMILY** avec les autres variables, au lieu d'être déclarée et directement définie dans la fonction **get_dist_package_manager()**.*
     - Réorganisation et structuration de la liste de définition des variables.
     - Ajout de plusieurs variables :
         - **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
@@ -100,12 +102,13 @@
     - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
     - Changement du nom de la variable **$SLEEP_TAB** par **$SLEEP_HEADER**.
     - Refonte de certaines parties du script pour une lecture et une compréhension plus facile, ainsi qu'un affichage des étapes plus agréable lors de l'exécution.
-
+    - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
+    - Ajout de la variable **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.
+    - Suppression d'une chaîne de caractères redondante dans la fonction **"get_dist_package_manager()"** -> _**"Détection de votre gestionnaire de paquets"**_, déjà écrite identiquement dans le header.
 
 # Prochaine version : 1.6
 
 * Changelogs :
-    - Utilisation d'un file descriptor pour vérifier qu'un paquet est déjà installé.
 
 
 # Future version : Alpha 2.0
