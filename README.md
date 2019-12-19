@@ -46,7 +46,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
     - **Documentation Bêta.odt :** La documentation officielle de la version Bêta.  
 
 * *__3.4) build-GUI-EXT4-Debug :__*
-    - Contient les fichiers objets et exécutables compilés grâce aux options du Makefile présent dans ce dossier (Makefile généré par l'IDE QtCreator)
+    - Dossier généré par l'IDE QtCreator. Contient les fichiers objets et exécutables compilés grâce aux options du Makefile présent dans ce dossier (Makefile généré par l'IDE QtCreator)
     
 * *__3.5) GUI:__*
     - **fenetreGUI.cpp :** Fichier source C++ contenant la définition des méthodes de la classe **"fenetreGUI"**.  
