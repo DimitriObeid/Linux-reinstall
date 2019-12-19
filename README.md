@@ -32,8 +32,8 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3 sous-dossiers :  
 
 * *__3.1) Dossier actuel :__*
-    * **Bug tracking.md :** Liste tous les bugs connus jusqu'à leur correction.    
-    * **Changelogs.md :** Contient les changements ayant eu lieu entre deux versions.    
+    * **Bug tracking.md :** Liste tous les bugs connus jusqu'à leur correction.  
+    * **Changelogs.md :** Contient les changements ayant eu lieu entre deux versions.  
     * **Mode d'emploi.odt :** Mode d'emploi d'exécution de chaque script.  
     * **README.md :** Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
@@ -45,14 +45,17 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
     - **beta.sh :** Le fichier exécutable de la version Bêta du script de réinstallation SIO.  
     - **Documentation Bêta.odt :** La documentation officielle de la version Bêta.  
 
-* *__3.4) GUI:__*
+* *__3.4) build-GUI-EXT4-Debug :__*
+    - Contient les fichiers objets et exécutables compilés grâce aux options du Makefile présent dans ce dossier (Makefile généré par l'IDE QtCreator)
+    
+* *__3.5) GUI:__*
     - **fenetreGUI.cpp :** Fichier source C++ contenant la définition des méthodes de la classe **"fenetreGUI"**.  
     - **fenetreGUI.h :** Fichier d'en-tête contenant la classe gérant l'affichage de la fenêtre principale.  
     - **GUI.pro :** Fichier de projet servant à séparer les fichiers source C++ et les fichiers d'en-tête dans l'arborescence des fichiers de l'IDE QtCreator.  
     - **GUI.pro.user :** Fichier XML
     - **main.cpp :** Fichier source C++ contenant la fonction principale du programme **(main)**, fonction de début et de fin de **TOUT** programme écrit en C ou en C++.
     
-* *__3.5) Stable :__*
+* *__3.6) Stable :__*
     - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.
     - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
     - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.
