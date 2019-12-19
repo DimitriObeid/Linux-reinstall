@@ -108,6 +108,7 @@
             - A:\ **make** : Paquet installant la commande **"make"**, extrêmement pratique pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande via un Makefile.
 
         - **<u>1.3) Variables</u>** :
+            - C:\ **$C_HEADER_LINE** : Renommée en **"$C_HEADER"**.
             - A:\ **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
             - A:\ **$SCRIPT_VERSION** : Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
             - C:\ **SLEEP_TAB** : Renommée en **"$SLEEP_HEADER"**
