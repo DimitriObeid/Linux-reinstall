@@ -29,11 +29,12 @@ SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de p
 ## COULEURS
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
-C_HEADER_LINE=$(tput setaf 6)   # Bleu cyan    --> Couleur des headers.
-C_JAUNE=$(tput setaf 226) 		# Jaune clair  --> Annonce d'une nouvelle sous-étape
-C_RESET=$(tput sgr0)        	# Restaurer la couleur originale du texte affiché selon la configuration du profil du terminal
-C_ROUGE=$(tput setaf 196)   	# Rouge clair  --> Affichage des messages d'erreur
-C_VERT=$(tput setaf 82)     	# Vert clair   --> Affichage de chaque succès de sous-étape
+C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
+C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de nouvelles sous-étapes
+C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de changement de catégorie de paquets
+C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
+C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de sous-étapes
+C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès de sous-étape
 
 
 ## AFFICHAGE DE TEXTE
@@ -68,7 +69,7 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-cats_echo() { cats_string=$1; echo "$C_HEADER_LINE$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
+cats_echo() { cats_string=$1; echo "$C_HEADER$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
@@ -113,7 +114,7 @@ script_header()
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
-		header_color=$C_HEADER_LINE
+		header_color=$C_HEADER
 	fi
 
 	echo "$VOID"
