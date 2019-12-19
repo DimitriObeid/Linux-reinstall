@@ -1,6 +1,6 @@
 # Linux Reinstall : Le programme qui va vous simplifier la réinstallation sur votre distribution Linux
 
-Version Bêta actuelle : 1.5
+Version Bêta actuelle : 2.0
 Version stable actuelle : 1.4.1
 
 ## 1) Description du projet
@@ -47,14 +47,14 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
 
 * *__3.4) build-GUI-EXT4-Debug :__*
     - Dossier généré par l'IDE QtCreator. Contient les fichiers objets et exécutables compilés grâce aux options du Makefile présent dans ce dossier (Makefile généré par l'IDE QtCreator)
-    
+
 * *__3.5) GUI:__*
     - **fenetreGUI.cpp :** Fichier source C++ contenant la définition des méthodes de la classe **"fenetreGUI"**.  
     - **fenetreGUI.h :** Fichier d'en-tête contenant la classe gérant l'affichage de la fenêtre principale.  
     - **GUI.pro :** Fichier de projet servant à séparer les fichiers source C++ et les fichiers d'en-tête dans l'arborescence des fichiers de l'IDE QtCreator.  
     - **GUI.pro.user :** Fichier XML
     - **main.cpp :** Fichier source C++ contenant la fonction principale du programme **(main)**, fonction de début et de fin de **TOUT** programme écrit en C ou en C++.
-    
+
 * *__3.6) Stable :__*
     - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.
     - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
