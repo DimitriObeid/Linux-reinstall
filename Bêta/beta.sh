@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation minimal pour les cours de BTS SIO en version Bêta
-# Version Bêta 1.5
+# Version Bêta 2.0
 
 # Pour débugguer ce script en cas de besoin, tapez la commande :
 # sudo <shell utilisé> -x <nom du fichier>
@@ -30,11 +30,11 @@ SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de p
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
 C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
-C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de nouvelles sous-étapes
-C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de changement de catégorie de paquets
-C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
-C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de sous-étapes
-C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès de sous-étape
+C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
+C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
+C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
+C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
+C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 
 ## AFFICHAGE DE TEXTE
