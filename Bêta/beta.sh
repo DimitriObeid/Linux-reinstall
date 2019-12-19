@@ -38,11 +38,15 @@ C_VERT=$(tput setaf 82)     	# Vert clair   --> Affichage de chaque succès de s
 
 ## AFFICHAGE DE TEXTE
 
-# Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets.
-# Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes (une ligne de chaque caractère).
+# Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
+# changez le caractère entre les double guillemets.
+# Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
+# (une ligne de chaque caractère).
 HEADER_LINE_CHAR="-"
 # Affichage de colonnes sur le terminal
 COLS=$(tput cols)
+# Nombre de dièses (hash) précédant et suivant une chaîne de caractères
+HASH="#####"
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges, et saut de ligne
 TAB=">>>>"
 # Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
@@ -62,11 +66,14 @@ SCRIPT_VERSION="2.0"
 ################### DÉFINITION DES FONCTIONS ###################
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage de texte en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
+# Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
+# entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
+cats_echo() { cats_string=$1; echo "$C_HEADER_LINE$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
+# Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
-# Affichage de texte en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
+# Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
-# Affichage de texte en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
+# Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 
 ## CRÉATION DES HEADERS
@@ -92,7 +99,7 @@ draw_header_line()
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
 	if test "$line_color" != ""; then
-        
+
         echo -n -e "$C_RESET"
 	fi
 }
@@ -104,7 +111,7 @@ script_header()
 
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
-        # Définition de la couleur de la ligne. 
+        # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
 		header_color=$C_HEADER_LINE
 	fi
@@ -115,9 +122,11 @@ script_header()
 	# $SLEEP_HEADER
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
 	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
-	echo "$header_color" "##>" "$header_string"    
+	echo "$header_color" "##>" "$header_string"
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
-	echo "$VOID" "$VOID"	# Parce que l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n') affiche toujours un saut de ligne à la fin)
+	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
+	# affiche toujours un saut de ligne à la fin)
+	echo "$VOID" "$VOID"
 
 	$SLEEP_HEADER
 }
@@ -139,6 +148,8 @@ handle_errors()
 	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
 	echo "$error_color" "##> $error_result"
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
+	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
+	# affiche toujours un saut de ligne à la fin)
 	echo "$VOID"
 
 	echo "$VOID"
@@ -159,9 +170,9 @@ detect_root()
     if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
-    	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0). 
+    	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$C_RESET	sudo $0"  
+    	r_echo "$C_RESET	sudo $0"
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
 		r_echo "$C_RESET	$0"
@@ -177,7 +188,7 @@ get_dist_package_manager()
 	# On cherche la commande du gestionnaire de paquets de la distribution dans les chemins de la variable d'environnement "$PATH" en l'exécutant.
 	# On redirige chaque sortie ("stdout (sortie standard) si la commande est trouvée" et "stderr(sortie d'erreurs) si la commande n'est pas trouvée")
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
-	
+
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
     command -v zypper &> /dev/null && OS_FAMILY="opensuse"
     command -v pacman &> /dev/null && OS_FAMILY="archlinux"
@@ -294,14 +305,15 @@ pack_install()
 	{
         # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 		$SLEEP_INST; "$@"
-		echo "$VOID"
 	}
 
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
 	# Si c'est le cas, le programme affiche que le paquet
 	# est déjà installé, sinon, on l'installe
-	command -v "$package_name" &> /dev/null 1> | v_echo "Le paquet \"$package_name\" est déjà installé $VOID" | 2> {
+	command -v "$package_name" &> /dev/null && v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || {
+		echo "$VOID"
 		j_echo "Installation de $package_name"
+
 		case $OS_FAMILY in
 			opensuse)
 				pack_install_complete zypper -y install "$package_name"
@@ -319,8 +331,8 @@ pack_install()
 				pack_install_complete emerge "$package_name"
 				;;
 		esac
-		
-		v_echo "Le paquet \"$package_name\" a été correctement installé $VOID"
+
+		v_echo "Le paquet \"$package_name\" a été correctement installé"
 	}
 }
 
@@ -422,37 +434,37 @@ dist_upgrade
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
 
 # Installations prioritaires
-j_echo "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 pack_install curl
 pack_install snapd
 pack_install wget
 echo "$VOID"
 
 # Commandes
-j_echo "INSTALLATION DES COMMANDES PRATIQUES"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES COMMANDES PRATIQUES"
 pack_install neofetch
 pack_install tree
 echo "$VOID"
 
 # Internet
-echo "$J_TAB INSTALLATION DES CLIENTS INTERNET $C_RESET"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES CLIENTS INTERNET"
 snap_install discord --stable
 pack_install thunderbird
 echo "$VOID"
 
 # Librairies
-j_echo "INSTALLATION DES LIBRAIRIES"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES LIBRAIRIES"
 pack_install python3.7
 pack_install python-pip
 echo "$VOID"
 
 # Logiciels
-j_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
 pack_install k4dirstat
 echo "$VOID"
 
 # Programmation
-j_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Atom IDE
 snap_install code --classic		# Visual Studio Code
 pack_install emacs
@@ -463,12 +475,12 @@ pack_install valgrind
 echo "$VOID"
 
 # Vidéo
-j_echo "INSTALLATION DES LOGICIELS VIDÉO"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES LOGICIELS VIDÉO"
 pack_install vlc
 echo "$VOID"
 
 # LAMP
-j_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"; $SLEEP_INST_CAT
+cats_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
 pack_install apache2			# Apache
 pack_install php				# PHP
 pack_install libapache2-mod-php
@@ -481,6 +493,7 @@ pack_install php-json
 pack_install php-mbstring
 pack_install php-xml
 pack_install php-zip
+echo "$VOID"
 
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 
