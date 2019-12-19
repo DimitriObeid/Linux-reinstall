@@ -49,7 +49,9 @@
     - Correction d'un bug affichant l'étape d'autoremove sans interaction possible.
     - Toujours dans l'étape d'autoremove : La fonction **read_autoremove()** se répète désormais en cas de réponse inattendue.
     - Léger changement de la chaîne de caractères à afficher en cas de réponse inattendue dans les fonctions **read_launch_script()** et **read_autoremove()**. Passage de *__"Veuillez rentrer une valeur valide (oui/non)"__* à *__"Veuillez répondre EXACTEMENT par "oui" ou par "non" "__*
-    - **detect_root()** : Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__* à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.
+    - **detect_root()** : Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__*
+    à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter
+    à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.
 
 
 # Ancienne version : 1.3 (mardi 3 décembre 2019, ~14h)
@@ -81,39 +83,67 @@
 # Prochaine version : 2.0
 
 * Changelogs :
-    - Utilisation des redirections pour vérifier qu'un paquet est déjà installé.
-    - Ajout des paquets :
-        - **git** pour tous les scripts, surtout pour la version SIO, étant donné qu'il s'agit d'un des meilleurs amis d'un programmeur --> https://fr.wikipedia.org/wiki/Git
-        - **"make"** pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande. 
-    - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
-    - Séparation des éléments de la fonction **detect_root()**. Dans cette fonction ne reste que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
-    - Création de trois nouvelles petites fonctions d'affichage de texte plus propre, sans avoir à définir les couleurs au début et à la fin du texte :
-        - **j_echo()** : Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
-        - **r_echo()** : Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
-        - **v_echo()** : Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
-    - **pack_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
-    - **Installation des paquets de LAMP** : Avec la modification ci-dessus de la fonction **pack_install()**, les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
-    - **handle_errors()** : Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
-    - Optimisation de la fonction **pack_install()**. Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
-    - Réorganisation et structuration de la liste de définition des variables.
-    - Ajout de plusieurs variables :
-        - **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
-        - **$SCRIPT_VERSION** : Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
-    - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
-    - Changement du nom de la variable **$SLEEP_TAB** par **$SLEEP_HEADER**.
-    - Refonte de certaines parties du script pour une lecture et une compréhension plus facile, ainsi qu'un affichage des étapes plus agréable lors de l'exécution.
-    - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
-    - Ajout de la variable **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.
-    - Suppression d'une chaîne de caractères redondante dans la fonction **"get_dist_package_manager()"** -> _**"Détection de votre gestionnaire de paquets"**_, déjà écrite identiquement dans le header.
 
-# Prochaine version : 1.6
+    - Ajouts globaux :
+        - Utilisation de redirections pour la détection des commandes d'installation.
+        - Ajout de fonctions de décoration et d'optimisation de texte.
+
+    - **<u>1) Ajouts (A), Changements (__C__) et Suppressions (S) de fonctions, paquets et variables</u>** :
+        - **<u>1.1) Fonctions</u>** :
+            - A:\ **cats_echo()** : Affiche un texte en bleu cyan entouré de 5 dièses avant de remettre la couleur par défaut au texte suivant et de démarrer un chronomètre d'une seconde.  
+            Cette fonction utilisée dans la partie d'installation de paquets pour afficher chaque message de changement de sous-catégories de paquets.  
+            Il est ainsi plus facile de différencier ces messages (autrefois affichés en jaune sans être entourés de caractères spéciaux) aux messages d'installation de chaque paquet absent (toujours affichés en jaune).
+            - C:\ **detect_root()** : Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
+            - S:\ **"get_dist_package_manager()"** : Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
+            - A:\ **j_echo()** : Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
+            - A:\ **launch_script()** : Voir la fonction **detect_root()** ci-dessus.
+            - C:\ **pack_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
+            - A:\ **r_echo()** : Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
+            - A:\ **v_echo()** : Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
+
+        - **<u>1.2) Paquets</u>** :
+            - A:\ **g++** : Paquet installant le compilateur G++ pour le langage C++.
+            - A:\ **gcc** : Paquet installant le compilateur GCC pour le langage C.
+            - A:\ **git** : Paquet installant le logiciel de gestion de versions décentralisé **"Git"** --> https://fr.wikipedia.org/wiki/Git
+            - A:\ **make** : Paquet installant la commande **"make"**, extrêmement pratique pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande via un Makefile.
+
+        - **<u>1.3) Variables</u>** :
+            - A:\ **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
+            - A:\ **$SCRIPT_VERSION** : Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
+            - C:\ **SLEEP_TAB** : Renommée en **"$SLEEP_HEADER"**
+            - A:\ **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.
+
+    - **<u>2) Corrections</u>** :
+        - **handle_errors()** : Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
+
+    - **<u>3) Optimisations</u>**
+        - Réorganisation et structuration de la liste de définition des variables.
+        - **pack_install()** : Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
+        - Utilisation des redirections pour vérifier qu'un paquet est déjà installé.
+
+    - **<u>4) Refontes</u>**
+        - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
+        - Refonte de certaines parties du script pour une lecture et une compréhension plus facile, ainsi qu'un affichage des étapes plus agréable lors de l'exécution.
+        - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
+        - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
+        - **Installation des paquets de LAMP** : Avec la modification de la fonction **pack_install()** apportée par cette version (voir la catégorie **"Ajouts..."**), les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
+
+
+# Prochaine version : 2.1
 
 * Changelogs :
 
 
-# Future version : Alpha 2.0
+# Future version : Alpha 3.0
 
 * Changelogs :
-    - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian), avec obtention du nom de l'utilisateur normal au moment de lancer le script via un appel système **"read"**.
-    - Pour l'instant : Demander à l'utilisateur d'écrire son nom via read
-    - Téléchargement des paquets de la logithèque de la distribution depuis les PPA.
+    - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian), avec obtention du nom de l'utilisateur normal au moment de lancer le script via l'appel système **"read"**.
+    - Pour l'instant : Demander à l'utilisateur d'écrire son nom via **"read"**.
+    - Téléchargement des paquets de la logithèque de la distribution depuis des dépôts PPA.
+
+# Future version : 4.0
+
+* Changelogs :
+    - Ajout de l'interface graphique.
+    - Refonte des parties d'ajout des PPA et des paquets
+        - Possible écriture dans un fichier XML et parsing de ce fichier (pour ajouter graphiquement des paquets et des dépôts PPA, puis les installer lorsque du clic sur le bouton d'exécution).
