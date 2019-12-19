@@ -39,23 +39,19 @@ C_VERT=$(tput setaf 82)     	# Vert clair   --> Affichage de chaque succès de s
 ## AFFICHAGE DE TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets.
-# Ne mettez pas plus de deux caractères si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes.
+# Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes (une ligne de chaque caractère).
 HEADER_LINE_CHAR="-"
-# Affichage de colonnes
+# Affichage de colonnes sur le terminal
 COLS=$(tput cols)
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges, et saut de ligne
 TAB=">>>>"
+# Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
+# Saut de ligne
 VOID=""
 
-## GESTION DE PAQUETS
-
-# Variable contenant le nom de la famille de distributions du gestionnaire de paquets supporté.
-# Si la chaîne de caractères de la variable est toujours vide après la définition de la variable,
-# Alors le gestionnaire de paquets n'est pas supporté.
-OS_FAMILY=""
 
 ## VERSION
 
@@ -66,11 +62,11 @@ SCRIPT_VERSION="2.0"
 ################### DÉFINITION DES FONCTIONS ###################
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage de texte en jaune avec des chevrons
+# Affichage de texte en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
-# Affichage de texte en rouge avec des chevrons
+# Affichage de texte en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
-# Affichage de texte en vert avec des chevrons
+# Affichage de texte en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 
 ## CRÉATION DES HEADERS
@@ -90,9 +86,14 @@ draw_header_line()
 		echo -n "$line_char"
 	done
 
-	# Pour définir la couleur de ce qui suit le dernier caractère
+	# Pour définir (ici, réintialiser) la couleur des caractères suivant le dernier caractère de la ligne du header.
+	# En pratique, La couleur des caractères suivants est déjà encodée quand ils sont appelés. Cette réinitialisation
+	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
+	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
+	# exemple.
 	if test "$line_color" != ""; then
-		echo -n -e "$C_RESET"		# La couleur de ce qui suit est déjà définie avec les paramètres des chaînes de caractères suivantes
+        
+        echo -n -e "$C_RESET"
 	fi
 }
 
@@ -103,23 +104,25 @@ script_header()
 
 	# Pour définir la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
-        # Définition de la couleur de la ligne. Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
+        # Définition de la couleur de la ligne. 
+        # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
 		header_color=$C_HEADER_LINE
 	fi
 
 	echo "$VOID"
 
-	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
-	# $SLEEP
+	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
+	# $SLEEP_HEADER
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
-	echo "$header_color" "##>" "$header_string"
+	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
+	echo "$header_color" "##>" "$header_string"    
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
 	echo "$VOID" "$VOID"	# Parce que l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n') affiche toujours un saut de ligne à la fin)
 
 	$SLEEP_HEADER
 }
 
-# Fonction de gestion d'erreurs
+# Fonction de gestion d'erreurs fatales (impossibles à corriger)
 handle_errors()
 {
 	error_result=$1
@@ -130,15 +133,17 @@ handle_errors()
 
 	echo "$VOID" "$VOID"
 
-	# Décommenter la ligne ci dessous pour activer le chronomètre avant l'affichage du header
-	# $SLEEP
+	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
+	# $SLEEP_HEADER
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
-	echo "$error_color" "##> $error_result"		# Pour afficher une autre couleur pour le texte, remplacer l'appel de variable "$error_color" par ce que vous souhaitez
+	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
+	echo "$error_color" "##> $error_result"
 	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
 	echo "$VOID"
 
 	echo "$VOID"
 
+	$SLEEP_HEADER
 	r_echo "Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation"
 	echo "$VOID"
 
@@ -154,7 +159,9 @@ detect_root()
     if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
-    	r_echo "$C_RESET	sudo $0"  # $0 est le nom du fichier shell en question avec le "./" placé devant (argument 0). S'il est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
+    	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0). 
+    	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
+    	r_echo "$C_RESET	sudo $0"  
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
 		r_echo "$C_RESET	$0"
@@ -167,34 +174,39 @@ get_dist_package_manager()
 {
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 
-	j_echo " Détection de votre gestionnaire de paquet"
-
+	# On cherche la commande du gestionnaire de paquets de la distribution dans les chemins de la variable d'environnement "$PATH" en l'exécutant.
+	# On redirige chaque sortie ("stdout (sortie standard) si la commande est trouvée" et "stderr(sortie d'erreurs) si la commande n'est pas trouvée")
+	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
+	
+	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
     command -v zypper &> /dev/null && OS_FAMILY="opensuse"
     command -v pacman &> /dev/null && OS_FAMILY="archlinux"
     command -v dnf &> /dev/null && OS_FAMILY="fedora"
     command -v apt &> /dev/null && OS_FAMILY="debian"
     command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
-	# Si, après l'appel de la fonction, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle
+	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle (aucune commande trouvée)
 	if test "$OS_FAMILY" = ""; then
-		handle_errors "ERREUR FATALE : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
+		handle_errors "ERREUR : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY)"
 		echo "$VOID"
 	fi
 }
 
-# Lancement du script s'il a bien été exécuté en tant que root
+# Demande à l'utilisateur s'il souhaite vraiment lancer le script, s'il a bien été exécuté en tant qu'utilisateur root
 launch_script()
 {
-	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."
+	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi (Mode d'emploi.odt) avant de lancer l'installation."
     j_echo "Êtes-vous sûr de savoir ce que vous faites ? (oui/non)"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
 	read_launch_script()
 	{
+        # Demande à l'utilisateur d'entrer une réponse
 		read -r rep_launch
 
+		# Les deux virgules suivant directement le "launch" signifient que les mêmes réponses avec des majuscules sont permises
 		case ${rep_launch,,} in
 	        "oui")
 				echo "$VOID"
@@ -211,17 +223,20 @@ launch_script()
 
 				exit 1
 	            ;;
+            # Si une réponse différente de "oui" ou de "non" est rentrée
 			*)
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				# On rappelle la fonction "read_launch_script" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée
 				read_launch_script
 				;;
 	    esac
 	}
+	# Appel de la fonction "read_launch_script", car même si la fonction est définie dans la fonction "launch_script", elle n'est pas lue automatiquement
 	read_launch_script
 }
 
 
-## CONNECTIVITÉ ET MISES À JOUR
+## CONNEXION À INTERNET ET MISES À JOUR
 # Vérification de la connexion à Internet
 check_internet_connection()
 {
@@ -236,7 +251,8 @@ check_internet_connection()
 }
 
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté
-# (ÉTAPE IMPORTANTE, NE PAS MODIFIER, SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
+# (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
+# SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
@@ -268,39 +284,43 @@ dist_upgrade()
 # Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
 pack_install()
 {
-	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le'$1'
-	# du dessous par '$@' et enlevez les doubles guillemets "" entourant chaque variable $package_name après la commande
-	# d'installation de la ou des distributions de votre choix.
+	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
+	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" suivant la commande
+	# d'installation de votre distribution.
 	package_name=$1
 
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
-	cmd_args_f()
+	pack_install_complete()
 	{
-		$SLEEP_INST; "$@"    # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+        # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+		$SLEEP_INST; "$@"
 		echo "$VOID"
 	}
 
-	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque. Si c'est le cas, le programme affiche que le paquet
+	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
+	# Si c'est le cas, le programme affiche que le paquet
 	# est déjà installé, sinon, on l'installe
-	command -v "$package_name" >/dev/null 2>&1 && { v_echo >&1 "Le paquet \"$package_name\" est déjà installé";} || {
-		>&2
+	command -v "$package_name" &> /dev/null 1> | v_echo "Le paquet \"$package_name\" est déjà installé $VOID" | 2> {
+		j_echo "Installation de $package_name"
 		case $OS_FAMILY in
 			opensuse)
-				cmd_args_f zypper -y install "$package_name"
+				pack_install_complete zypper -y install "$package_name"
 				;;
 			archlinux)
-				cmd_args_f pacman --noconfirm -S "$package_name"
+				pack_install_complete pacman --noconfirm -S "$package_name"
 				;;
 			fedora)
-				cmd_args_f dnf -y install "$package_name"
+				pack_install_complete dnf -y install "$package_name"
 				;;
 			debian)
-				cmd_args_f apt -y install "$package_name"
+				pack_install_complete apt -y install "$package_name"
 				;;
 			gentoo)
-				cmd_args_f emerge "$package_name"
+				pack_install_complete emerge "$package_name"
 				;;
 		esac
+		
+		v_echo "Le paquet \"$package_name\" a été correctement installé $VOID"
 	}
 }
 
