@@ -291,9 +291,9 @@ PPA_install()
 # Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
 set_sudo()
 {
-    script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS";
+    script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
     echo "$J_TAB Détection de sudo $C_RESET"
-    if ! command -v sudo > /dev/null ; then
+    if test ! command -v sudo &> /dev/null ; then
         pack_install sudo
     else
         echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; echo "$VOID"

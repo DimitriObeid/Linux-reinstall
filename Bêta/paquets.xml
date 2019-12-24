@@ -1,0 +1,88 @@
+<?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
+
+<!-- DTD (Document Type Definition) interne, servant à définir l'architecture du document XML et la hiérarchie existant entre ses balises-->
+<!DOCTYPE paquets [
+    <!ELEMENT paquets (cmd*)>  <!-- Balise racine du corps du document XML -->
+    <!ATTLIST cmd
+        cat     CDATA           #REQUIRED
+        sio     (vrai|faux)     #REQUIRED
+        gest    (Dist|PPA|Snap) #REQUIRED
+    >
+]>
+
+<!-- Balise racine du corps du document XML -->
+<paquets>
+    <dist>
+        <cmd cat="Commandes de téléchargement">
+            <perso />
+            <sio>
+                curl
+                snapd
+                wget
+            </sio>
+        </cmd>
+            
+        <cmd cat="Commandes">
+            <perso>
+                sl
+            </perso>
+            <sio>
+                neofetch
+                tree
+            </sio>
+        </cmd>
+            
+            <cmd cat="Disque">
+                k4dirstat
+            </cmd>
+            
+            <cmd cat="Internet">
+                discord
+                thunderbird
+            </cmd>
+            
+            <cmd cat="LAMP">
+                apache2
+                php
+                libapache2-mod
+                mariadb-server
+                php-mysql
+                php-curl
+                php-gd
+                php_intl
+                php-json
+                php-mbstring
+                php-xml
+                php-zip
+            </cmd>
+            
+            <cmd cat="Librairies">
+                python3.7
+                python-pip
+            </cmd>
+            
+            <cmd cat="Programmation">
+                emacs
+                g++
+                gcc
+                git
+                valgrind
+            </cmd>
+                
+            <cmd type="Vidéos">
+                vlc
+            </cmd>
+            
+        </dist>
+        
+        
+        <PPA />
+        
+        <snap>
+            
+        </snap>
+    </sio>
+    
+    <perso>
+    </perso>
+</paquets>

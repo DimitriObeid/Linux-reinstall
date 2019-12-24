@@ -311,7 +311,7 @@ pack_install()
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
 	# Si c'est le cas, le programme affiche que le paquet
 	# est déjà installé, sinon, on l'installe
-	command -v "$package_name" &> /dev/null && v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || {
+	command -v "$package_name" 1> /dev/null && v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || command -v "$package_name" 2> && {
 		echo "$VOID"
 		j_echo "Installation de $package_name"
 
@@ -342,6 +342,13 @@ snap_install()
 {
     snap install "$@"    # Tableau dynamique d'arguments
 	echo "$VOID"
+}
+
+set_sudo()
+{
+	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
+
+	command -v sudo &> /dev/null && v_echo "Le paquet \"sudo\" est déjà installé"
 }
 
 # Suppression des paquets obsolètes
@@ -434,6 +441,12 @@ dist_upgrade
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
 
+v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
+v_echo "La partie d'installation de vos programmes commence véritablement"
+echo "$VOID"
+
+sleep 3
+
 # Installations prioritaires
 cats_echo "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 pack_install curl
@@ -447,37 +460,15 @@ pack_install neofetch
 pack_install tree
 echo "$VOID"
 
-# Internet
-cats_echo "INSTALLATION DES CLIENTS INTERNET"
-snap_install discord --stable
-pack_install thunderbird
-echo "$VOID"
-
-# Librairies
-cats_echo "INSTALLATION DES LIBRAIRIES"
-pack_install python3.7
-pack_install python-pip
-echo "$VOID"
-
-# Logiciels
+# Logiciels de nettoyage de disque
 cats_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
 pack_install k4dirstat
 echo "$VOID"
 
-# Programmation
-cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
-snap_install atom --classic		# Atom IDE
-snap_install code --classic		# Visual Studio Code
-pack_install emacs
-pack_install g++
-pack_install gcc
-pack_install git
-pack_install valgrind
-echo "$VOID"
-
-# Vidéo
-cats_echo "INSTALLATION DES LOGICIELS VIDÉO"
-pack_install vlc
+# Internet
+cats_echo "INSTALLATION DES CLIENTS INTERNET"
+snap_install discord --stable
+pack_install thunderbird
 echo "$VOID"
 
 # LAMP
@@ -494,6 +485,28 @@ pack_install php-json
 pack_install php-mbstring
 pack_install php-xml
 pack_install php-zip
+echo "$VOID"
+
+# Librairies
+cats_echo "INSTALLATION DES LIBRAIRIES"
+pack_install python3.7
+pack_install python-pip
+echo "$VOID"
+
+# Programmation
+cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
+snap_install atom --classic		# Atom IDE
+snap_install code --classic		# Visual Studio Code
+pack_install emacs
+pack_install g++
+pack_install gcc
+pack_install git
+pack_install valgrind
+echo "$VOID"
+
+# Vidéo
+cats_echo "INSTALLATION DES LOGICIELS VIDÉO"
+pack_install vlc
 echo "$VOID"
 
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"

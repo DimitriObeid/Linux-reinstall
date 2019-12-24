@@ -94,7 +94,7 @@
             Cette fonction utilisée dans la partie d'installation de paquets pour afficher chaque message de changement de sous-catégories de paquets.  
             Il est ainsi plus facile de différencier ces messages (autrefois affichés en jaune sans être entourés de caractères spéciaux) aux messages d'installation de chaque paquet absent (toujours affichés en jaune).
             - C:\ **detect_root()** : Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
-            - S:\ **"get_dist_package_manager()"** : Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
+            - C:\ **"get_dist_package_manager()"** : Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
             - A:\ **j_echo()** : Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **launch_script()** : Voir la fonction **detect_root()** ci-dessus.
             - C:\ **pack_install()** : Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
@@ -128,6 +128,7 @@
         - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
         - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
         - **Installation des paquets de LAMP** : Avec la modification de la fonction **pack_install()** apportée par cette version (voir la catégorie **"Ajouts..."**), les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
+        - Légère refonte de l'affichage des messages relatifs à l'installation d'un paquet s'il est absent ou pas, pour une meilleure lisibilité.
 
 
 # Prochaine version : 2.1

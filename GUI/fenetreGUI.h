@@ -13,7 +13,6 @@
 #ifndef FENETREGUI_H
 #define FENETREGUI_H
 
-#include <QApplication>
 #include <QWidget>
 #include <QPushButton>
 
@@ -21,9 +20,9 @@
 class FenetreGUI : public QWidget
 {
 public:
-    FenetreGUI();       // Constructeur
-    void quitter();     // Définition du bouton "quitter"
-    ~FenetreGUI();      // Déconstructeur
+    FenetreGUI();           // Constructeur
+    void quitter() const;   // Définition du bouton "quitter"
+    ~FenetreGUI();          // Déconstructeur
 
 private:
     QPushButton *m_bouton;
