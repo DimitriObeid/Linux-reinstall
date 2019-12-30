@@ -2,12 +2,11 @@
 
 <!-- DTD (Document Type Definition) interne, servant à définir l'architecture du document XML et la hiérarchie existant entre ses balises-->
 <!DOCTYPE paquets [
-    <!ELEMENT paquets (cmd*)>  <!-- Balise racine du corps du document XML -->
-    <!ATTLIST cmd
-        cat     CDATA           #REQUIRED
-        sio     (vrai|faux)     #REQUIRED
-        gest    (Dist|PPA|Snap) #REQUIRED
-    >
+    <!ELEMENT paquets (dist*)>          <!-- Balise racine du corps du document XML -->
+    <!ELEMENT cmd (perso, sio)>         <!-- Définition du contenu de la balise "cmd" -->
+    <!ATTLIST cmd cat CDATA #REQUIRED>  <!-- Définition de l'attribut de la balise "cmd". Il peut contenit n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT perso (#PCDATA)>          <!-- Définition du contenu de la balise "perso" -->
+    <!ELEMENT sio (#PCDATA)>            <!-- Définition du contenu de la balise "sio" -->
 ]>
 
 <!-- Balise racine du corps du document XML -->
@@ -21,7 +20,7 @@
                 wget
             </sio>
         </cmd>
-            
+
         <cmd cat="Commandes">
             <perso>
                 sl
@@ -31,17 +30,24 @@
                 tree
             </sio>
         </cmd>
-            
-            <cmd cat="Disque">
+
+        <cmd cat="Disque">
+            <perso />
+            <sio>
                 k4dirstat
-            </cmd>
-            
-            <cmd cat="Internet">
-                discord
+            </sio>
+        </cmd>
+
+        <cmd cat="Internet">
+            <perso />
+            <sio>
                 thunderbird
-            </cmd>
-            
-            <cmd cat="LAMP">
+            </sio>
+        </cmd>
+
+        <cmd cat="LAMP">
+            <perso />
+            <sio>
                 apache2
                 php
                 libapache2-mod
@@ -54,35 +60,51 @@
                 php-mbstring
                 php-xml
                 php-zip
-            </cmd>
-            
-            <cmd cat="Librairies">
+            </sio>
+        </cmd>
+
+        <cmd cat="Librairies">
+            <perso>
+                libcsfml-dev
+                libsfml-dev
+            </perso>
+            <sio>
                 python3.7
                 python-pip
-            </cmd>
-            
-            <cmd cat="Programmation">
+            </sio>
+        </cmd>
+
+        <cmd cat="Programmation">
+            <sio>
                 emacs
                 g++
                 gcc
                 git
                 valgrind
-            </cmd>
-                
-            <cmd type="Vidéos">
+            </sio>
+        </cmd>
+
+        <cmd cat="Vidéos">
+            <sio>
                 vlc
-            </cmd>
-            
-        </dist>
-        
-        
-        <PPA />
-        
-        <snap>
-            
-        </snap>
-    </sio>
-    
-    <perso>
-    </perso>
+            </sio>
+        </cmd>
+
+    </dist>
+
+
+    <PPA />
+
+    <snap>
+        <cmd cat="Internet">
+            <sio>
+                discord
+            </sio>
+        </cmd>
+
+        <cmd cat="Programmation">
+            atom --classic
+            code --classic
+        </cmd>
+    </snap>
 </paquets>

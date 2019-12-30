@@ -21,8 +21,8 @@
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un changement d'étape
-SLEEP_INST=sleep\ .5    	# Temps d'affichage lors de l'installation d'un nouveau paquet
+SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
+SLEEP_INST=sleep\ .5    	# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
 SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 
@@ -37,7 +37,14 @@ C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages 
 C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 
-## AFFICHAGE DE TEXTE
+## REDIRECTIONS
+# Sortie standard
+STDOUT=>&1
+# Sortie d'erreurs
+STDERR=>&2
+
+
+## TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
 # changez le caractère entre les double guillemets.
@@ -48,8 +55,8 @@ HEADER_LINE_CHAR="-"
 COLS=$(tput cols)
 # Nombre de dièses (hash) précédant et suivant une chaîne de caractères
 HASH="#####"
-# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges, et saut de ligne
-TAB=">>>>"
+# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
+TAB=""
 # Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
@@ -69,7 +76,7 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-cats_echo() { cats_string=$1; echo "$C_HEADER$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
+cats_echo() { cats_string=$1; echo "$C_PACK_CATS$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
@@ -100,7 +107,6 @@ draw_header_line()
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
 	if test "$line_color" != ""; then
-
         echo -n -e "$C_RESET"
 	fi
 }
@@ -127,7 +133,9 @@ script_header()
 	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
-	echo "$VOID" "$VOID"
+	echo "$VOID"
+
+	echo "$VOID"
 
 	$SLEEP_HEADER
 }
@@ -202,13 +210,14 @@ get_dist_package_manager()
 		handle_errors "ERREUR : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY)"
-		echo "$VOID"
 	fi
 }
 
 # Demande à l'utilisateur s'il souhaite vraiment lancer le script, s'il a bien été exécuté en tant qu'utilisateur root
 launch_script()
 {
+	script_header "LANCEMENT DU SCRIPT"
+
 	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi (Mode d'emploi.odt) avant de lancer l'installation."
     j_echo "Êtes-vous sûr de savoir ce que vous faites ? (oui/non)"
 
@@ -255,7 +264,7 @@ check_internet_connection()
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
 	# Si l'ordinateur est connecté à internet
-	if ping -q -c 1 -W 1 google.com >/dev/null; then
+	if ping -q -c 1 -W 1 google.com > /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 	else
 		handle_errors "ERREUR : AUCUNE CONNEXION À INTERNET"
@@ -304,14 +313,15 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	pack_install_complete()
 	{
-        # Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+        # $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 		$SLEEP_INST; "$@"
 	}
 
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
-	# Si c'est le cas, le programme affiche que le paquet
-	# est déjà installé, sinon, on l'installe
-	command -v "$package_name" 1> /dev/null && v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || command -v "$package_name" 2> && {
+	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
+	# Sinon, le script installe le paquet manquant.
+	command -v "$package_name" 1> /dev/null && v_echo "$VOID Le paquet \"$package_name\" est déjà installé"
+	command -v "$package_name" 2> /dev/null && {
 		echo "$VOID"
 		j_echo "Installation de $package_name"
 
@@ -340,7 +350,7 @@ pack_install()
 # Pour installer des paquets Snap
 snap_install()
 {
-    snap install "$@"    # Tableau dynamique d'arguments
+    snap install "$@"    # Tableau dynamique d'arguments pour ajouter des options
 	echo "$VOID"
 }
 
@@ -348,7 +358,7 @@ set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
-	command -v sudo &> /dev/null && v_echo "Le paquet \"sudo\" est déjà installé"
+	command -v sudo 1>$STDOUT /dev/null && v_echo "Le paquet \"sudo\" est déjà installé"
 }
 
 # Suppression des paquets obsolètes
@@ -501,6 +511,7 @@ pack_install emacs
 pack_install g++
 pack_install gcc
 pack_install git
+pack_install make
 pack_install valgrind
 echo "$VOID"
 

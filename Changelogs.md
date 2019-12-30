@@ -109,7 +109,7 @@
 
         - **<u>1.3) Variables</u>** :
             - C:\ **$C_HEADER_LINE** : Renommée en **"$C_HEADER"**.
-            - A:\ **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de la nouvelle variable).
+            - A:\ **$COLS** : Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line()** (suppression de la variable **$line_cols** au profit de cette nouvelle variable).
             - A:\ **$SCRIPT_VERSION** : Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
             - C:\ **SLEEP_TAB** : Renommée en **"$SLEEP_HEADER"**
             - A:\ **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.
@@ -124,7 +124,7 @@
 
     - **<u>4) Refontes</u>**
         - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
-        - Refonte de certaines parties du script pour une lecture et une compréhension plus facile, ainsi qu'un affichage des étapes plus agréable lors de l'exécution.
+        - Refonte de certaines parties du script pour une lecture et une compréhension plus facile, ainsi qu'un affichage des étapes plus agréable à lire lors de l'exécution.
         - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
         - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
         - **Installation des paquets de LAMP** : Avec la modification de la fonction **pack_install()** apportée par cette version (voir la catégorie **"Ajouts..."**), les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
