@@ -37,13 +37,6 @@ C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages 
 C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 
-## REDIRECTIONS
-# Sortie standard
-STDOUT=>&1
-# Sortie d'erreurs
-STDERR=>&2
-
-
 ## TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
@@ -302,7 +295,7 @@ dist_upgrade()
 }
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
-# Installation des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets
+# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation
 pack_install()
 {
 	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
@@ -358,7 +351,7 @@ set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
-	command -v sudo 1>$STDOUT /dev/null && v_echo "Le paquet \"sudo\" est déjà installé"
+	command -v sudo &1> /dev/null && v_echo "Le paquet \"sudo\" est déjà installé"
 }
 
 # Suppression des paquets obsolètes

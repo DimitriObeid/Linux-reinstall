@@ -1,52 +1,127 @@
 <?xml version = "1.0" encoding="UTF-8" standalone="yes" ?>
 
 <!-- DTD (Document Type Definition) interne, servant à définir l'architecture du document XML et la hiérarchie existant entre ses balises-->
-<!DOCTYPE paquets [
-    <!ELEMENT paquets (dist*)>          <!-- Balise racine du corps du document XML -->
-    <!ELEMENT cmd (perso, sio)>         <!-- Définition du contenu de la balise "cmd" -->
-    <!ATTLIST cmd cat CDATA #REQUIRED>  <!-- Définition de l'attribut de la balise "cmd". Il peut contenit n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT perso (#PCDATA)>          <!-- Définition du contenu de la balise "perso" -->
-    <!ELEMENT sio (#PCDATA)>            <!-- Définition du contenu de la balise "sio" -->
+<!DOCTYPE installation [
+    <!ELEMENT paquets (distribution*, PPA*, snap*)>   <!-- Balise racine du corps du document XML -->
+
+    <!ELEMENT distribution (commande)>          <!-- Balise racine de la structure des paquets installés par le gestionnaire de paquets de la distribution Linux -->
+    <!ELEMENT commande (personnel, sio)>        <!-- Définition du contenu de la balise "commande", contenant les informations  -->
+    <!ATTLIST commande cat CDATA #REQUIRED>     <!-- Définition de l'attribut de la balise "commande". L'attribut "cat" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT personnel (paquet)>               <!-- Définition du contenu de la balise "personnel" -->
+    <!ELEMENT paquet (description)>             <!-- Définition de la balise "paquets", contenant le nom d'un paquet -->
+    <!ATTLIST paquet nom CDATA #REQUIRED>       <!-- Définition de l'attribut de la balise "paquet" enfant de la balise "personnel". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT description (#PCDATA)             <!-- Définition de la balise "description".   -->
+    <!ELEMENT sio (paquetSIO)>                  <!-- Définition du contenu de la balise "sio" -->
+    <!ELEMENT paquet (description)>
+
+    <!ELEMENT PPA (commande)>                   <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
+    <!ELEMENT commande (personnel, sio)>        <!-- Définition du contenu de la balise "commande" -->
+    <!ATTLIST commande cat CDATA #REQUIRED>     <!-- Définition de l'attribut de la balise "commande". Il peut contenit n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT personnel (#PCDATA)>              <!-- Définition du contenu de la balise "personnel" -->
+    <!ELEMENT sio (#PCDATA)>                    <!-- Définition du contenu de la balise "sio" -->
+
+    <!ELEMENT snap (commande)>                  <!-- Balise racine de la structure des paquets installés par le gestionnaire de paquets Snap -->
+    <!ELEMENT commande (personnel, sio)>        <!-- Définition du contenu de la balise "commande" -->
+    <!ATTLIST commande cat CDATA #REQUIRED>     <!-- Définition de l'attribut de la balise "commande". Il peut contenit n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT personnel (#PCDATA)>              <!-- Définition du contenu de la balise "personnel" -->
+    <!ELEMENT sio (#PCDATA)>                    <!-- Définition du contenu de la balise "sio" -->
 ]>
 
 <!-- Balise racine du corps du document XML -->
-<paquets>
-    <dist>
-        <cmd cat="Commandes de téléchargement">
-            <perso />
+<installation>
+    <distribution>
+        <commande cat="Commandes de téléchargement">
+            <personnel>
+                <paquet nom="">
+                    <description />
+                </paquet>
+            </personnel>
             <sio>
-                curl
-                snapd
-                wget
-            </sio>
-        </cmd>
+                <paquet nom="curl">
+                    <description>
+                        ▪ Cette commande, à l’instar de Wget, permet de télécharger des fichiers téléchargeables depuis un site web.
 
-        <cmd cat="Commandes">
-            <perso>
+                        ▪ Les similitudes et les différences entre ces deux commandes sont listées dans cet article → https://daniel.haxx.se/docs/curl-vs-wget.html
+                    </description>
+                </paquet>
+                <paquet nom="snapd">
+                    <description>
+                        ▪ Cette commande permet l’installation de Snap.
+
+                        ▪ Snap est, à l’instar d’APT (Debian) ou de RPM (Fedora),un gestionnaire de paquets multi-distributions
+                        développé par Canonical, l’entreprise derrière le projet Ubuntu.
+
+                        ▪ En plus de vous permettre d’installer de nombreux paquets déjà disponibles dans les dépôts officiels de votre distribution,
+                        Snap vous permet d’installer des paquets ne figurant pas dans ces mêmes dépôts, tels que Discord, Atom, Visual Studio Code, etc...
+                    </description>
+                </paquet>
+                <paquet nom="wget">
+                    <description>
+                        ▪ Cette commande vous permet de télécharger des fichiers téléchargeables disponibles sur une page web,
+                        en passant en arguments le ou les liens des fichiers que vous souhaitez télécharger.
+
+                        ▪ ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
+                    </description>
+                </paquet>
+            </sio>
+        </commande>
+
+        <commande cat="3D">
+            <personnel>
+                <paquet nom="blender">
+                    <description>
+                        Blender 3D est un excellent logiciel de modélisation 3D et d’animation, vous permettant d’exporter vos créations 3D
+                        sous plusieurs formats de fichiers et sous de nombreuses options. En outre, de nombreuses extensions sont disponibles
+                    </description>
+                </paquet>
+            </personnel>
+            <sio />
+        </commande>
+
+        <commande cat="Commandes">
+            <personnel>
                 sl
-            </perso>
+            </personnel>
             <sio>
                 neofetch
                 tree
             </sio>
-        </cmd>
+        </commande>
 
-        <cmd cat="Disque">
-            <perso />
+        <commande cat="Disque">
+            <personnel />
             <sio>
                 k4dirstat
             </sio>
-        </cmd>
+        </commande>
 
-        <cmd cat="Internet">
-            <perso />
+        <commande cat="Images">
+            <personnel>
+                gimp
+            </personnel>
+            <sio />
+        </cat>
+
+        <commande cat="Internet">
+            <personnel />
             <sio>
                 thunderbird
             </sio>
-        </cmd>
+        </commande>
 
-        <cmd cat="LAMP">
-            <perso />
+        <commande cat="Jeux">
+            <personnel>
+                bsdgames
+                pacman
+                supertux
+                supertuxkart
+                wesnoth
+            </personnel>
+            <sio />
+        </commande>
+
+        <commande cat="LAMP">
+            <personnel />
             <sio>
                 apache2
                 php
@@ -55,56 +130,65 @@
                 php-mysql
                 php-curl
                 php-gd
-                php_intl
+                php-intl
                 php-json
                 php-mbstring
                 php-xml
                 php-zip
             </sio>
-        </cmd>
+        </commande>
 
-        <cmd cat="Librairies">
-            <perso>
+        <commande cat="Librairies">
+            <personnel>
                 libcsfml-dev
                 libsfml-dev
-            </perso>
+            </personnel>
             <sio>
                 python3.7
                 python-pip
             </sio>
-        </cmd>
+        </commande>
 
-        <cmd cat="Programmation">
+        <commande cat="Programmation">
             <sio>
                 emacs
                 g++
                 gcc
                 git
+                make
                 valgrind
             </sio>
-        </cmd>
+        </commande>
 
-        <cmd cat="Vidéos">
+        <commande cat="Vidéos">
             <sio>
                 vlc
             </sio>
-        </cmd>
+        </commande>
 
-    </dist>
+    </distribution>
 
-
-    <PPA />
+    <PPA>
+        <commande cat="">
+            <personnelnnel />
+            <sio />
+        </commande>
+    </PPA>
 
     <snap>
-        <cmd cat="Internet">
+        <commande cat="Internet">
+            <personnelnnel />
             <sio>
                 discord
             </sio>
-        </cmd>
+        </commande>paquets
 
-        <cmd cat="Programmation">
-            atom --classic
-            code --classic
-        </cmd>
+        <commande cat="Programmation">
+            <personnelnnel />
+            <sio>
+                atom --classic
+                code --classic
+            </sio>
+        </commande>
     </snap>
-</paquets>
+</installation>
