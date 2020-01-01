@@ -1,4 +1,3 @@
-#include <QApplication>
 #include "fenetreGUI.h"
 
 int main(int argc, char *argv[])

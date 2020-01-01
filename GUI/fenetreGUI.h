@@ -1,7 +1,7 @@
 /*
- * Nom du fichier :
+ *  Nom du fichier :
  *      window.h
- *  Description
+ *  Description :
  *      Fichier d'en-tête pour les fonctions de ma fenêtre
 */
 
@@ -13,16 +13,23 @@
 #ifndef FENETREGUI_H
 #define FENETREGUI_H
 
-#include <QWidget>
+#include <QApplication>
+#include <QMessageBox>
 #include <QPushButton>
+#include <QWidget>
 
 //  * Comme la classe "FenetreGUI" hérite de la classe "QWidget", on pense à inclure la définition de cette dernière.
 class FenetreGUI : public QWidget
 {
 public:
-    FenetreGUI();           // Constructeur
-    void quitter() const;   // Définition du bouton "quitter"
-    ~FenetreGUI();          // Déconstructeur
+    FenetreGUI();               // Constructeur
+    void FenetreGUI::boutonBase(string nom, string police, int taillePolice, string aide, int x, int y);
+    void boutonExecuter();      // Définition du bouton d'exécution du script de réinstallation
+    void boutonQuitter();       // Définition du bouton "quitter"
+    ~FenetreGUI();              // Déconstructeur
+
+public slots:
+    void ouvrirFenetre();
 
 private:
     QPushButton *m_bouton;

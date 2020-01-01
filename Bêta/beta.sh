@@ -295,7 +295,7 @@ dist_upgrade()
 }
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
-# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation
+# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
 pack_install()
 {
 	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
@@ -340,10 +340,10 @@ pack_install()
 	}
 }
 
-# Pour installer des paquets Snap
+# Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
-    snap install "$@"    # Tableau dynamique d'arguments pour ajouter des options
+    snap install "$@"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
 	echo "$VOID"
 }
 
@@ -453,6 +453,7 @@ sleep 3
 # Installations prioritaires
 cats_echo "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 pack_install curl
+pack_install python-pip
 pack_install snapd
 pack_install wget
 echo "$VOID"
@@ -493,7 +494,6 @@ echo "$VOID"
 # Librairies
 cats_echo "INSTALLATION DES LIBRAIRIES"
 pack_install python3.7
-pack_install python-pip
 echo "$VOID"
 
 # Programmation

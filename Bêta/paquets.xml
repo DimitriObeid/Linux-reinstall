@@ -2,422 +2,333 @@
 
 <!-- DTD (Document Type Definition) interne, servant à définir l'architecture du document XML et la hiérarchie existant entre ses balises-->
 <!DOCTYPE installation [
-    <!ELEMENT paquets (distribution*, PPA*, snap*)>   <!-- Balise racine du corps du document XML -->
+    <!ELEMENT installation (distribution*, PPA*, snap*)> <!-- Balise racine du corps du document XML -->
 
-    <!ELEMENT distribution (commande)>          <!-- Balise racine de la structure des paquets installés par le gestionnaire de paquets de la distribution Linux -->
-    <!ELEMENT categorie (personnel, sio)>       <!-- Définition du contenu de la balise "categorie", contenant les informations -->
-    <!ATTLIST categorie cat CDATA #REQUIRED>    <!-- Définition de l'attribut de la balise "categorie". L'attribut "cat" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT personnel (paquet)>               <!-- Définition du contenu de la balise "personnel" -->
-    <!ELEMENT paquet (description)>             <!-- Définition de la balise "paquets", contenant le nom d'un paquet -->
-    <!ATTLIST paquet nom CDATA #REQUIRED>       <!-- Définition de l'attribut de la balise "paquet" enfant de la balise "personnel". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT description (#PCDATA)>             <!-- Définition de la balise "description" -->
-    <!ELEMENT sio (paquetSIO)>                  <!-- Définition du contenu de la balise "sio" -->
-    <!ELEMENT paquet (description)>
+    <!ELEMENT distribution (categorie)>             <!-- Balise racine de la structure concernant les paquets installés par le gestionnaire de paquets de la distribution Linux de l'utilisateur -->
+    <!ELEMENT categorie (paquet)>                   <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
+    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
+    <!ATTLIST paquet
+    nom CDATA #REQUIRED
+    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
+    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
 
-    <!ELEMENT PPA (commande)>                   <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
-    <!ELEMENT categorie (personnel, sio)>       <!-- Définition du contenu de la balise "categorie", contenant les informations -->
-    <!ATTLIST categorie cat CDATA #REQUIRED>    <!-- Définition de l'attribut de la balise "categorie". L'attribut "cat" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT personnel (paquet)>               <!-- Définition du contenu de la balise "personnel" -->
-    <!ELEMENT paquet (description)>             <!-- Définition de la balise "paquets", contenant le nom d'un paquet -->
-    <!ATTLIST paquet nom CDATA #REQUIRED>       <!-- Définition de l'attribut de la balise "paquet" enfant de la balise "personnel". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT description (#PCDATA)>             <!-- Définition de la balise "description" -->
-    <!ELEMENT sio (paquetSIO)>                  <!-- Définition du contenu de la balise "sio" -->
+    <!ELEMENT PPA (categorie)>                      <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
+    <!ELEMENT categorie (paquet)>                   <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
+    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
+    <!ATTLIST paquet
+    nom CDATA #REQUIRED
+    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
+    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
 
-    <!ELEMENT snap (commande)>                  <!-- Balise racine de la structure des paquets installés par le gestionnaire de paquets Snap -->
-    <!ELEMENT categorie (personnel, sio)>       <!-- Définition du contenu de la balise "categorie", contenant les informations -->
-    <!ATTLIST categorie cat CDATA #REQUIRED>    <!-- Définition de l'attribut de la balise "categorie". L'attribut "cat" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT personnel (paquet)>               <!-- Définition du contenu de la balise "personnel" -->
-    <!ELEMENT paquet (description)>             <!-- Définition de la balise "paquets", contenant le nom d'un paquet -->
-    <!ATTLIST paquet nom CDATA #REQUIRED>       <!-- Définition de l'attribut de la balise "paquet" enfant de la balise "personnel". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT description (#PCDATA)>             <!-- Définition de la balise "description" -->
-    <!ELEMENT sio (paquetSIO)>                  <!-- Définition du contenu de la balise "sio" -->
+    <!ELEMENT snap (categorie)>
+    <!ELEMENT categorie (paquet)>                   <!-- Définition du contenu de la balise "categorie", contenant les informations -->
+    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut de la balise "categorie". L'attribut "cat" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", contenant le nom d'un paquet -->
+    <!ATTLIST paquet
+    nom CDATA #REQUIRED
+    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition de l'attribut de la balise "paquet" enfant de la balise "personnel". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description" -->
 ]>
 
 <!-- Balise racine du corps du document XML -->
 <installation>
     <distribution>
         <categorie cat="Commandes de téléchargement">
-            <personnel>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="curl">
-                    <description>
-                        ▪ Cette commande, à l’instar de Wget, permet de télécharger des fichiers téléchargeables depuis un site web.
+            <paquet nom="curl" script="sio">
+                <description>
+                    ▪ Cette commande, à l’instar de Wget, permet de télécharger des fichiers téléchargeables depuis un site web.
 
-                        ▪ Les similitudes et les différences entre ces deux commandes sont listées dans cet article → https://daniel.haxx.se/docs/curl-vs-wget.html
-                    </description>
-                </paquet>
-                <paquet nom="python-pip">
-                    <description>
-                        ▪ Pip est un gestionnaire de paquets utilisé pour installer et gérer des paquets écrits en Python, tels des librairies Python (Flask ou encore Django pour du web).
-                    </description>
-                </paquet>
-                <paquet nom="snapd">
-                    <description>
-                        ▪ Cette commande permet l’installation de paquets Snap.
+                    ▪ Les similitudes et les différences entre ces deux commandes sont listées dans cet article → https://daniel.haxx.se/docs/curl-vs-wget.html
 
-                        ▪ Snap est, à l’instar d’APT (Debian) ou de RPM (Fedora),un gestionnaire de paquets multi-distributions développé par Canonical, l’entreprise derrière le projet Ubuntu.
+                    ▪ ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
+                </description>
+            </paquet>
+            <paquet nom="python-pip" script="sio">
+                <description>
+                    ▪ Pip est un gestionnaire de paquets utilisé pour installer et gérer des paquets écrits en Python, tels des librairies Python (Flask ou encore Django pour du web).
+                </description>
+            </paquet>
+            <paquet nom="snapd" script="sio">
+                <description>
+                    ▪ Cette commande permet l’installation de paquets Snap.
 
-                        ▪ En plus de vous permettre d’installer de nombreux paquets déjà disponibles dans les dépôts officiels de votre distribution, Snap vous permet d’installer des paquets ne figurant pas dans ces mêmes dépôts, tels que Discord, Atom, Visual Studio Code, etc...
-                    </description>
-                </paquet>
-                <paquet nom="wget">
-                    <description>
-                        ▪ Cette commande vous permet de télécharger des fichiers téléchargeables disponibles sur une page web, en passant en arguments le ou les liens des fichiers que vous souhaitez télécharger.
+                    ▪ Snap est, à l’instar d’APT (Debian) ou de RPM (Fedora),un gestionnaire de paquets multi-distributions développé par Canonical, l’entreprise derrière le projet Ubuntu.
 
-                        ▪ ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
-                    </description>
-                </paquet>
-            </sio>
+                    ▪ En plus de vous permettre d’installer de nombreux paquets déjà disponibles dans les dépôts officiels de votre distribution, Snap vous permet d’installer des paquets ne figurant pas dans ces mêmes dépôts, tels que Discord, Atom, Visual Studio Code, etc...
+                </description>
+            </paquet>
+            <paquet nom="wget" script="sio">
+                <description>
+                    ▪ Cette commande vous permet de télécharger des fichiers téléchargeables disponibles sur une page web, en passant en arguments le ou les liens des fichiers que vous souhaitez télécharger.
+
+                    ▪ ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="3D">
-            <personnel>
-                <paquet nom="blender">
-                    <description>
-                        ▪ Blender 3D est un excellent logiciel de modélisation 3D et d’animation, vous permettant d’exporter vos créations sous plusieurs formats de fichiers et sous de nombreuses options. En outre, de nombreuses extensions sont disponibles.
-                    </description>
-                </paquet>
-            </personnel>
-            <sio />
+            <paquet nom="blender" script="personnel">
+                <description>
+                    ▪ Blender 3D est un excellent logiciel de modélisation 3D et d’animation, vous permettant d’exporter vos créations sous plusieurs formats de fichiers et sous de nombreuses options.
+
+                    ▪ En outre, de nombreuses extensions sont disponibles.
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Commandes">
-            <personnel>
-                <paquet nom="sl">
-                    <description>
-                        ▪ Cette commande n’a rien de bien sérieux, si ce n’est d’afficher une locomotive à vapeur passer sur votre terminal si, au lieu de taper la commande « ls », vous tapez « sl » ou « LS ».
-                    </description>
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="neofetch">
-                    <description>
-                        ▪ Cette commande permet d’afficher des informations concernant votre système d’exploitation, sur votre terminal,
-                        à côté du logo de votre distribution, parfois dessiné en art ASCII.
+            <paquet nom="neofetch" script="sio">
+                <description>
+                    ▪ Cette commande permet d’afficher des informations concernant votre système d’exploitation, sur votre terminal,
+                    à côté du logo de votre distribution, parfois dessiné en art ASCII.
 
-                        ▪ Selon son fichier de configuration, la commande retourne (exemple sur ma distribution Kubuntu 18.04) :
-                            • La version de votre système d’exploitation
-                            • Le nom de l’hôte du système d’exploitation (votre ordinateur)
-                            • La version de votre kernel (noyau Linux)
-                            • Le temps écoulé depuis la connexion à votre session
-                            • Le nombre de paquets installés
-                            • L’interpréteur shell actuellement utilisé, ainsi que sa version
-                            • La résolution de votre écran
-                            • Votre environnement de bureau
-                            • Votre gestionnaire de fenêtres
-                            • Les thèmes de votre environnement de bureau
-                            • Les thèmes d’icônes utilisés
-                            • Le terminal actuellement utilisé
-                            • Les caractéristiques principales de votre processeur
-                            • Les caractéristiques principales de votre carte graphique
-                            • La mémoire vive actuellement utilisée comparée à la mémoire vive totale
-                    </description>
-                </paquet>
-                <paquet nom="tree">
-                    <description>
-                        ▪ Cette commande est très pratique, elle vous permet de visualiser dans une arborescence tous les fichiers contenus dans les sous-dossiers à partir du dossier dans lequel vous lancez cette commande.
-                    </description>
-                </paquet>
-            </sio>
+                    ▪ Selon son fichier de configuration, la commande retourne (exemple sur ma distribution Kubuntu 18.04) :
+                        • La version de votre système d’exploitation
+                        • Le nom de l’hôte du système d’exploitation (votre ordinateur)
+                        • La version de votre kernel (noyau Linux)
+                        • Le temps écoulé depuis la connexion à votre session
+                        • Le nombre de paquets installés
+                        • L’interpréteur shell actuellement utilisé, ainsi que sa version
+                        • La résolution de votre écran
+                        • Votre environnement de bureau
+                        • Votre gestionnaire de fenêtres
+                        • Les thèmes de votre environnement de bureau
+                        • Les thèmes d’icônes utilisés
+                        • Le terminal actuellement utilisé
+                        • Les caractéristiques principales de votre processeur
+                        • Les caractéristiques principales de votre carte graphique
+                        • La mémoire vive actuellement utilisée comparée à la mémoire vive totale
+                </description>
+            </paquet>
+            <paquet nom="tree" script="sio">
+                <description>
+                    ▪ Cette commande est très pratique, elle vous permet de visualiser dans une arborescence tous les fichiers contenus dans les sous-dossiers à partir du dossier dans lequel vous lancez cette commande.
+                </description>
+            </paquet>
+            <paquet nom="sl" script="personnel">
+                <description>
+                    ▪ Cette commande n’a rien de bien sérieux, si ce n’est d’afficher une locomotive à vapeur passer sur votre terminal si, au lieu de taper la commande « ls », vous tapez « sl » ou « LS ».
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Disque">
-            <personnel>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="k4dirstat">
-                    <description>
-                        ▪ K4dirstat est un excellent logiciel vous permettant de scanner un dossier choisi et de représenter tous les fichiers du dossier et des sous-dossiers en carrés et rectangles. Plus ces carrés ou rectangles sont gros, plus ces fichiers sont volumineux.
-                    </description>
-                </paquet>
-            </sio>
+            <paquet nom="k4dirstat" script="sio">
+                <description>
+                    ▪ K4dirstat est un excellent logiciel de nettoyage de disque manuel. Il est gratuit, libre et open-source.
+
+                    ▪ Ce logiciel vous permettant de scanner un dossier choisi et de cartographier tous les fichiers du dossier et des sous-dossiers en carrés et rectangles. Plus ces carrés ou rectangles sont gros, plus ces fichiers sont volumineux.
+
+                    ▪ Un point fort de ce logiciel par rapport à son équivalent Windows « Windirstat » est qu’il vous permet de partir à partir de n’importe quel dossier, si vous ne voulez pas partir depuis le dossier racine (ce qui évite de perdre du temps à scanner des dossiers non voulus dans les dossiers système pouvant peser jusqu’à plusieurs gigaoctets).
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Images">
-            <personnel>
-                <paquet nom="gimp">
-                    <description>
-                        ▪ GIMP est un puissant logiciel d’édition d’image, la meilleure alternative gratuite, libre et open-source à Photoshop.
-                        ▪ En outre, ce logiciel propose une myriade d'extensions.
-                    </description>
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </sio>
+            <paquet nom="gimp" script="personnel">
+                <description>
+                    ▪ GIMP est un puissant logiciel d’édition d’image, la meilleure alternative gratuite, libre et open-source à Photoshop.
+
+                    ▪ En outre, ce logiciel propose une myriade d'extensions.
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Internet">
-            <personnel>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="thunderbird">
-                    <description>
-                        ▪ Thunderbird est un client messagerie développé par la fondation Mozilla. Sécurisé, gratuit, libre et open-source, vous proposant :
-                            • La gestion de plusieurs comptes de messagerie, avec :
-                                ◦ Recherche rapide de messages
-                                ◦ Filtrage de messages
-                                ◦ Groupement de messages
-                                ◦ etc ...
-                            • Un filtre de spams
-                            • L’envoi de pièces jointes volumineuses (contournement efficace des limites des messageries Gmail, Outlook, etc...)
-                            • La permission d’avoir une adresse de messagerie personnalisée
-                            • Une myriade d’extensions
-                    </description>
-                </paquet>
-            </sio>
+            <paquet nom="thunderbird" script="sio">
+                <description>
+                    ▪ Thunderbird est un client messagerie développé par la fondation Mozilla. Sécurisé, gratuit, libre et open-source, vous proposant :
+                        • La gestion de plusieurs comptes de messagerie, avec :
+                            ◦ Recherche rapide de messages
+                            ◦ Filtrage de messages
+                            ◦ Groupement de messages
+                            ◦ etc ...
+                        • Un filtre de spams
+                        • L’envoi de pièces jointes volumineuses (contournement efficace des limites des messageries Gmail, Outlook, etc...)
+                        • La permission d’avoir une adresse de messagerie personnalisée
+                        • Une myriade d’extensions
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Jeux">
-            <personnel>
-                <paquet nom="bsdgames">
-                    <description>
-                        ▪ Ce paquet rajoute un « Snake » en version terminal. Vous devez ramasser le plus d’argent possible sans vous faire dévorer par le serpent. Vous pouvez quitter à tout moment en passant sur la dièse ‘#’ et sauvegarder votre record.
-                    </description>
-                </paquet>
-                <paquet nom="pacman">
-                    <description>
-                        ▪ Le nom du paquet n’est il pas assez explicite ?
-                    </description>
-                </paquet>
-                <paquet nom="supertux">
-                    <description>
-                        ▪ Vous aimez Super Mario Bros ? Vous avez toujours voulu :
-                            • Jouer à un clone libre et open-source de ce jeu légendaire, tout en incarnant le légendaire manchot Tux, la mascotte du noyau Linux ?
-                            • Jouer à un jeu régulièrement mis à jour proposant, en plus des nombreux niveau disponibles, un nombre incalculable de niveaux créés par la communauté ?
+            <paquet nom="bsdgames" script="personnel">
+                <description>
+                    ▪ Ce paquet rajoute un « Snake » en version terminal. Vous devez ramasser le plus d’argent possible sans vous faire dévorer par le serpent. Vous pouvez quitter à tout moment en passant sur la dièse ‘#’ et sauvegarder votre record.
+                </description>
+            </paquet>
+            <paquet nom="pacman" script="personnel">
+                <description>
+                    ▪ Le nom du paquet n’est il pas assez explicite ?
+                </description>
+            </paquet>
+            <paquet nom="supertux" script="personnel">
+                <description>
+                    ▪ Vous aimez Super Mario Bros ? Vous avez toujours voulu :
+                        • Jouer à un clone libre et open-source de ce jeu légendaire, tout en incarnant le légendaire manchot Tux, la mascotte du noyau Linux ?
+                        • Jouer à un jeu régulièrement mis à jour proposant, en plus des nombreux niveau disponibles, un nombre incalculable de niveaux créés par la communauté ?
 
-                        ▪ Alors foncez, ce jeu est fait pour vous !
-                    </description>
-                </paquet>
-                <paquet nom="supertuxkart">
-                    <description>
-                        ▪ Même principe que Super Tux, mais appliqué à Mario Kart.
-                    </description>
-                </paquet>
-                <paquet nom="wesnoth">
-                    <description>
-                        ▪ The Battle for Wesnoth est un jeu de stratégie au tour par tour en 2D dont l’histoire se déroule dans un univers d’heroic-fantasy. Il est gratuit, libre et open-source.
+                    ▪ Alors foncez, ce jeu est fait pour vous !
+                </description>
+            </paquet>
+            <paquet nom="supertuxkart" script="personnel">
+                <description>
+                    ▪ Même principe que Super Tux, mais appliqué à Mario Kart.
+                </description>
+            </paquet>
+            <paquet nom="wesnoth" script="personnel">
+                <description>
+                    ▪ The Battle for Wesnoth est un jeu de stratégie au tour par tour en 2D dont l’histoire se déroule dans un univers d’heroic-fantasy. Il est gratuit, libre et open-source.
 
-                        ▪ Pour en savoir plus sur ce jeu, cliquez sur ce lien → https://linuxfr.org/news/sortie-de-la-bataille-pour-wesnoth-1-12.
-                    </description>
-                </paquet>
-            </personnel>
-            <sio />
+                    ▪ Pour en savoir plus sur ce jeu, cliquez sur ce lien → https://linuxfr.org/news/sortie-de-la-bataille-pour-wesnoth-1-12.
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="LAMP">
-            <personnel>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="apache2">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="libapache2-mod">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="mariadb-server">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-mysql">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-curl">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-gd">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-intl">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-json">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-mbstring">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-xml">
-                    <description>
-
-                    </description>
-                </paquet>
-                <paquet nom="php-zip">
-                    <description>
-
-                    </description>
-                </paquet>
-            </sio>
+            <paquet nom="apache2" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php" script="sio">
+                <description>
+                    ▪ Comme son nom l'indique, ce paquet installe les librairies PHP.
+                </description>
+            </paquet>
+            <paquet nom="libapache2-mod" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="mariadb-server" script="sio">
+                <description>
+                    ▪ Ce paquet installe un serveur MariaDB.
+                </description>
+            </paquet>
+            <paquet nom="php-mysql" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-curl" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-gd" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-intl" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-json" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-mbstring" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-xml" script="sio">
+                <description />
+            </paquet>
+            <paquet nom="php-zip" script="sio">
+                <description />
+            </paquet>
         </categorie>
 
         <categorie cat="Librairies">
-            <personnel>
-                <paquet nom="libcsfml-dev">
-                    <description>
-                        ▪ Portage officiel de la librairie graphique SFML en C.
-                    </description>
-                </paquet>
-                <paquet nom="libsfml-dev">
-                    <description>
-                        ▪ La SFML (Standard and Fast Multimedia Library) est une librairie graphique permettant de créer des jeux vidéo en 2D ou encore des programmes interactifs en utilisant l’API graphique OpenGL.
-                    </description>
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="python3.7">
-                    <description>
-                        ▪ La version de Python la plus récente, livrée avec son interpréteur.
-                    </description>
-                </paquet>
-            </sio>
+            <paquet nom="libcsfml-dev" script="personnel">
+                <description>
+                    ▪ Portage officiel de la librairie graphique SFML en C.
+                </description>
+            </paquet>
+            <paquet nom="libsfml-dev" script="personnel">
+                <description>
+                    ▪ La SFML (Standard and Fast Multimedia Library) est une librairie graphique permettant de créer des jeux vidéo en 2D ou encore des programmes interactifs en utilisant l’API graphique OpenGL.
+                </description>
+            </paquet>
+
+            <paquet nom="python3.7" script="sio">
+                <description>
+                    ▪ La version de Python la plus récente, livrée avec son interpréteur.
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Programmation">
-            <sio>
-                <paquet nom="emacs">
-                    <description>
-                        ▪ Emacs est un éditeur de texte avancé se manipulant de la même manière que Nano, avec le clavier et les raccourcis claviers (à la différence près que l’on peut déplacer le curseur en cliquant sur la zone que l’on veut éditer).
-                    </description>
-                </paquet>
-                <paquet nom="g++">
-                    <description>
-                        ▪ Compilateur pour le langage C++.
-                    </description>
-                </paquet>
-                <paquet nom="gcc">
-                    <description>
-                        ▪ Compilateur pour le langage C.
-                    </description>
-                </paquet>
-                <paquet nom="git">
-                    <description>
-                        ▪ Git est un logiciel de gestion de versions décentralisé, généralement utilisé pour sauvegarder des versions d’un projet en programmation.
+            <paquet nom="emacs" script="sio">
+                <description>
+                    ▪ Emacs est un éditeur de texte avancé se manipulant de la même manière que Nano, avec le clavier et les raccourcis claviers (à la différence près que l’on peut déplacer le curseur en cliquant sur la zone que l’on veut éditer).
+                </description>
+            </paquet>
+            <paquet nom="g++" script="sio">
+                <description>
+                    ▪ Compilateur pour le langage C++.
+                </description>
+            </paquet>
+            <paquet nom="gcc" script="sio">
+                <description>
+                    ▪ Compilateur pour le langage C.
+                </description>
+            </paquet>
+            <paquet nom="git" script="sio">
+                <description>
+                    ▪ Git est un logiciel de gestion de versions décentralisé, généralement utilisé pour sauvegarder des versions d’un projet en programmation.
 
-                        ▪ La documentation de Git se trouve sur ce site → https://git-scm.com/doc
-                    </description>
-                </paquet>
-                <paquet nom="make">
-                    <description>
-                        ▪
-                    </description>
-                </paquet>
-                <paquet nom="valgrind">
-                    <description>
-                        ▪ Valgrind est le meilleur ami des programmeurs C et C++ au moment où des erreurs de segmentation apparaissent au lancement d’un programme.
+                    ▪ La documentation de Git se trouve sur ce site → https://git-scm.com/doc
+                </description>
+            </paquet>
+            <paquet nom="make" script="sio">
+                <description>
+                    ▪
+                </description>
+            </paquet>
+            <paquet nom="valgrind" script="sio">
+                <description>
+                    ▪ Valgrind est le meilleur ami des programmeurs C et C++ au moment où des erreurs de segmentation apparaissent au lancement d’un programme.
 
-                        ▪ Cet utilitaire permet de débusquer des fuites mémoire, des mauvais pointeurs, et bien plus (voir la documentation de Valgrind pour plus d’informations).
-                    </description>
-                </paquet>
-            </sio>
+                    ▪ Cet utilitaire permet de débusquer des fuites mémoire, des mauvais pointeurs, et bien plus (voir la documentation de Valgrind pour plus d’informations).
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Vidéos">
-            <personnel>
-                <paquet nom="">
-                    <description>
-                        ▪ VLC est le lecteur vidéo libre le plus populaire au monde. Il permet la lecture de nombreux formats de fichiers audio et vidéo.
-                    </description>
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="vlc">
-                    <description>
-
-                    </description>
-                </paquet>
-            </sio>
+            <paquet nom="vlc" script="sio">
+                <description>
+                    ▪ VLC est le lecteur audio et vidéo libre le plus populaire au monde. Il permet la lecture de nombreux formats de fichiers audio et vidéo.
+                </description>
+            </paquet>
         </categorie>
-
     </distribution>
 
     <PPA>
         <categorie cat="">
-            <personnel>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </sio>
+            <paquet nom="" script="aucun">
+                <description />
+            </paquet>
         </categorie>
     </PPA>
 
     <snap>
         <categorie cat="Internet">
-            <personnel>
-                <paquet nom="">
-                    <description>
-
-                    </description>
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="discord">
-                    <description>
-                        ▪ Client Linux du célèbre réseau social
-                    </description>
-                </paquet>
-            </sio>
+            <paquet nom="discord" script="sio">
+                <description>
+                    ▪ Ce paquet installe le client Linux du célèbre réseau social.
+                </description>
+            </paquet>
         </categorie>
 
         <categorie cat="Programmation">
-            <personnel>
-                <paquet nom="">
-                    <description />
-                </paquet>
-            </personnel>
-            <sio>
-                <paquet nom="atom --classic">
-                    <description>
+            <paquet nom="atom --classic" script="sio">
+                <description>
+                    ▪ Atom est un éditeur de code avancé libre et open-source permettant l'installation de très nombreuses extensions.
 
-                    </description>
-                </paquet>
-                <paquet nom="code --classic">
-                    <description>
+                    ▪ C'est par ailleurs avec cet éditeur que j'ai effectué la plus grosse partie du travail sur ce script de réinstallation.
 
-                    </description>
-                </paquet>
-            </sio>
+                    ▪ Atom est installé par défaut avec Visual Studio Code, pour vous faire tester deux éditeurs de code. Vous pouvez supprimer l'éditeur dont vous ne voulez pas avant ou après le téléchargement, et garder l'éditeur de votre choix.
+                </description>
+            </paquet>
+            <paquet nom="code --classic" script="sio">
+                <description>
+                    ▪ Visual Studio Code est un éditeur de code avancé open-source développé par Microsoft.
+
+                    ▪ Visual Studio Code est installé par défaut avec Atom, pour vous faire tester deux éditeurs de code. Vous pouvez supprimer l'éditeur dont vous ne voulez pas avant ou après le téléchargement, et garder l'éditeur de votre choix.
+                </description>
+            </paquet>
         </categorie>
     </snap>
 </installation>

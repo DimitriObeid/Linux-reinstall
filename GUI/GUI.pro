@@ -3,4 +3,5 @@ SOURCES += \
     fenetreGUI.cpp
 
 HEADERS += \
-    fenetreGUI.h
+    fenetreGUI.h \
+    scriptParser.h
