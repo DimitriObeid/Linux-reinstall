@@ -1,10 +1,15 @@
-Alpha/.~lock.Documentation Alpha.odt#
-B\303\252ta/.~lock.Documentation Bêta.odt#
-Stable/.~lock.Documentation Stable.odt#
-.directory
+# Dossiers
+
 .divers/
 build-GUI-EXT4-Debug/
+Parser/obj/
+
+# Fichiers
+
+Alpha/.~lock.Documentation Alpha.odt#
+B\303\252ta/.~lock.Documentation Bêta.odt#
+.directory
 GUI/GUI.pro
 GUI/GUI.pro.user
-parser/obj/
-parser/.parser.cpp.old
+Parser/parser
+Stable/.~lock.Documentation Stable.odt#
