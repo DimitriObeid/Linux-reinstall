@@ -10,29 +10,31 @@
  * qu'une seule et unique fois. C'est à dire que rien ne sera redéfini
  * qu'à chaque appel de ce fichier header dans tous les fichiers source C++.
 */
-#ifndef FENETREGUI_H
-#define FENETREGUI_H
+#ifndef WindowGUI_H
+#define WindowGUI_H
 
 #include <QApplication>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QWidget>
 
-//  * Comme la classe "FenetreGUI" hérite de la classe "QWidget", on pense à inclure la définition de cette dernière.
-class FenetreGUI : public QWidget
+#include <string>
+
+//  * Comme la classe "WindowGUI" hérite de la classe "QWidget", on pense à inclure la définition de cette dernière.
+class WindowGUI : public QWidget
 {
 public:
-    FenetreGUI();               // Constructeur
-    void FenetreGUI::boutonBase(string nom, string police, int taillePolice, string aide, int x, int y);
-    void boutonExecuter();      // Définition du bouton d'exécution du script de réinstallation
-    void boutonQuitter();       // Définition du bouton "quitter"
-    ~FenetreGUI();              // Déconstructeur
+    WindowGUI();                // Constructeur
+    void WindowGUI::buttonBase(string name, std::string font, int fontSize, std::string help, int x, int y);
+    void buttonExecute();       // Définition du bouton d'exécution du script de réinstallation
+    void buttonQuit();          // Définition du bouton "quitter"
+    ~WindowGUI();               // Déconstructeur
 
 public slots:
-    void ouvrirFenetre();
+    void openWindow();
 
 private:
-    QPushButton *m_bouton;
+    QPushButton *m_button;
 };
 
-#endif // FENETREGUI_H
+#endif // WindowGUI_H
