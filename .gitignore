@@ -3,3 +3,8 @@ B\303\252ta/.~lock.Documentation Bêta.odt#
 Stable/.~lock.Documentation Stable.odt#
 .directory
 .divers/
+build-GUI-EXT4-Debug/
+GUI/GUI.pro
+GUI/GUI.pro.user
+parser/obj/
+parser/.parser.cpp.old
