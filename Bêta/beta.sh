@@ -347,6 +347,9 @@ snap_install()
 	echo "$VOID"
 }
 
+
+## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
+# Détection de la commande Sudo
 set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
@@ -480,7 +483,7 @@ cats_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
 pack_install apache2			# Apache
 pack_install php				# PHP
 pack_install libapache2-mod-php
-pack_install mariadb-server		# Un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par mysql-server)
+pack_install mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server")
 pack_install php-mysql
 pack_install php-curl
 pack_install php-gd

@@ -29,7 +29,7 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 
 ## 3) Arborescence et description des fichiers du projet
 
-Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3 sous-dossiers :  
+Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5 sous-dossiers :  
 
 * *__3.1) Dossier actuel :__*
     * **.gitignore :** Fichier servant à ne pas inclure, dans les commits Git, les fichiers listés dedans (fichiers binaires, etc...).
@@ -50,8 +50,6 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
     - **.gitignore :** Fichier servant à ne pas inclure, dans les commits Git, les fichiers listés dedans (fichiers binaires, etc...).
     - **fenetreGUI.cpp :** Fichier source C++ contenant la définition des méthodes de la classe **"fenetreGUI"**.  
     - **fenetreGUI.h :** Fichier d'en-tête contenant la classe gérant l'affichage de la fenêtre principale.  
-    - **GUI.pro :** Fichier de projet servant à séparer les fichiers source C++ et les fichiers d'en-tête dans l'arborescence des fichiers de l'IDE QtCreator.  
-    - **GUI.pro.user :** Fichier XML
     - **main.cpp :** Fichier source C++ contenant la fonction principale du programme **(main)**, fonction de début et de fin de **TOUT** programme écrit en C ou en C++.
 
 * *__3.5) Parser :__*
@@ -59,7 +57,6 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 4 fichiers et 3
     - **Makefile :** Fichier Makefile, permettant de compiler tous les fichiers d'un projet avec des paramètres prédéfinis, le tout en une seule commande.
     - **parser.cpp :** Fichier source C++ contenant les définitions des méthodes de la classe **"Parser"**.
     - **parser.h :** Fichier d'en-tête (header) contenant la classe **"Parser"**, ses attributs et déclarations de méthodes et l'inclusion des en-têtes des librairies standard C++ (iostream, string, fstream, etc...).
-    - **test.sh :** Fichier de test du programme de parsing de fichier Shell.
 
 * *__3.6) Stable :__*
     - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.

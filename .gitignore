@@ -8,8 +8,10 @@ Parser/obj/
 
 Alpha/.~lock.Documentation Alpha.odt#
 B\303\252ta/.~lock.Documentation Bêta.odt#
+B\303\252ta/beta_gui.sh
 .directory
 GUI/GUI.pro
 GUI/GUI.pro.user
 Parser/parser
+Parser/test.sh
 Stable/.~lock.Documentation Stable.odt#
