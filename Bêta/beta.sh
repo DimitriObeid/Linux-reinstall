@@ -528,8 +528,8 @@ echo "$VOID"
 
 # Programmation
 cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
-snap_install atom --classic		# Atom IDE
-snap_install code --classic		# Visual Studio Code
+snap_install atom --classic		# Éditeur de code Atom
+snap_install code --classic		# Éditeur de code Visual Studio Code
 pack_install emacs
 pack_install g++
 pack_install gcc
