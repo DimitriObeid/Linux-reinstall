@@ -8,8 +8,6 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#define FILENAME "parsing.sh"
-
 #include <fstream>
 #include <iostream>
 #include <string>

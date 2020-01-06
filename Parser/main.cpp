@@ -10,10 +10,14 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	string const shellFile(argv[1]);
-	ifstream stream(shellFile.c_str());
+	ifstream stream(argv[1], ios::in);
 
 	Parser parseString;
+
+	if (argc != 2)
+	{
+		cout << "Erreur : Seulement deux arguments sont attendus, ni plus ni moins" << endl;
+	}
 
 	if (stream) {
 		parseString.parseFunction();

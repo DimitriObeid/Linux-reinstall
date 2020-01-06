@@ -8,14 +8,18 @@
 #include "parser.h"
 using namespace std;
 
-Parser::Parser()
+Parser::Parser() : m_function(), m_scriptString(), m_var() 
 {
 
 }
 
 void Parser::parseFunction()
 {
-	
+	string str;
+    string delim("()");
+	string functionName = str.substr(0, str.find(delim));
+
+	cout << functionName << endl;
 }
 
 Parser::~Parser()
