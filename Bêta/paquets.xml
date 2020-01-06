@@ -181,160 +181,205 @@
                 </description>
                 <script>&personnalise;</script>
             </paquet>
-            <paquet nom="supertuxkart" script="personnel">
+            <paquet>
                 <nom>supertuxkart</nom>
                 <description>▪ Même principe que Super Tux, mais appliqué à Mario Kart.</description>
                 <script>&personnalise;</script>
             </paquet>
-            <paquet nom="wesnoth" script="personnel">
+            <paquet>
+                <nom>wesnoth</nom>
                 <description>
                     ▪ The Battle for Wesnoth est un jeu de stratégie au tour par tour en 2D dont l’histoire se déroule dans un univers d’heroic-fantasy. Il est gratuit, libre et open-source.
 
                     ▪ Pour en savoir plus sur ce jeu, cliquez sur ce lien → https://linuxfr.org/news/sortie-de-la-bataille-pour-wesnoth-1-12.
                 </description>
+                <script>&personnalise;</script>
             </paquet>
         </categorie>
 
         <categorie cat="LAMP">
-            <paquet nom="apache2" script="sio">
-                <description />
+            <paquet>
+                <nom>apache2</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php" script="sio">
-                <description>
-                    ▪ Comme son nom l'indique, ce paquet installe les librairies PHP.
-                </description>
+            <paquet>
+                <nom>php</nom>
+                <description>▪ Comme son nom l'indique, ce paquet installe les librairies PHP.</description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="libapache2-mod" script="sio">
-                <description />
+            <paquet>
+                <nom>libapache2-mod</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="mariadb-server" script="sio">
-                <description>
-                    ▪ Ce paquet installe un serveur MariaDB.
-                </description>
+            <paquet>
+                <nom>mariadb-server</nom>
+                <description>▪ Ce paquet installe un serveur MariaDB.</description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-mysql" script="sio">
-                <description />
+            <paquet>
+                <nom>php-mysql</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-curl" script="sio">
-                <description />
+            <paquet>
+                <nom>php-curl</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-gd" script="sio">
-                <description />
+            <paquet>
+                <nom>php-gd</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-intl" script="sio">
-                <description />
+            <paquet>
+                <nom>php-intl</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-json" script="sio">
-                <description />
+            <paquet>
+                <nom>php-json</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-mbstring" script="sio">
-                <description />
+            <paquet>
+                <nom>php-mbstring</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-xml" script="sio">
-                <description />
+            <paquet>
+                <nom>php-xml</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="php-zip" script="sio">
-                <description />
+            <paquet>
+                <nom>php-zip</nom>
+                <description></description>
+                <script>&sio;</script>
             </paquet>
         </categorie>
 
         <categorie cat="Librairies">
-            <paquet nom="libcsfml-dev" script="personnel">
+            <paquet>
+                <nom>libcsfml-dev</nom>
                 <description>
                     ▪ Portage officiel de la librairie graphique SFML en C.
                 </description>
+                <script>&personnalise;</script>
             </paquet>
-            <paquet nom="libsfml-dev" script="personnel">
+            <paquet>
+                <nom>libsfml-dev</nom>
                 <description>
                     ▪ La SFML (Standard and Fast Multimedia Library) est une librairie graphique permettant de créer des jeux vidéo en 2D ou encore des programmes interactifs en utilisant l’API graphique OpenGL.
                 </description>
+                <script>&personnalise;</script>
             </paquet>
 
-            <paquet nom="python3.7" script="sio">
+            <paquet>
+                <nom>python3.7</nom>
                 <description>
                     ▪ La version de Python la plus récente, livrée avec son interpréteur.
                 </description>
+                <script>sio</script>
             </paquet>
         </categorie>
 
         <categorie cat="Programmation">
-            <paquet nom="emacs" script="sio">
+            <paquet>
+                <nom>emacs</nom>
                 <description>
                     ▪ Emacs est un éditeur de texte avancé se manipulant de la même manière que Nano, avec le clavier et les raccourcis claviers (à la différence près que l’on peut déplacer le curseur en cliquant sur la zone que l’on veut éditer).
                 </description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="g++" script="sio">
-                <description>
-                    ▪ Compilateur pour le langage C++.
-                </description>
+            <paquet>
+                <nom>g++</nom>
+                <description>▪ Compilateur pour le langage C++.</description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="gcc" script="sio">
-                <description>
-                    ▪ Compilateur pour le langage C.
-                </description>
+            <paquet>
+                <nom>gcc</nom>
+                <description>▪ Compilateur pour le langage C.</description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="git" script="sio">
+            <paquet>
+                <nom>git</nom>
                 <description>
                     ▪ Git est un logiciel de gestion de versions décentralisé, généralement utilisé pour sauvegarder des versions d’un projet en programmation.
 
-                    ▪ La documentation de Git se trouve sur ce site → https://git-scm.com/doc
+                    ▪ La documentation de Git se trouve sur ce site → https://git-scm.com/doc.
                 </description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="make" script="sio">
-                <description>
-                    ▪ Make est une commande permettant de compiler tous les fichiers d’un projet listés dans un fichier de type Makefile avec les options souhaitées.
-                </description>
+            <paquet>
+                <nom>make</nom>
+                <description>▪ Make est une commande permettant de compiler tous les fichiers d’un projet listés dans un fichier de type Makefile avec les options souhaitées.</description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="umlet" script="sio">
+            <paquet>
+                <nom>umlet</nom>
                 <description>
                     ▪ UMLet est un logiciel de dessin de diagrammes UML gratuit, libre et open-source.
                 </description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="valgrind" script="sio">
+            <paquet>
+                <nom>valgrind</nom>
                 <description>
                     ▪ Valgrind est le meilleur ami des programmeurs C et C++ au moment où des erreurs de segmentation apparaissent au lancement d’un programme.
 
                     ▪ Cet utilitaire permet de débusquer des fuites mémoire, des mauvais pointeurs, et bien plus (voir la documentation de Valgrind pour plus d’informations).
                 </description>
+                <script>&sio;</script>
             </paquet>
         </categorie>
 
         <categorie cat="Vidéos">
-            <paquet nom="vlc" script="sio">
+            <paquet>
+                <nom>vlc</nom>
                 <description>
                     ▪ VLC est le lecteur audio et vidéo libre le plus populaire au monde. Il permet la lecture de nombreux formats de fichiers audio et vidéo.
                 </description>
+                <script>&sio;</script>
             </paquet>
         </categorie>
 
         <categorie cat="Wine">
-            <paquet nom="wine-stable" script="sio">
+            <paquet>
+                <nom>wine-stable</nom>
                 <description>
                     ▪ Wine (accronyme récursif de "Wine Is Not an Emulator") est un logiciel permettant l'exécution de certains programmes Windows sur Linux.
                 </description>
+                <script>&sio;</script>
             </paquet>
         </categorie>
     </distribution>
 
     <PPA>
         <categorie cat="">
-            <paquet nom="" script="aucun">
+            <paquet>
+                <nom></nom>
                 <description />
+                <script></script>
             </paquet>
         </categorie>
     </PPA>
 
     <snap>
         <categorie cat="Internet">
-            <paquet nom="discord" script="sio">
+            <paquet>
+                <nom>discord</nom>
                 <description>
                     ▪ Ce paquet installe le client Linux du célèbre réseau social.
                 </description>
+                <script>&sio;</script>
             </paquet>
         </categorie>
 
         <categorie cat="Programmation">
-            <paquet nom="atom --classic" script="sio">
+            <paquet>
+                <nom>atom --classic</nom>
                 <description>
                     ▪ Atom est un éditeur de code avancé libre et open-source permettant l'installation de très nombreuses extensions.
 
@@ -342,13 +387,16 @@
 
                     ▪ Atom est installé par défaut avec Visual Studio Code, pour vous faire tester deux éditeurs de code. Vous pouvez supprimer l'éditeur dont vous ne voulez pas avant ou après le téléchargement, et garder l'éditeur de votre choix.
                 </description>
+                <script>&sio;</script>
             </paquet>
-            <paquet nom="code --classic" script="sio">
+            <paquet>
+                <nom>code --classic</nom>
                 <description>
                     ▪ Visual Studio Code est un éditeur de code avancé open-source développé par Microsoft.
 
                     ▪ Visual Studio Code est installé par défaut avec Atom, pour vous faire tester deux éditeurs de code. Vous pouvez supprimer l'éditeur dont vous ne voulez pas avant ou après le téléchargement, et garder l'éditeur de votre choix.
                 </description>
+                <script>&sio;</script>
             </paquet>
         </categorie>
     </snap>
