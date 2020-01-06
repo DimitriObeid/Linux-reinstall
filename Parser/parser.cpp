@@ -8,7 +8,7 @@
 #include "parser.h"
 using namespace std;
 
-Parser::Parser() : m_function(), m_scriptString(), m_var() 
+Parser::Parser() : m_function(), m_scriptString(), m_var()
 {
 
 }
