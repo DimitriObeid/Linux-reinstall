@@ -22,14 +22,14 @@
     script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
     <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
 
-    <!ELEMENT snap (categorie)>
-    <!ELEMENT categorie (paquet)>                   <!-- Définition du contenu de la balise "categorie", contenant les informations -->
-    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut de la balise "categorie". L'attribut "cat" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", contenant le nom d'un paquet -->
+    <!ELEMENT PPA (categorie)>                      <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
+    <!ELEMENT categorie (paquet)>                   <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
+    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
+    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
     <!ATTLIST paquet
     nom CDATA #REQUIRED
-    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition de l'attribut de la balise "paquet" enfant de la balise "personnel". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description" -->
+    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
+    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
 ]>
 
 <!-- Balise racine du corps du document XML -->
@@ -274,7 +274,12 @@
             </paquet>
             <paquet nom="make" script="sio">
                 <description>
-                    ▪
+                    ▪ Make est une commande permettant de compiler tous les fichiers d’un projet listés dans un fichier de type Makefile avec les options souhaitées.
+                </description>
+            </paquet>
+            <paquet nom="umlet" script="sio">
+                <description>
+                    ▪ UMLet est un logiciel de dessin de diagrammes UML gratuit, libre et open-source.
                 </description>
             </paquet>
             <paquet nom="valgrind" script="sio">
@@ -290,6 +295,14 @@
             <paquet nom="vlc" script="sio">
                 <description>
                     ▪ VLC est le lecteur audio et vidéo libre le plus populaire au monde. Il permet la lecture de nombreux formats de fichiers audio et vidéo.
+                </description>
+            </paquet>
+        </categorie>
+
+        <categorie cat="Wine">
+            <paquet nom="wine-stable" script="sio">
+                <description>
+                    ▪ Wine (accronyme récursif de "Wine Is Not an Emulator") est un logiciel permettant l'exécution de certains programmes Windows sur Linux.
                 </description>
             </paquet>
         </categorie>
