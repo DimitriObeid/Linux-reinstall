@@ -37,6 +37,11 @@ C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages 
 C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 
+# FICHIERS
+TMPDIR="$HOME/Linux_script_output.d"	# Dossier contenant les fichiers temporaires
+TMPPACK="tmppack"						# Fichier temporaire contenant les sorties de la commande "command -v $package_name"
+TMPPATH="$TMPDIR/$TMPPACK"				# Chemin vers le fichier temporaire
+
 ## TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
@@ -49,7 +54,7 @@ COLS=$(tput cols)
 # Nombre de dièses (hash) précédant et suivant une chaîne de caractères
 HASH="#####"
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
-TAB=""
+TAB=">>>>"
 # Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
 J_TAB="$C_JAUNE$TAB"
 R_TAB="$C_ROUGE$TAB$TAB"
@@ -295,6 +300,21 @@ dist_upgrade()
 }
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
+# Changer de dossier pour l'installation pour éviter d'interférer avec les fichiers et les permissions non-accordées par Sudo
+cd_tmpdir()
+{
+	if [ ! -d $TMPDIR ]; then
+		mkdir $TMPDIR
+	fi
+	cd $TMPDIR
+	if [ ! -f $TMPPATH ]; then
+		touch $TMPPATH
+	elif [ -f $TMPPATH ]; then
+		rm $TMPPATH
+		touch $TMPPATH
+	fi
+}
+
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
 pack_install()
 {
@@ -313,9 +333,13 @@ pack_install()
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
 	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
 	# Sinon, le script installe le paquet manquant.
-	command -v "$package_name" 1> /dev/null && v_echo "$VOID Le paquet \"$package_name\" est déjà installé"
-	command -v "$package_name" 2> /dev/null && {
+
+	# Rediriger les sorties de "command -v" vers un fichier temporaire et lire le fichier pour trouver la commande
+	command -v "$package_name" 1> $TMPPATH
+
+	v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || {
 		echo "$VOID"
+
 		j_echo "Installation de $package_name"
 
 		case $OS_FAMILY in
@@ -338,6 +362,7 @@ pack_install()
 
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
 	}
+	echo "test" > $TMPPATH
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
@@ -442,6 +467,8 @@ launch_script
 check_internet_connection
 # Mise à jour des paquets actuels
 dist_upgrade
+# Création du dossier temporaire
+cd_tmpdir
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
@@ -508,6 +535,7 @@ pack_install g++
 pack_install gcc
 pack_install git
 pack_install make
+pack_install umlet
 pack_install valgrind
 echo "$VOID"
 
@@ -515,6 +543,9 @@ echo "$VOID"
 cats_echo "INSTALLATION DES LOGICIELS VIDÉO"
 pack_install vlc
 echo "$VOID"
+
+cats_echo "INSTALLATION DE WINE"
+pack_install wine-stable
 
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 
