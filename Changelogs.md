@@ -102,10 +102,12 @@
             - A:\ **v_echo()** : Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
 
         - **<u>1.2) Paquets</u>** :
-            - A:\ **g++** : Paquet installant le compilateur G++ pour le langage C++.
-            - A:\ **gcc** : Paquet installant le compilateur GCC pour le langage C.
-            - A:\ **git** : Paquet installant le logiciel de gestion de versions décentralisé **"Git"** --> https://fr.wikipedia.org/wiki/Git
-            - A:\ **make** : Paquet installant la commande **"make"**, extrêmement pratique pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande via un Makefile.
+            - A:\ **g++ :** Paquet installant le compilateur G++ pour le langage C++.
+            - A:\ **gcc :** Paquet installant le compilateur GCC pour le langage C.
+            - A:\ **git :** Paquet installant le logiciel de gestion de versions décentralisé **"Git"** --> https://fr.wikipedia.org/wiki/Git
+            - A:\ **make :** Paquet installant la commande **"make"**, extrêmement pratique pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande via un Makefile.
+            - A:\ **umlet :** Paquet installant le logiciel UMLet.
+            - A:\ **wine-stable :** Paquet installant Wine.
 
         - **<u>1.3) Variables</u>** :
             - C:\ **$C_HEADER_LINE** : Renommée en **"$C_HEADER"**.
