@@ -4,32 +4,18 @@
 <!DOCTYPE installation [
     <!ELEMENT installation (distribution*, PPA*, snap*)> <!-- Balise racine du corps du document XML -->
 
-    <!ELEMENT distribution (categorie)>             <!-- Balise racine de la structure concernant les paquets installés par le gestionnaire de paquets de la distribution Linux de l'utilisateur -->
-    <!ELEMENT categorie (paquet)>                   <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
+    <!ELEMENT distribution (categorie*)>            <!-- Balise racine de la structure concernant les paquets installés par le gestionnaire de paquets de la distribution Linux de l'utilisateur -->
+    <!ELEMENT categorie (paquet*)>                  <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
     <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
+    <!ELEMENT paquet (description*)>                <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
     <!ATTLIST paquet
     nom CDATA #REQUIRED
     script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
     <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
 
-    <!ELEMENT PPA (categorie)>                      <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
-    <!ELEMENT categorie (paquet)>                   <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
-    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
-    <!ATTLIST paquet
-    nom CDATA #REQUIRED
-    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
-    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
+    <!ELEMENT PPA (categorie*)>                     <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
 
-    <!ELEMENT PPA (categorie)>                      <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
-    <!ELEMENT categorie (paquet)>                   <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
-    <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
-    <!ELEMENT paquet (description)>                 <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
-    <!ATTLIST paquet
-    nom CDATA #REQUIRED
-    script (aucun|personnel|sio) #REQUIRED>         <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
-    <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
+    <!ELEMENT snap (categorie*)>                    <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
 ]>
 
 <!-- Balise racine du corps du document XML -->
