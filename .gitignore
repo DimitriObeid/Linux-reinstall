@@ -1,15 +1,17 @@
 # Dossiers
 
 .divers/
+.vscode/
 build-GUI-EXT4-Debug/
 Parser/obj/
 
 # Fichiers
 
+.directory
+.~lock.Mode d'emploi.odt#
 Alpha/.~lock.Documentation Alpha.odt#
 B\303\252ta/.~lock.Documentation Bêta.odt#
 B\303\252ta/beta_gui.sh
-.directory
 GUI/GUI.pro
 GUI/GUI.pro.user
 Parser/parser
