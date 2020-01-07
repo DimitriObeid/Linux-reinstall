@@ -40,7 +40,6 @@ C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages d
 # FICHIERS
 TMPDIR="$HOME/Linux_script_output.d"	# Dossier contenant les fichiers temporaires
 TMPPACK="tmppack"						# Fichier temporaire contenant les sorties de la commande "command -v $package_name"
-TMPPATH="$TMPDIR/$TMPPACK"				# Chemin vers le fichier temporaire
 
 ## TEXTE
 
@@ -192,7 +191,7 @@ get_dist_package_manager()
 {
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 
-	# On cherche la commande du gestionnaire de paquets de la distribution dans les chemins de la variable d'environnement "$PATH" en l'exécutant.
+	# On cherche la commande du gestionnaire de paquets de la distribution de l'utilisateur dans les chemins de la variable d'environnement "$PATH" en l'exécutant.
 	# On redirige chaque sortie ("stdout (sortie standard) si la commande est trouvée" et "stderr(sortie d'erreurs) si la commande n'est pas trouvée")
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
@@ -303,16 +302,21 @@ dist_upgrade()
 # Changer de dossier pour l'installation pour éviter d'interférer avec les fichiers et les permissions non-accordées par Sudo
 cd_tmpdir()
 {
-	if [ ! -d $TMPDIR ]; then
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE"
+
+	if test ! -d $TMPDIR; then
+		j_echo "Création d'un dossier temporaire dans $TMPDIR pour y stocker les redirections des sorties de commandes"
 		mkdir $TMPDIR
+		echo "$VOID"
 	fi
-	cd $TMPDIR
-	if [ ! -f $TMPPATH ]; then
-		touch $TMPPATH
-	elif [ -f $TMPPATH ]; then
-		rm $TMPPATH
-		touch $TMPPATH
-	fi
+
+	j_echo "Changement de dossier : Déplacement vers $TMPDIR"
+	cd "$TMPDIR"
+	echo "$VOID"
+	
+	j_echo "Création du fichier \"$TMPPACK\" dans le dossier $TMPDIR"
+	touch "$TMPPACK"
+	echo "$VOID"
 }
 
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
@@ -335,7 +339,7 @@ pack_install()
 	# Sinon, le script installe le paquet manquant.
 
 	# Rediriger les sorties de "command -v" vers un fichier temporaire et lire le fichier pour trouver la commande
-	command -v "$package_name" 1> $TMPPATH
+	command -v "$package_name" 1> $TMPPACK
 
 	v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || {
 		echo "$VOID"
@@ -362,7 +366,7 @@ pack_install()
 
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
 	}
-	echo "test" > $TMPPATH
+	echo "test" > $TMPPACK
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
@@ -370,16 +374,6 @@ snap_install()
 {
     snap install "$@"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
 	echo "$VOID"
-}
-
-
-## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
-# Détection de la commande Sudo
-set_sudo()
-{
-	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
-
-	command -v sudo &1> /dev/null && v_echo "Le paquet \"sudo\" est déjà installé"
 }
 
 # Suppression des paquets obsolètes
@@ -447,6 +441,11 @@ autoremove()
 is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
+	v_echo "Retour vers le dossier d'origine, suppression du dossier temporaire"
+	cd -
+	#rm -rf $TMPDIR
+	echo "$VOID"
+
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	echo "$VOID"
 }
@@ -546,6 +545,7 @@ echo "$VOID"
 
 cats_echo "INSTALLATION DE WINE"
 pack_install wine-stable
+echo "$VOID"
 
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 

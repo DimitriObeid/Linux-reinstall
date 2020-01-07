@@ -8,11 +8,10 @@
     <!ELEMENT categorie (paquet*)>                  <!-- Définition de la balise "categorie", structurant la catégorie des paquets installés -->
     <!ATTLIST categorie cat CDATA #REQUIRED>        <!-- Définition de l'attribut "cat" de la balise "categorie". Cet attribut peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE -->
     <!ELEMENT paquet (nom, description, script)>    <!-- Définition de la balise "paquets", structurant le nom, la version et la description du paquet souhaité-->
-    <!ELEMENT nom (#PCDATA)>                        <!-- Définition de la balise "nom" -->
-    <!-- Définition des attributs de la balise "paquet". L'attribut "nom" peut contenir n'importe quelle chaîne de caractères et est OBLIGATOIRE. L'attribut "script" ne peut contenir qu'une des trois chaînes de caractères : "aucun" pour respecter le DTD dans la partie des PPA, "personnel" pour gérer les paquets de la version de reinstallation personnelle, "sio" pour gérer les paquets de la version SIO. Cet attribut est également OBLIGATOIRE -->
+    <!ELEMENT nom (#PCDATA)>                        <!-- Définition de la balise "nom", contenant le nom des paquets -->
     <!ELEMENT description (#PCDATA)>                <!-- Définition de la balise "description", contenant la description des paquets installés -->
-    <!ELEMENT script (#PCDATA)>
-    <!ENTITY personnalise "personnalise">
+    <!ELEMENT script (#PCDATA)>                     <!-- Définition de la balise "script", contenant la version du script choisie (SIO ou personnalisée) -->
+    <!ENTITY perso "personnel">
     <!ENTITY sio "SIO">
 
     <!ELEMENT PPA (categorie*)>                     <!-- Balise racine de la structure des paquets installés par les dépôts PPA -->
@@ -72,7 +71,7 @@
 
                     ▪ En outre, de nombreuses extensions sont disponibles.
                 </description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
         </categorie>
 
@@ -110,7 +109,7 @@
             <paquet>
                 <nom>sl</nom>
                 <description>▪ Cette commande n’a rien de bien sérieux, si ce n’est d’afficher une locomotive à vapeur passer sur votre terminal si, au lieu de taper la commande « ls », vous tapez « sl » ou « LS ».</description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
         </categorie>
 
@@ -136,7 +135,7 @@
 
                     ▪ En outre, ce logiciel propose une myriade d'extensions.
                 </description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
         </categorie>
 
@@ -163,12 +162,12 @@
             <paquet>
                 <nom></nom>
                 <description>▪ Ce paquet rajoute un « Snake » en version terminal. Vous devez ramasser le plus d’argent possible sans vous faire dévorer par le serpent. Vous pouvez quitter à tout moment en passant sur la dièse ‘#’ et sauvegarder votre record.</description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
             <paquet>
                 <nom>pacman</nom>
                 <description>▪ Le nom du paquet n’est il pas assez explicite ?</description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
             <paquet>
                 <nom>supertux</nom>
@@ -179,12 +178,12 @@
 
                     ▪ Alors foncez, ce jeu est fait pour vous !
                 </description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
             <paquet>
                 <nom>supertuxkart</nom>
                 <description>▪ Même principe que Super Tux, mais appliqué à Mario Kart.</description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
             <paquet>
                 <nom>wesnoth</nom>
@@ -193,7 +192,7 @@
 
                     ▪ Pour en savoir plus sur ce jeu, cliquez sur ce lien → https://linuxfr.org/news/sortie-de-la-bataille-pour-wesnoth-1-12.
                 </description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
         </categorie>
 
@@ -266,14 +265,14 @@
                 <description>
                     ▪ Portage officiel de la librairie graphique SFML en C.
                 </description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
             <paquet>
                 <nom>libsfml-dev</nom>
                 <description>
                     ▪ La SFML (Standard and Fast Multimedia Library) est une librairie graphique permettant de créer des jeux vidéo en 2D ou encore des programmes interactifs en utilisant l’API graphique OpenGL.
                 </description>
-                <script>&personnalise;</script>
+                <script>&perso;</script>
             </paquet>
 
             <paquet>
