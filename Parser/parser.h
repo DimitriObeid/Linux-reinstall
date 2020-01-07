@@ -17,7 +17,7 @@ class Parser
 {
 public:
     Parser();
-    void parseFunction();
+    void parseFunction();   // Méthode de récupération des chaînes de caractères composant les noms des fonctions
     ~Parser();
 
 private:
