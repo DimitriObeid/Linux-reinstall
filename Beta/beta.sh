@@ -376,6 +376,13 @@ snap_install()
 	echo "$VOID"
 }
 
+## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
+# Détection de Sudo
+set_sudo()
+{
+	
+}
+
 # Suppression des paquets obsolètes
 autoremove()
 {
