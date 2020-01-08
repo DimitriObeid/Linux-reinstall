@@ -30,7 +30,7 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 ## 3) Fichiers à télécharger :
 
 - Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle ou plus avancée se trouvent dans le dossier **Stable** (*__Documentation Stable.odt__* _(si vous souhaitez modifier le script)_, plus *__sio.sh__* ou *__personnel.sh__*).  
-- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Alpha"** (si vous êtes déterminé) ou dans le sous-dossier **"Bêta"** (si vous voulez donner un petit coup de main).  
+- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Alpha"** (si vous êtes déterminé) ou dans le sous-dossier **"Beta"** (si vous voulez donner un petit coup de main).  
 
 ## 4) Arborescence et description des fichiers du projet
 
@@ -47,9 +47,9 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5
     - **alpha.sh :** Le fichier exécutable de la version Alpha. Il est régulièrement mis à jour.  
     - **Documentation Alpha.odt :** La documentation de la version Alpha du projet. Elle est mise à jour dès que possible.  
 
-* *__4.3) Bêta :__*
-    - **beta.sh :** Le fichier exécutable de la version Bêta du script de réinstallation SIO.  
-    - **Documentation Bêta.odt :** La documentation officielle de la version Bêta.  
+* *__4.3) Beta :__*
+    - **beta.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
+    - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
     - **paquets.xml :** Fichier de structuration de données contenant les noms des paquets
 
 * *__4.4) GUI :__*
