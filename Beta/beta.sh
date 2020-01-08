@@ -493,6 +493,10 @@ pack_install neofetch
 pack_install tree
 echo "$VOID"
 
+# Logiciels de cryptage et de sécurité
+cats_echo "INSTALLATION DES LOGICIELS DE CRYPTAGE ET DE SÉCURITÉ"
+pack_install veracrypt
+
 # Développement
 cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Éditeur de code Atom
