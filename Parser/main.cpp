@@ -8,15 +8,22 @@
 #include "parser.h"
 using namespace std;
 
+void parseFunction()
+{
+	string str;
+    string delim("()");
+	string functionName = str.substr(0, str.find(delim));
+
+	cout << functionName << endl;
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc != 2) {
 		cout << "Erreur : Seulement deux arguments sont attendus, ni plus ni moins" << endl;
 	}
 	
-	Parser parseString;
-
-	ifstream stream(argv[1], ios::in);
+	ifstream stream(argv[1]);
 	stream.open(argv[1]);
 
 	char c;
@@ -46,8 +53,10 @@ int main(int argc, char *argv[])
 				stream.ignore();
 				while (stream.good() && (c = stream.get()) != '"') {
 					buffer += c;
+					parseFunction();
 				}
 				field[j] = buffer;
+				cout << buffer << endl;
 				buffer = "";
 				if (j != fieldCount - 1) {
 					stream.ignore();
@@ -55,7 +64,6 @@ int main(int argc, char *argv[])
 			}
 		}
 		
-		parseString.parseFunction();
 	}
 	else {
 		cout << "ERREUR FATALE : Le fichier \"" << argv[1] << "\" n'existe pas" << endl;

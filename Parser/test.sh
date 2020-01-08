@@ -1,9 +1,25 @@
 #!/bin/bash
 
-testing()
+SLEEP=sleep\ 2
+
+one()
 {
-	echo "test"
-	exit 1;
+	echo "one"
+	$SLEEP
 }
 
-testing
+two()
+{
+	pwd
+	$SLEEP
+}
+
+three()
+{
+	ls
+	$SLEEP
+}
+
+one
+two
+three

@@ -493,6 +493,19 @@ pack_install neofetch
 pack_install tree
 echo "$VOID"
 
+# Développement
+cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
+snap_install atom --classic		# Éditeur de code Atom
+snap_install code --classic		# Éditeur de code Visual Studio Code
+pack_install emacs
+pack_install g++
+pack_install gcc
+pack_install git
+pack_install make
+pack_install umlet
+pack_install valgrind
+echo "$VOID"
+
 # Logiciels de nettoyage de disque
 cats_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
 pack_install k4dirstat
@@ -525,17 +538,9 @@ cats_echo "INSTALLATION DES LIBRAIRIES"
 pack_install python3.7
 echo "$VOID"
 
-# Programmation
-cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
-snap_install atom --classic		# Éditeur de code Atom
-snap_install code --classic		# Éditeur de code Visual Studio Code
-pack_install emacs
-pack_install g++
-pack_install gcc
-pack_install git
-pack_install make
-pack_install umlet
-pack_install valgrind
+# Réseau
+cats_echo "INSTALLATION DES LOGICIELS RÉSEAU"
+pack_install wireshark
 echo "$VOID"
 
 # Vidéo
