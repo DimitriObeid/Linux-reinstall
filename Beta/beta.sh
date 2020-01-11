@@ -299,26 +299,6 @@ dist_upgrade()
 }
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
-# Changer de dossier pour l'installation pour éviter d'interférer avec les fichiers et les permissions non-accordées par Sudo
-cd_tmpdir()
-{
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE"
-
-	if test ! -d $TMPDIR; then
-		j_echo "Création d'un dossier temporaire dans $TMPDIR pour y stocker les redirections des sorties de commandes"
-		mkdir $TMPDIR
-		echo "$VOID"
-	fi
-
-	j_echo "Changement de dossier : Déplacement vers $TMPDIR"
-	cd "$TMPDIR"
-	echo "$VOID"
-	
-	j_echo "Création du fichier \"$TMPPACK\" dans le dossier $TMPDIR"
-	touch "$TMPPACK"
-	echo "$VOID"
-}
-
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
 pack_install()
 {
@@ -328,45 +308,44 @@ pack_install()
 	package_name=$1
 
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
-	pack_install_complete()
+	pack_manager_install()
 	{
         # $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 		$SLEEP_INST; "$@"
 	}
 
+	pack_manager_check_pack()
+	{
+		pkg_mng_cmd="$@"
+	}
+
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
 	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
 	# Sinon, le script installe le paquet manquant.
+	echo "$VOID"
+	
+	j_echo "Installation de $package_name"
 
-	# Rediriger les sorties de "command -v" vers un fichier temporaire et lire le fichier pour trouver la commande
-	command -v "$package_name" 1> $TMPPACK
+	case $OS_FAMILY in
+		opensuse)
+			pack_manager_install zypper -y install "$package_name"
+			;;
+		archlinux)
+			pack_manager_install pacman --noconfirm -S "$package_name"
+			;;
+		fedora)
+			pack_manager_install dnf -y install "$package_name"
+			;;
+		debian)
+			pack_manager_install apt -y install "$package_name"
+			;;
+		gentoo)
+			pack_manager_install emerge "$package_name"
+			;;
+	esac
 
-	v_echo "$VOID Le paquet \"$package_name\" est déjà installé" || {
-		echo "$VOID"
-
-		j_echo "Installation de $package_name"
-
-		case $OS_FAMILY in
-			opensuse)
-				pack_install_complete zypper -y install "$package_name"
-				;;
-			archlinux)
-				pack_install_complete pacman --noconfirm -S "$package_name"
-				;;
-			fedora)
-				pack_install_complete dnf -y install "$package_name"
-				;;
-			debian)
-				pack_install_complete apt -y install "$package_name"
-				;;
-			gentoo)
-				pack_install_complete emerge "$package_name"
-				;;
-		esac
-
-		v_echo "Le paquet \"$package_name\" a été correctement installé"
+	v_echo "Le paquet \"$package_name\" a été correctement installé"
 	}
-	echo "test" > $TMPPACK
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
@@ -378,10 +357,10 @@ snap_install()
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection de Sudo
-set_sudo()
-{
-	
-}
+#set_sudo()
+# {
+#	
+# }
 
 # Suppression des paquets obsolètes
 autoremove()
