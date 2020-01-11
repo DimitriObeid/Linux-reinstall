@@ -108,6 +108,7 @@
             - A:\ **make :** Paquet installant la commande **"make"**, extrêmement pratique pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande via un Makefile.
             - A:\ **umlet :** Paquet installant le logiciel UMLet.
             - A:\ **wine-stable :** Paquet installant Wine.
+            - A:\ **wireshark** Paquet installant Wireshark.
 
         - **<u>1.3) Variables</u>** :
             - C:\ **$C_HEADER_LINE** : Renommée en **"$C_HEADER"**.
