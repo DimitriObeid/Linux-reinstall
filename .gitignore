@@ -17,4 +17,4 @@ GUI/GUI.pro.user
 Parser/parser
 Parser/test.sh
 Stable/.~lock.Documentation Stable.odt#
-tests/tmppack
+tests/

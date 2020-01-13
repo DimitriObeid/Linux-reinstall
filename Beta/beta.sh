@@ -36,11 +36,6 @@ C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage
 C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
-
-# FICHIERS
-TMPDIR="$HOME/Linux_script_output.d"	# Dossier contenant les fichiers temporaires
-TMPPACK="tmppack"						# Fichier temporaire contenant les sorties de la commande "command -v $package_name"
-
 ## TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
@@ -314,38 +309,37 @@ pack_install()
 		$SLEEP_INST; "$@"
 	}
 
-	pack_manager_check_pack()
-	{
-		pkg_mng_cmd="$@"
-	}
-
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
 	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
 	# Sinon, le script installe le paquet manquant.
 	echo "$VOID"
-	
-	j_echo "Installation de $package_name"
 
-	case $OS_FAMILY in
-		opensuse)
-			pack_manager_install zypper -y install "$package_name"
-			;;
-		archlinux)
-			pack_manager_install pacman --noconfirm -S "$package_name"
-			;;
-		fedora)
-			pack_manager_install dnf -y install "$package_name"
-			;;
-		debian)
-			pack_manager_install apt -y install "$package_name"
-			;;
-		gentoo)
-			pack_manager_install emerge "$package_name"
-			;;
-	esac
+	if ! test -x command -v "$package_name"; then
+		j_echo "Installation de $package_name"
 
-	v_echo "Le paquet \"$package_name\" a été correctement installé"
-	}
+		# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+		case $OS_FAMILY in
+			opensuse)
+				pack_manager_install zypper -y install "$package_name"
+				;;
+			archlinux)
+				pack_manager_install pacman --noconfirm -S "$package_name"
+				;;
+			fedora)
+				pack_manager_install dnf -y install "$package_name"
+				;;
+			debian)
+				pack_manager_install apt -y install "$package_name"
+				;;
+			gentoo)
+				pack_manager_install emerge "$package_name"
+				;;
+		esac
+
+		v_echo "Le paquet \"$package_name\" a été correctement installé"
+	fi
+
+	echo "$VOID"
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
@@ -427,10 +421,6 @@ autoremove()
 is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
-	v_echo "Retour vers le dossier d'origine, suppression du dossier temporaire"
-	cd -
-	#rm -rf $TMPDIR
-	echo "$VOID"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	echo "$VOID"
@@ -452,8 +442,6 @@ launch_script
 check_internet_connection
 # Mise à jour des paquets actuels
 dist_upgrade
-# Création du dossier temporaire
-cd_tmpdir
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
