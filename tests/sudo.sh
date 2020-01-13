@@ -8,7 +8,6 @@
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
 SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
-SLEEP_INST=sleep\ .5    	# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
 SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 
@@ -41,13 +40,6 @@ R_TAB="$C_ROUGE$TAB$TAB"
 V_TAB="$C_VERT$TAB$TAB"
 # Saut de ligne
 VOID=""
-
-
-## VERSION
-
-# Version actuelle du script
-SCRIPT_VERSION="2.0"
-
 
 ################### DÉFINITION DES FONCTIONS ###################
 
@@ -135,53 +127,57 @@ set_sudo()
 	# Si l'utilisateur ne bénéficie pas des privilèges root
 
 	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
-    if [ $USER != sudoers ]; then
-		j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
-		j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
-		echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
-		echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
-		echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."
-		echo "$VOID"
+    find /etc/ -type f -print | xargs -0 grep -1 "sudoers"
+	
+	while read -r line; do
+		if [ ! $line="%sudo	ALL=(ALL:ALL) ALL" || ! $line="$SUDO_USER    ALL=(ALL:ALL) ALL" ]; then
+			j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
+			j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
+			echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
+			echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
+			echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."
+			echo "$VOID"
 
-		j_echo "La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne"
-		echo "root    ALL=(ALL) ALL"
-		
-		j_echo "Tapez (écrivez également le commentaire de la ligne ci-dessous pour vous rappeler ce que fait cette ligne) :"
-		echo "# Permettre l'accès aux membres du groupe d'utilisateurs \"sudo\" (dont vous) aux prvilèges de super-utilisateur "
-		echo "%sudo	ALL=(ALL:ALL) ALL"
-		echo "$VOID"
-		
-		echo "$J_TAB Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
-		echo "$J_TAB Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
+			j_echo "La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne"
+			echo "root    ALL=(ALL) ALL"
+			
+			j_echo "Tapez (écrivez également le commentaire de la ligne ci-dessous pour vous rappeler ce que fait cette ligne) :"
+			echo "# Permettre l'accès aux membres du groupe d'utilisateurs \"sudo\" (dont vous) aux prvilèges de super-utilisateur "
+			echo "%sudo	ALL=(ALL:ALL) ALL"
+			echo "$VOID"
+			
+			echo "$J_TAB Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
+			echo "$J_TAB Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
 
-		# Fonction d'entrée de réponse sécurisée et optimisée
-		read_visudo()
-		{
-			read -r visudo_rep
-			case ${visudo_rep,,} in
-				"compris")
-					visudo
-					usermod -aG sudo $USER
-					# SI USERMOD = MODIFIÉ; ALORS
-					#	AFFICHER "sudoers modifié"
-					# SINON
-					#	AFFICHER "sudoers non modifié"
-					;;
-				"quitter")
-					return
-					;;
-				*)
-				#	echo "$VOID"
-				#	echo "$R_TAB Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
-				#	echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard $C_RESET"
-					read_visudo
-					;;
-			esac
-		}
-		read_visudo
-    else
-        echo "$V_TAB Vous avez déjà les permissions du mode sudo $C_RESET"
-    fi
+			# Fonction d'entrée de réponse sécurisée et optimisée
+			read_visudo()
+			{
+				read -r visudo_rep
+				case ${visudo_rep,,} in
+					"compris")
+						visudo
+						usermod -aG sudo "$USER"
+						# SI USERMOD = MODIFIÉ; ALORS
+						#	AFFICHER "sudoers modifié"
+						# SINON
+						#	AFFICHER "sudoers non modifié"
+						;;
+					"quitter")
+						return
+						;;
+					*)
+					#	echo "$VOID"
+					#	echo "$R_TAB Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
+					#	echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard $C_RESET"
+						read_visudo
+						;;
+				esac
+			}
+			read_visudo
+		else
+			v_echo "Vous bénéficiez déjà des privilèges du super-administrateur"
+		fi
+	done
 }
 
 set_sudo
