@@ -305,41 +305,41 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	pack_manager_install()
 	{
-        # $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		$SLEEP_INST; "$@"
+		$SLEEP_INST
+
+		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+		# ATTENTION 
+		"$@" "$package_name"
+		v_echo "Le paquet \"$package_name\" a été correctement installé"
+		echo "$VOID"
+
+		$SLEEP_INST
 	}
 
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
 	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
 	# Sinon, le script installe le paquet manquant.
-	echo "$VOID"
 
-	if ! test -x command -v "$package_name"; then
-		j_echo "Installation de $package_name"
+	j_echo "Installation de $package_name"
 
-		# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-		case $OS_FAMILY in
-			opensuse)
-				pack_manager_install zypper -y install "$package_name"
-				;;
-			archlinux)
-				pack_manager_install pacman --noconfirm -S "$package_name"
-				;;
-			fedora)
-				pack_manager_install dnf -y install "$package_name"
-				;;
-			debian)
-				pack_manager_install apt -y install "$package_name"
-				;;
-			gentoo)
-				pack_manager_install emerge "$package_name"
-				;;
-		esac
-
-		v_echo "Le paquet \"$package_name\" a été correctement installé"
-	fi
-
-	echo "$VOID"
+	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+	case $OS_FAMILY in
+		opensuse)
+			pack_manager_install zypper -y install
+			;;
+		archlinux)
+			pack_manager_install pacman --noconfirm -S
+			;;
+		fedora)
+			pack_manager_install dnf -y install
+			;;
+		debian)
+			pack_manager_install apt -y install 
+			;;
+		gentoo)
+			pack_manager_install emerge
+			;;
+	esac
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
@@ -352,9 +352,12 @@ snap_install()
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection de Sudo
 #set_sudo()
-# {
-#	
-# }
+{
+	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
+	
+    j_echo "$J_TAB Détection de sudo $C_RESET"
+	command -v sudo /dev/null 2>&1 || {}
+}
 
 # Suppression des paquets obsolètes
 autoremove()
@@ -404,8 +407,8 @@ autoremove()
 			"non")
 				echo "$VOID"
 
-				j_echo "Les paquets obsolètes ne seront pas supprimés"
-				j_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
+				v_echo "Les paquets obsolètes ne seront pas supprimés"
+				v_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
 				return
 				;;
 			*)
@@ -500,7 +503,7 @@ cats_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
 pack_install apache2			# Apache
 pack_install php				# PHP
 pack_install libapache2-mod-php
-pack_install mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server")
+pack_install mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server"
 pack_install php-mysql
 pack_install php-curl
 pack_install php-gd
