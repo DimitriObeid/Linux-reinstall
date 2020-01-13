@@ -85,8 +85,8 @@
 * Changelogs :
 
     - Ajouts globaux :
-        - Utilisation de redirections pour la détection des commandes d'installation.
         - Ajout de fonctions de décoration et d'optimisation de texte.
+        - Ajout de la détection de la commande sudo pour les distributions Linux n'ayant pas Sudo installé de base.
 
     - **<u>1) Ajouts (A), Changements (__C__) et Suppressions (S) de fonctions, paquets et variables</u>** :
         - **<u>1.1) Fonctions</u>** :
@@ -123,7 +123,6 @@
     - **<u>3) Optimisations</u>**
         - Réorganisation et structuration de la liste de définition des variables.
         - **pack_install()** : Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
-        - Utilisation des redirections pour vérifier qu'un paquet est déjà installé.
 
     - **<u>4) Refontes</u>**
         - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
@@ -131,7 +130,6 @@
         - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
         - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
         - **Installation des paquets de LAMP** : Avec la modification de la fonction **pack_install()** apportée par cette version (voir la catégorie **"Ajouts..."**), les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
-        - Légère refonte de l'affichage des messages relatifs à l'installation d'un paquet s'il est absent ou pas, pour une meilleure lisibilité.
 
 
 # Prochaine version : 2.1
