@@ -136,16 +136,21 @@ set_sudo()
 
 	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
     if [ $USER != sudoers ]; then
-		echo "$J_TAB AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
-		echo "$J_TAB LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
+		j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
+		j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
 		echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
 		echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
-		echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."; echo "$VOID"
-		echo "$J_TAB La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne $C_RESET"
-		echo "root    ALL=(ALL) ALL"; echo "$VOID"
-		echo "$J_TAB Tapez : $C_RESET"
-		echo "$%sudo	ALL=(ALL) NOPASSWD:ALL"; echo "$VOID"
-        echo 
+		echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."
+		echo "$VOID"
+
+		j_echo "La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne"
+		echo "root    ALL=(ALL) ALL"
+		
+		j_echo "Tapez (écrivez également le commentaire de la ligne ci-dessous pour vous rappeler ce que fait cette ligne) :"
+		echo "# Permettre l'accès aux membres du groupe d'utilisateurs \"sudo\" (dont vous) aux prvilèges de super-utilisateur "
+		echo "%sudo	ALL=(ALL:ALL) ALL"
+		echo "$VOID"
+		
 		echo "$J_TAB Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
 		echo "$J_TAB Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
 
