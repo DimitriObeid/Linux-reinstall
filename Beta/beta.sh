@@ -21,20 +21,20 @@
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
-SLEEP_INST=sleep\ .5    	# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
-SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
+SCRIPT_SLEEP_HEADER=sleep\ 1.5 	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
+SCRIPT_SLEEP_INST=sleep\ .5    	# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
+SCRIPT_SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 
 ## COULEURS
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
-C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
-C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
-C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
-C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
-C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
-C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
+SCRIPT_C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
+SCRIPT_C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
+SCRIPT_C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
+SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
+SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
+SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 ## TEXTE
 
@@ -42,19 +42,19 @@ C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages d
 # changez le caractère entre les double guillemets.
 # Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
 # (une ligne de chaque caractère).
-HEADER_LINE_CHAR="-"
+SCRIPT_HEADER_LINE_CHAR="-"
 # Affichage de colonnes sur le terminal
-COLS=$(tput cols)
+SCRIPT_COLS=$(tput SCRIPT_COLS)
 # Nombre de dièses (hash) précédant et suivant une chaîne de caractères
-HASH="#####"
+SCRIPT_HASH="#####"
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
-TAB=">>>>"
+SCRIPT_TAB=">>>>"
 # Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
-J_TAB="$C_JAUNE$TAB"
-R_TAB="$C_ROUGE$TAB$TAB"
-V_TAB="$C_VERT$TAB$TAB"
+SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"
+SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"
+SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"
 # Saut de ligne
-VOID=""
+SCRIPT_VOID=""
 
 
 ## VERSION
@@ -68,13 +68,13 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-cats_echo() { cats_string=$1; echo "$C_PACK_CATS$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
+cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET"; $SCRIPT_SLEEP_INST_CAT;}
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
+j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET";}
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
+r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET";}
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
+v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET";}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -89,7 +89,7 @@ draw_header_line()
 	fi
 
 	# Pour afficher le caractère souhaité sur toute la ligne
-	for i in $(eval echo "{1..$COLS}"); do
+	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
 		echo -n "$line_char"
 	done
 
@@ -99,7 +99,7 @@ draw_header_line()
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
 	if test "$line_color" != ""; then
-        echo -n -e "$C_RESET"
+        echo -n -e "$SCRIPT_C_RESET"
 	fi
 }
 
@@ -112,24 +112,24 @@ script_header()
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
-		header_color=$C_HEADER
+		header_color=$SCRIPT_C_HEADER
 	fi
 
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
-	# $SLEEP_HEADER
-	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
+	# $SCRIPT_SLEEP_HEADER
+	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$header_color"
 	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
 	echo "$header_color" "##>" "$header_string"
-	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
+	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$header_color"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
-	$SLEEP_HEADER
+	$SCRIPT_SLEEP_HEADER
 }
 
 # Fonction de gestion d'erreurs fatales (impossibles à corriger)
@@ -138,26 +138,26 @@ handle_errors()
 	error_result=$1
 
 	if test "$error_color" = ""; then
-		error_color=$C_ROUGE
+		error_color=$SCRIPT_C_ROUGE
 	fi
 
-	echo "$VOID" "$VOID"
+	echo "$SCRIPT_VOID" "$SCRIPT_VOID"
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
-	# $SLEEP_HEADER
-	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
+	# $SCRIPT_SLEEP_HEADER
+	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
 	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
 	echo "$error_color" "##> $error_result"
-	draw_header_line "$HEADER_LINE_CHAR" "$error_color"
+	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
-	$SLEEP_HEADER
+	$SCRIPT_SLEEP_HEADER
 	r_echo "Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation"
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
 	exit 1
 }
@@ -169,15 +169,9 @@ detect_root()
 {
     # Si le script n'est pas exécuté en root
     if test "$EUID" -ne 0; then
-    	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
-    	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
-    	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
-    	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$C_RESET	sudo $0"
-		r_echo "Ou connectez vous directement en tant que super-administrateur"
-		r_echo "Et tapez cette commande :"
-		r_echo "$C_RESET	$0"
-		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+    	SSCRIPT_C_USERNAME
+	else
+		r_echo "Ne lancez pas tout de suite le script en mode super-administrateur"
     fi
 }
 
@@ -222,17 +216,17 @@ launch_script()
 		# Les deux virgules suivant directement le "launch" signifient que les mêmes réponses avec des majuscules sont permises
 		case ${rep_launch,,} in
 	        "oui")
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script. C'est parti !!!"
 				return
 	            ;;
 	        "non")
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 				r_echo "Le script ne sera pas exécuté"
 	            r_echo "Abandon"
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 				exit 1
 	            ;;
@@ -288,7 +282,7 @@ dist_upgrade()
 			;;
 	esac
 
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 
 	v_echo "Mise à jour du système effectuée avec succès"
 }
@@ -305,15 +299,15 @@ pack_install()
 	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	pack_manager_install()
 	{
-		$SLEEP_INST
+		$SCRIPT_SLEEP_INST
 
 		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
 		# ATTENTION 
 		"$@" "$package_name"
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
-		echo "$VOID"
+		echo "$SCRIPT_VOID"
 
-		$SLEEP_INST
+		$SCRIPT_SLEEP_INST
 	}
 
 	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
@@ -346,7 +340,7 @@ pack_install()
 snap_install()
 {
     snap install "$@"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 }
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
@@ -355,7 +349,7 @@ snap_install()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 	
-    j_echo "$J_TAB Détection de sudo $C_RESET"
+    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
 	command -v sudo /dev/null 2>&1 || {}
 }
 
@@ -373,10 +367,10 @@ autoremove()
 
 		case ${autoremove_rep,,} in
 			"oui")
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 				j_echo "Suppression des paquets"
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 	    		case "$OS_FAMILY" in
 	        		opensuse)
@@ -399,13 +393,13 @@ autoremove()
 	            		;;
 				esac
 
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 				v_echo "Auto-suppression des paquets obsolètes effectuée avec succès"
 				return
 				;;
 			"non")
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 
 				v_echo "Les paquets obsolètes ne seront pas supprimés"
 				v_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
@@ -426,7 +420,7 @@ is_installation_done()
 	script_header "FIN DE L'INSTALLATION"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
-	echo "$VOID"
+	echo "$SCRIPT_VOID"
 }
 
 ################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
@@ -452,7 +446,7 @@ script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE D
 
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 v_echo "La partie d'installation de vos programmes commence véritablement"
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 sleep 3
 
@@ -462,13 +456,13 @@ pack_install curl
 pack_install python-pip
 pack_install snapd
 pack_install wget
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Commandes
 cats_echo "INSTALLATION DES COMMANDES PRATIQUES"
 pack_install neofetch
 pack_install tree
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Logiciels de cryptage et de sécurité
 cats_echo "INSTALLATION DES LOGICIELS DE CRYPTAGE ET DE SÉCURITÉ"
@@ -485,18 +479,18 @@ pack_install git
 pack_install make
 pack_install umlet
 pack_install valgrind
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Logiciels de nettoyage de disque
 cats_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
 pack_install k4dirstat
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Internet
 cats_echo "INSTALLATION DES CLIENTS INTERNET"
 snap_install discord --stable
 pack_install thunderbird
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # LAMP
 cats_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
@@ -512,26 +506,26 @@ pack_install php-json
 pack_install php-mbstring
 pack_install php-xml
 pack_install php-zip
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Librairies
 cats_echo "INSTALLATION DES LIBRAIRIES"
 pack_install python3.7
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Réseau
 cats_echo "INSTALLATION DES LOGICIELS RÉSEAU"
 pack_install wireshark
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 # Vidéo
 cats_echo "INSTALLATION DES LOGICIELS VIDÉO"
 pack_install vlc
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 cats_echo "INSTALLATION DE WINE"
 pack_install wine-stable
-echo "$VOID"
+echo "$SCRIPT_VOID"
 
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 
