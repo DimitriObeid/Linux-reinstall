@@ -44,7 +44,7 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 # (une ligne de chaque caractère).
 SCRIPT_HEADER_LINE_CHAR="-"
 # Affichage de colonnes sur le terminal
-SCRIPT_COLS=$(tput SCRIPT_COLS)
+SCRIPT_COLS=$(tput cols)
 # Nombre de dièses (hash) précédant et suivant une chaîne de caractères
 SCRIPT_HASH="#####"
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
@@ -169,9 +169,17 @@ detect_root()
 {
     # Si le script n'est pas exécuté en root
     if test "$EUID" -ne 0; then
-    	SSCRIPT_C_USERNAME
+    	SCRIPT_USERNAME=$(whoami)
 	else
 		r_echo "Ne lancez pas tout de suite le script en mode super-administrateur"
+		r_echo "Si vous êtes déjà connecté en mode utilisateur root, veuillez vous reconnecter en mode utilisateur normal"
+		r_echo "Puis relancez le script en tapant uniquement"
+		r_echo "$SCRIPT_C_RESET$0"
+		echo "$SCRIPT_VOID"
+		
+		r_echo "Abandon"
+
+		handle_errors "ERREUR : SCRIPT LANCÉ EN MODE SUPER-UTILISATEUR"
     fi
 }
 
@@ -218,8 +226,23 @@ launch_script()
 	        "oui")
 				echo "$SCRIPT_VOID"
 
-				v_echo "Vous avez confirmé vouloir exécuter ce script. C'est parti !!!"
-				return
+				v_echo "Vous avez confirmé vouloir exécuter ce script"
+				echo "$VOID"
+				
+				j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliquer toutes les modifications du script"
+				j_echo "Entrez votre mot de passe root pour continuer"
+
+				read -s -p "Entrez votre mot de passe : " password
+
+				echo "$SCRIPT_VOID"
+				correct="$(cat /etc/verify)"
+
+				if test $password = $correct; then
+					v_echo "C'est parti !!!"
+					return
+				else
+					handle_errors "ERREUR : MAUVAIS MOT DE PASSE"
+				fi
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -345,7 +368,7 @@ snap_install()
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection de Sudo
-#set_sudo()
+set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 	
