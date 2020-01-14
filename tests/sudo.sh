@@ -35,12 +35,14 @@ set_sudo()
 	# Si l'utilisateur ne bénéficie pas des privilèges root
 
 	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
- #   find /etc/ -type f -print | xargs -0 grep -1 "sudoers"
+ 	sudoers="sudoers"
+	find /etc/ -name "$sudoers" | 
 	
-	while read -r line; do
+	while IFS= read -r line; do
+		echo "$line"
 		if [ -n ! "${$line=%"sudo	ALL=(ALL:ALL) ALL"}" ] || [ ! -n "${$line=$"SUDO_USER	ALL=(ALL:ALL) ALL"}" ]; then
-			j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
-			j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
+			j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS"
+			j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!!"
 			echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
 			echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
 			echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."
@@ -82,10 +84,10 @@ set_sudo()
 				esac
 			}
 			read_visudo
-		else
+	else
 			v_echo "Vous bénéficiez déjà des privilèges du super-administrateur"
 		fi
-	done
+	done > $sudoers
 }
 
 set_sudo
