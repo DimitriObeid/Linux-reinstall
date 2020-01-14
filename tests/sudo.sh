@@ -115,22 +115,22 @@ set_sudo()
 {
     script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
-    echo "$J_TAB Détection de sudo $C_RESET"
-    if test command -v sudo > /dev/null 2>&1; then
+    j_echo "Détection de sudo"
+    if [ ! which -a sudo ]; then
         j_echo "sudo n'est pas installé sur votre système"
         j_echo "installation"
         pack_install sudo
         v_echo "sudo a été correctement istallé sur votre système"
     else
-        echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation $C_RESET"; echo "$VOID"
+        v_echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation"
     fi
 	# Si l'utilisateur ne bénéficie pas des privilèges root
 
 	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
-    find /etc/ -type f -print | xargs -0 grep -1 "sudoers"
+ #   find /etc/ -type f -print | xargs -0 grep -1 "sudoers"
 	
 	while read -r line; do
-		if [ ! $line="%sudo	ALL=(ALL:ALL) ALL" || ! $line="$SUDO_USER    ALL=(ALL:ALL) ALL" ]; then
+		if [ -n ! "${$line=%"sudo	ALL=(ALL:ALL) ALL"}" ] || [ ! -n "${$line=$"SUDO_USER	ALL=(ALL:ALL) ALL"}" ]; then
 			j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS $C_RESET"
 			j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!! $C_RESET"
 			echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
