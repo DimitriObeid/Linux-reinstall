@@ -39,7 +39,7 @@ set_sudo()
 		echo "$line"
 	done < $sudoers
 
-	if [ -n "$(grep -c "%sudo	ALL=(ALL:ALL) ALL" $sudoers)" ] || [ -n "$(grep -c "$SUDO_USER	ALL=(ALL:ALL) ALL" "$sudoers")" ]; then
+	if [ "$(grep -c "%sudo	ALL=(ALL:ALL) ALL" $sudoers)" ] || [ "$(grep -c "$SUDO_USER	ALL=(ALL:ALL) ALL" "$sudoers")" ]; then
 			v_echo "Vous bénéficiez déjà des privilèges du super-administrateur"
 		else
 			echo "$VOID"
