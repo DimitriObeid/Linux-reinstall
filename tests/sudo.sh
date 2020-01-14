@@ -30,65 +30,10 @@ set_sudo()
     else
         v_echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation"
     fi
-	# Si l'utilisateur ne bénéficie pas des privilèges root
 
-	# Astuce : Essayer de parser le fichier sudoers et de récupérer la ligne : "root    ALL=(ALL) ALL", puis le contenu de la ligne du dessous. Si elle est vide, alors on ouvre Visudo et on laisse l'utilisateur rentrer la ligne "user root    ALL=(ALL) NOPASSWORD"
- 	sudoers="/etc/sudoers"
-	
-	while IFS= read -r line; do
-		echo "$line"
-	done < $sudoers
+	# Ajout de l'utilisateur 
+	adduser $LOGNAME sudo
 
-	if [ "$(grep -c "%sudo	ALL=(ALL:ALL) ALL" $sudoers)" ] || [ "$(grep -c "$SUDO_USER	ALL=(ALL:ALL) ALL" "$sudoers")" ]; then
-			v_echo "Vous bénéficiez déjà des privilèges du super-administrateur"
-		else
-			echo "$VOID"
-			j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS"
-			j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!!"
-			echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
-			echo "va s'ouvrir pour que vous puissiez ajouter votre compte utilisateur à la liste des sudoers afin de bénéficier"
-			echo "des privilèges d'administrateur avec la commande sudo sans avoir à vous connecter en mode super-utilisateur."
-			echo "$VOID"
-
-			j_echo "La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne"
-			echo "root    ALL=(ALL) ALL"
-			echo "$VOID"
-			
-			j_echo "Tapez (écrivez également le commentaire de la ligne ci-dessous pour vous rappeler ce que fait cette ligne) :"
-			echo "# Permettre l'accès aux membres du groupe d'utilisateurs \"sudo\" (dont vous) aux prvilèges de super-utilisateur "
-			echo "%sudo	ALL=(ALL:ALL) ALL"
-			echo "$VOID"
-			
-			j_echo "Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
-			j_echo "Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard"
-
-			# Fonction d'entrée de réponse sécurisée et optimisée
-			read_visudo()
-			{
-				read -r visudo_rep
-				case ${visudo_rep,,} in
-					"compris")
-						visudo
-						usermod -aG sudo "$USER"
-						# SI USERMOD = MODIFIÉ; ALORS
-						#	AFFICHER "sudoers modifié"
-						# SINON
-						#	AFFICHER "sudoers non modifié"
-						;;
-					"quitter")
-						return
-						;;
-					*)
-						echo "$VOID"
-						
-						r_echo "Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
-						r_echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard"
-						read_visudo
-						;;
-				esac
-			}
-			read_visudo
-		fi
 }
 
 set_sudo
