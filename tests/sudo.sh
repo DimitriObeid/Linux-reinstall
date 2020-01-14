@@ -21,8 +21,6 @@ v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 # Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
 set_sudo()
 {
-    script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
-
     j_echo "Détection de sudo"
     if [ ! -f /usr/bin/sudo ]; then
         j_echo "sudo n'est pas installé sur votre système"
@@ -39,9 +37,12 @@ set_sudo()
 	
 	while IFS= read -r line; do
 		echo "$line"
-		if [ "$(grep -q)" == "%sudo	ALL=(ALL:ALL) ALL" ] || [ "$(grep -q)" == "SUDO_USER	ALL=(ALL:ALL) ALL" ]; then
+	done < $sudoers
+
+	if [ "$(grep -Fq)" == "%sudo	ALL=(ALL:ALL) ALL" ] || [ "$(grep -Fq)" == "SUDO_USER	ALL=(ALL:ALL) ALL" ]; then
 			v_echo "Vous bénéficiez déjà des privilèges du super-administrateur"
 		else
+			echo "$VOID"
 			j_echo "AJOUT DE L'UTILISATEUR ACTUEL À LA LISTE DES SUDOERS"
 			j_echo "LISEZ ATTENTIVEMENT CE QUI SUIT !!!!!!!!"
 			echo "L'éditeur de texte Visudo (éditeur basé sur Vi spécialement créé pour modifier le fichier protégé /etc/sudoers)"
@@ -51,14 +52,15 @@ set_sudo()
 
 			j_echo "La ligne à ajouter se trouve dans la section \"#User privilege specification\". Sous la ligne"
 			echo "root    ALL=(ALL) ALL"
+			echo "$VOID"
 			
 			j_echo "Tapez (écrivez également le commentaire de la ligne ci-dessous pour vous rappeler ce que fait cette ligne) :"
 			echo "# Permettre l'accès aux membres du groupe d'utilisateurs \"sudo\" (dont vous) aux prvilèges de super-utilisateur "
 			echo "%sudo	ALL=(ALL:ALL) ALL"
 			echo "$VOID"
 			
-			echo "$J_TAB Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
-			echo "$J_TAB Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard $C_RESET"
+			j_echo "Si vous avez bien compris (ou mieux, noté) la procédure à suivre, tapez EXACTEMENT \"compris\" pour ouvrir Visudo"
+			j_echo "Ou tapez EXACTEMENT \"quitter\" si vous souhaitez configurer le fichier \"/etc/visudo\" plus tard"
 
 			# Fonction d'entrée de réponse sécurisée et optimisée
 			read_visudo()
@@ -77,16 +79,16 @@ set_sudo()
 						return
 						;;
 					*)
-					#	echo "$VOID"
-					#	echo "$R_TAB Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
-					#	echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard $C_RESET"
+						echo "$VOID"
+						
+						r_echo "Veuillez taper EXACTEMENT \"compris\" pour ouvrir Visudo,"
+						r_echo "$R_TAB ou \"quitter\" pour configurer le fichier \"/etc/sudoers\" plus tard"
 						read_visudo
 						;;
 				esac
 			}
 			read_visudo
 		fi
-	done < $sudoers
 }
 
 set_sudo
