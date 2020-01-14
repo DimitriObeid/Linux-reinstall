@@ -1,37 +1,10 @@
 #!/bin/bash
 
-
-## CHRONOMÈTRE
-
-# Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
-# Pour changer le timer, changer la valeur de "sleep".
-# Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
-# NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-SLEEP_HEADER=sleep\ 1.5   	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
-SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
-
-
-## COULEURS
-
-# Encodage des couleurs pour mieux lire les étapes de l'exécution du script
-C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
 C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
-C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
 C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
 C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
-## TEXTE
-
-# Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
-# changez le caractère entre les double guillemets.
-# Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
-# (une ligne de chaque caractère).
-HEADER_LINE_CHAR="-"
-# Affichage de colonnes sur le terminal
-COLS=$(tput cols)
-# Nombre de dièses (hash) précédant et suivant une chaîne de caractères
-HASH="#####"
 # Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
 TAB=">>>>"
 # Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
@@ -41,17 +14,8 @@ V_TAB="$C_VERT$TAB$TAB"
 # Saut de ligne
 VOID=""
 
-################### DÉFINITION DES FONCTIONS ###################
-
-## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
-# entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-cats_echo() { cats_string=$1; echo "$C_PACK_CATS$HASH $cats_string $HASH $C_RESET"; $SLEEP_INST_CAT;}
-# Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 j_echo() { j_string=$1; echo "$J_TAB $j_string $C_RESET";}
-# Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
-# Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 
 # Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
@@ -63,7 +27,7 @@ set_sudo()
     if [ ! -f /usr/bin/sudo ]; then
         j_echo "sudo n'est pas installé sur votre système"
         j_echo "installation"
-        pack_install sudo
+        apt install sudo
         v_echo "sudo a été correctement istallé sur votre système"
     else
         v_echo "$V_TAB \"sudo\" est déjà installé sur votre système d'exploitation"
