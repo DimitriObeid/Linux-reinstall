@@ -116,6 +116,7 @@
             - A:\ **$SCRIPT_VERSION :** Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
             - C:\ **SLEEP_TAB :** Renommée en **"$SLEEP_HEADER"**
             - A:\ **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.
+            
             - C:\ **"TOUTES LES VARIABLES" :** **RENOMMAGE MASSIF !!** DÉSORMAIS, LEURS NOMS SONT PRÉCÉDÉS DU PRÉFIXE **$SCRIPT_** POUR ÉVITER TOUTE CONFUSION AVEC LES VARIABLES D'ENVIRONNEMENT (**QUI NE SONT PAS PRÉCÉDÉES DE CE PRÉFIXE**).
 
     - **<u>2) Corrections</u> :**
