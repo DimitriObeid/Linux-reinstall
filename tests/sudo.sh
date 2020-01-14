@@ -54,62 +54,6 @@ r_echo() { r_string=$1; echo "$R_TAB $r_string $C_RESET";}
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 v_echo() { v_string=$1; echo "$V_TAB $v_string $C_RESET";}
 
-## CRÉATION DES HEADERS
-# Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
-draw_header_line()
-{
-	line_char=$1	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
-	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
-
-	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	if test "$line_color" != ""; then
-		echo -n -e "$line_color"
-	fi
-
-	# Pour afficher le caractère souhaité sur toute la ligne
-	for i in $(eval echo "{1..$COLS}"); do
-		echo -n "$line_char"
-	done
-
-	# Pour définir (ici, réintialiser) la couleur des caractères suivant le dernier caractère de la ligne du header.
-	# En pratique, La couleur des caractères suivants est déjà encodée quand ils sont appelés. Cette réinitialisation
-	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
-	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
-	# exemple.
-	if test "$line_color" != ""; then
-        echo -n -e "$C_RESET"
-	fi
-}
-
-# Affichage du texte des headers
-script_header()
-{
-	header_string=$1
-
-	# Pour définir la couleur de la ligne du caractère souhaité
-	if test "$header_color" = ""; then
-        # Définition de la couleur de la ligne.
-        # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
-		header_color=$C_HEADER
-	fi
-
-	echo "$VOID"
-
-	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
-	# $SLEEP_HEADER
-	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
-	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
-	echo "$header_color" "##>" "$header_string"
-	draw_header_line "$HEADER_LINE_CHAR" "$header_color"
-	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
-	# affiche toujours un saut de ligne à la fin)
-	echo "$VOID"
-
-	echo "$VOID"
-
-	$SLEEP_HEADER
-}
-
 # Installer sudo sur Debian et ajouter l'utilisateur actuel à la liste des sudoers
 set_sudo()
 {
