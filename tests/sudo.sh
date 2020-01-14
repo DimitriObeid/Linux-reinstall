@@ -116,7 +116,7 @@ set_sudo()
     script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
     j_echo "Détection de sudo"
-    if [ ! which -a sudo ]; then
+    if [ ! -f /usr/bin/sudo ]; then
         j_echo "sudo n'est pas installé sur votre système"
         j_echo "installation"
         pack_install sudo
