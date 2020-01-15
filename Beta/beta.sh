@@ -201,11 +201,11 @@ get_dist_package_manager()
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-    command -v zypper &> /dev/null && OS_FAMILY="opensuse"
-    command -v pacman &> /dev/null && OS_FAMILY="archlinux"
-    command -v dnf &> /dev/null && OS_FAMILY="fedora"
-    command -v apt &> /dev/null && OS_FAMILY="debian"
-    command -v emerge &> /dev/null && OS_FAMILY="gentoo"
+    which zypper &> /dev/null && OS_FAMILY="opensuse"
+    which pacman &> /dev/null && OS_FAMILY="archlinux"
+    which dnf &> /dev/null && OS_FAMILY="fedora"
+    which apt &> /dev/null && OS_FAMILY="debian"
+    which emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle (aucune commande trouvée)
 	if  [ "$OS_FAMILY" = "" ]; then
