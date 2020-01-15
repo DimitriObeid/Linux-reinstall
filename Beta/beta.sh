@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Script de réinstallation minimal pour les cours de BTS SIO en version Bêta
 # Version Bêta 2.0
@@ -17,7 +17,7 @@
 
 ## CHRONOMÈTRE
 
-# Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
+# Met en pause le script pendant un certain temps défini en argument de la commande "sleep" pour mieux voir l'arrivée d'une nouvelle étape majeure/sous-étape.
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
@@ -30,18 +30,23 @@ SCRIPT_SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégori
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
 SCRIPT_C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
-SCRIPT_C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
-SCRIPT_C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
+SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
+SCRIPT_C_PACK_CATS=$(tput setaf 6)	# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
 SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
 SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
+
+## DOSSIERS ET FICHIERS
+# Dossier temporaire contenant les fichiers temporaires générés par le script
+SCRIPT_TMPDIR="$HOME/Linux-reinstall.d"
+SCRIPT_USERFILE="whoami.tmp"
 
 ## TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
 # changez le caractère entre les double guillemets.
-# Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
-# (une ligne de chaque caractère).
+# Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes.
+# (Pour chaque caractère supplémentaire, une ligne de plus est créée et la chaîne de caractère se répète jusqu'au numéro de ligne correspondant au dernier carctère de la chaîne de caractères).
 SCRIPT_HEADER_LINE_CHAR="-"
 # Affichage de colonnes sur le terminal
 SCRIPT_COLS=$(tput cols)
@@ -84,7 +89,7 @@ draw_header_line()
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	if test "$line_color" != ""; then
+	if [ "$line_color" != "" ]; then
 		echo -n -e "$line_color"
 	fi
 
@@ -98,7 +103,7 @@ draw_header_line()
 	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
-	if test "$line_color" != ""; then
+	if [ "$line_color" != "" ]; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
 }
@@ -109,7 +114,7 @@ script_header()
 	header_string=$1
 
 	# Pour définir la couleur de la ligne du caractère souhaité
-	if test "$header_color" = ""; then
+	if [ "$header_color" = "" ]; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
 		header_color=$SCRIPT_C_HEADER
@@ -137,7 +142,7 @@ handle_errors()
 {
 	error_result=$1
 
-	if test "$error_color" = ""; then
+	if [ "$error_color" = "" ]; then
 		error_color=$SCRIPT_C_ROUGE
 	fi
 
@@ -168,8 +173,12 @@ handle_errors()
 detect_root()
 {
     # Si le script n'est pas exécuté en root
-    if test "$EUID" -ne 0; then
+    if [ "$EUID" -ne 0 ]; then
+		cd "$SCRIPT_TMPDIR" || handle_errors "ERREUR : LE DOSSIER $TMPDIR N'EXISTE PAS"
+		touch "$SCRIPT_USERFILE"
     	SCRIPT_USERNAME=$(whoami)
+
+	# Sinon, si le script est exécuté en root
 	else
 		r_echo "Ne lancez pas tout de suite le script en mode super-administrateur"
 		r_echo "Si vous êtes déjà connecté en mode utilisateur root, veuillez vous reconnecter en mode utilisateur normal"
@@ -178,7 +187,6 @@ detect_root()
 		echo "$SCRIPT_VOID"
 		
 		r_echo "Abandon"
-
 		handle_errors "ERREUR : SCRIPT LANCÉ EN MODE SUPER-UTILISATEUR"
     fi
 }
@@ -200,7 +208,7 @@ get_dist_package_manager()
     command -v emerge &> /dev/null && OS_FAMILY="gentoo"
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle (aucune commande trouvée)
-	if test "$OS_FAMILY" = ""; then
+	if  [ "$OS_FAMILY" = "" ]; then
 		handle_errors "ERREUR : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY)"
@@ -214,12 +222,13 @@ launch_script()
 
 	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi (Mode d'emploi.odt) avant de lancer l'installation."
     j_echo "Êtes-vous sûr de savoir ce que vous faites ? (oui/non)"
+	echo "$SCRIPT_VOID"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
 	read_launch_script()
 	{
         # Demande à l'utilisateur d'entrer une réponse
-		read -r rep_launch
+		IFS= read -p -r  "Entrez votre réponse : " rep_launch
 
 		# Les deux virgules suivant directement le "launch" signifient que les mêmes réponses avec des majuscules sont permises
 		case ${rep_launch,,} in
@@ -230,19 +239,18 @@ launch_script()
 				echo "$VOID"
 				
 				j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliquer toutes les modifications du script"
-				j_echo "Entrez votre mot de passe root pour continuer"
-
-				read -s -p "Entrez votre mot de passe : " password
-
+				j_echo "Entrez votre mot de passe root pour vous connecter en mode super-utilisateur (root) "
 				echo "$SCRIPT_VOID"
-				correct="$(cat /etc/verify)"
 
-				if test $password = $correct; then
-					v_echo "C'est parti !!!"
-					return
-				else
-					handle_errors "ERREUR : MAUVAIS MOT DE PASSE"
-				fi
+				IFS= read -p -r -s "Entrez votre mot de passe :" password
+				sudo -k
+				#if test sudo -l -S &> /dev/null << EOF;$password EOF
+				#then
+				#	v_echo "C'est parti !!!"
+				#	return
+				#else
+				#	handle_errors "ERREUR : MAUVAIS MOT DE PASSE"
+				#fi
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -255,7 +263,11 @@ launch_script()
 	            ;;
             # Si une réponse différente de "oui" ou de "non" est rentrée
 			*)
+				echo "$SCRIPT_VOID"
+
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				echo "$SCRIPT_VOID"
+
 				# On rappelle la fonction "read_launch_script" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée
 				read_launch_script
 				;;
@@ -368,13 +380,10 @@ snap_install()
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection de Sudo
-set_sudo()
-{
-	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
-	
-    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
-	command -v sudo /dev/null 2>&1 || {}
-}
+#set_sudo()
+#{
+#
+#}
 
 # Suppression des paquets obsolètes
 autoremove()
@@ -386,7 +395,7 @@ autoremove()
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
 	read_autoremove()
 	{
-		read -r autoremove_rep
+		read -p autoremove_rep
 
 		case ${autoremove_rep,,} in
 			"oui")
