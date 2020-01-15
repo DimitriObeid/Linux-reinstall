@@ -90,12 +90,12 @@ draw_header_line()
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if [ "$line_color" != "" ]; then
-		echo -n -e "$line_color"
+		printf "%s" "$line_color"
 	fi
 
 	# Pour afficher le caractère souhaité sur toute la ligne
 	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
-		echo -n "$line_char"
+		printf "%s" "$line_char"
 	done
 
 	# Pour définir (ici, réintialiser) la couleur des caractères suivant le dernier caractère de la ligne du header.
@@ -104,7 +104,8 @@ draw_header_line()
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
 	if [ "$line_color" != "" ]; then
-        echo -n -e "$SCRIPT_C_RESET"
+        printf "%s" "$SCRIPT_C_RESET"
+		echo "$SCRIPT_VOID"
 	fi
 }
 
@@ -173,7 +174,7 @@ handle_errors()
 detect_root()
 {
     # Si le script n'est pas exécuté en root
-    if [ "$EUID" -ne 0 ]; then
+    if [ "$(id -u)" == "0" ]; then
 		cd "$SCRIPT_TMPDIR" || handle_errors "ERREUR : LE DOSSIER $TMPDIR N'EXISTE PAS"
 		touch "$SCRIPT_USERFILE"
     	SCRIPT_USERNAME=$(whoami)
