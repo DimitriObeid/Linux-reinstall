@@ -1,7 +1,7 @@
 # Linux Reinstall : Le programme qui va vous simplifier la réinstallation de vos programmes sur votre distribution Linux
 
 **Version Bêta actuelle :** 2.0  
-**Version stable actuelle :** 1.4.1  
+**Version stable actuelle :** 1.4.2  
 
 ## 1) Description du projet
 
