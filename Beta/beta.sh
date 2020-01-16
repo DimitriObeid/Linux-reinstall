@@ -404,9 +404,19 @@ set_sudo()
 				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
 				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers
 
-				if test -f "sudoers"; then
+				if ! test -f "sudoers"; then
+					handle_errors "FICHIER SUDOERS MANQUANT"
+				else
+					j_echo "Fichier \"sudoers\"téléchargé avec succès"
+					j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
 					mv "sudoers" /etc/
+					echo "$SCRIPT_VOID"
+
+					j_echo "Ajout de l'utilisateur $rep_sudo_name au groupe sudo"
 					usermod -aG root $rep_sudo_name
+					echo "$SCRIPT_VOID"
+
+					v_echo "L'utilisateur $rep_sudo_name a été ajouté au groupe sudo avec succès"
 				fi
 
 				return
