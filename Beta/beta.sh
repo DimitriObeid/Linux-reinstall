@@ -402,7 +402,7 @@ set_sudo()
 				read -r -p "Votre nom ? : " rep_sudo_name
 
 				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
-				wget https://github.com/DimitriObeid/Linux-reinstall/blob/master/Ressources/sudoers
+				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers
 
 				if test -f "sudoers"; then
 					mv "sudoers" /etc/
