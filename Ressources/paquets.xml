@@ -77,6 +77,13 @@
 
         <categorie cat="Commandes">
             <paquet>
+                <nom>cmatrix</nom>
+                <description>
+                    ▪ Cette commande fait défiler ne nombreux caractères de haut en bas sur votre terminal.
+                </description>
+                <script>&perso;</script>
+            </paquet>
+            <paquet>
                 <nom>neofetch</nom>
                 <description>
                     ▪ Cette commande permet d’afficher des informations concernant votre système d’exploitation, sur votre terminal,
