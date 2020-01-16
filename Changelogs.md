@@ -74,11 +74,15 @@
     - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour lesquelles cette version est sortie près de deux heures après la version 1.3.
 
 
-# Version actuelle : 1.4.1 (mardi 3 décembre 2019, ~22h)
+# Ancienne version : 1.4.1 (mardi 3 décembre 2019, ~22h)
 
 * Changelogs :  
     - Correction d'un bug d'affichage des couleurs des headers apporté par la version 1.3. La couleur par défaut du terminal était utilisé à la place de la couleur souhaitée à cause d'un **$** placé où il ne fallait pas, ajouté accidentellement lors de l'ajout des double guillemets afin de renforcer l'intégrité du script **(ajout conseillé par le débogueur de Shell Check)**.
 
+# Version actuelle : 1.4.2 (jeudi 16 janvier 2020, 14h43)
+* Changelogs :
+    - **handle_errors() :** Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).  
+    - **Note :** Pratiquement un mois et demi s'est écoulé depuis la mise à jour du script stable vers la version 1.4.1, car je me suis beaucoup concentré sur la nouvelle version majeure à venir, malgrès le fait que le bug a été corrigé pratiquement quelques jours après la sortie de la dernière version.
 
 # Prochaine version : 2.0
 
@@ -97,7 +101,9 @@
             - A:\ **launch_script() :** Voir la fonction **detect_root()** ci-dessus.
             - A:\ **r_echo() :** Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **v_echo() :** Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
-            - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
+            
+            - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.  
+            La partie de demande de permission est modifiée. Désormais, le script ne doit pas s'exécuter en mode super-utilisateur pour que le script obtienne les valeurs des variables d'environnement quand le mode super-utilisateur est désactivé pour les utiliser au moment opportun.
             - C:\ **"get_dist_package_manager() :"** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
             
             - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
@@ -118,6 +124,7 @@
 
             - C:\ **$C_HEADER_LINE :** Renommée en **"$C_HEADER"**.
             - C:\ **SLEEP_TAB :** Renommée en **"$SLEEP_HEADER"**
+
             - C:\ **"TOUTES LES VARIABLES" :** **RENOMMAGE MASSIF !!** DÉSORMAIS, LEURS NOMS SONT PRÉCÉDÉS DU PRÉFIXE **$SCRIPT_** POUR ÉVITER TOUTE CONFUSION AVEC LES VARIABLES D'ENVIRONNEMENT (**QUI NE SONT PAS PRÉCÉDÉES DE CE PRÉFIXE**).
 
     - **<u>2) Corrections</u> :**
@@ -125,7 +132,7 @@
 
     - **<u>3) Optimisations</u>**
         - Réorganisation et structuration de la liste de définition des variables.
-        - **pack_install() :** Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **cmd_args_f()** et passage des commandes d'installation complètes dans un tableau d'arguments.
+        - **pack_install() :** Placement des appels de commandes répétitifs dans une nouvelle sous-fonction nommée **pack_install_manager()** et passage des commandes d'installation complètes dans un tableau d'arguments.
 
     - **<u>4) Refontes</u>**
         - Légère refonte de la partie de création des headers. La personnalisation de la couleur pour chaque partie est désormais plus facile et compréhensible.
