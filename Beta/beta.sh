@@ -36,6 +36,10 @@ SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'af
 SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
+# DOSSIERS ET FICHIERS
+TMPDIR="$HOME/Linux-reinstall.tmp.d"
+
+
 ## TEXTE
 
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret,
@@ -252,6 +256,10 @@ launch_script()
 	read_launch_script
 }
 
+mktmpdir()
+{
+
+}
 
 ## CONNEXION À INTERNET ET MISES À JOUR
 # Vérification de la connexion à Internet
@@ -429,6 +437,8 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
 
+	rm -r "$TMPDIR"
+
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	sudo -k
 
@@ -447,14 +457,17 @@ v_echo "Début de l'installation"
 get_dist_package_manager
 # Assurance que l'utilisateur soit sûr de lancer le script
 launch_script
-	
+# Création du dossier temporaire où sont stockés les fichiers temporaires
+mktmpdir
+
+# Connexion en mode super-utilisateur
 script_header "CONNEXION EN MODE SUPER-UTILISATEUR"
 
 j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliquer toutes les modifications du script."
 j_echo "Entrez votre mot de passe root pour continuer."
 echo "$SCRIPT_VOID"
 
-echo "Entrez votre mot de passe : " | sudo -s << EOF | tee -a beta.sh
+echo "Entrez votre mot de passe : " | sudo -s << EOF | tee -a sudo.tmp
 echo "$SCRIPT_VOID"
 
 # Détection de la connexion à Internet
@@ -557,3 +570,4 @@ autoremove
 # Fin de l'installation
 is_installation_done
 EOF
+
