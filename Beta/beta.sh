@@ -261,10 +261,19 @@ mktmpdir()
 {
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPATH"
 
-	if test ! -d "$SCRIPT_TMPDIR"; then
-		mkdir "$SCRIPT_TMPDIR"
+	if test ! -d "$SCRIPT_TMPPATH"; then
+		j_echo "Création du dossier"
+		mkdir "$SCRIPT_TMPPATH"
+		echo "$SCRIPT_VOID"
+		
+		v_echo "Le dossier $SCRIPT_TMPDIR a été créé avec succès"
+		echo "$SCRIPT_VOID"
 	fi
-	cd "$SCRIPT_TMPDIR" || handle_errors "LE DOSSIER $SCRIPT_TMPDIR N'EXISTE PAS"
+
+	v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
+	cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
+	v_echo "Déplacement vers le dossier $SCRIPT_TMPPATH effectué avec succès"
+	echo "$SCRIPT_VOID"
 }
 
 ## CONNEXION À INTERNET ET MISES À JOUR
@@ -502,7 +511,7 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
 
-	v_echo "Suppression du dossier temporaire $SCRIPT_TMPDIR"
+	v_echo "Retour vers le dossier $OLDPWD et suppression du dossier temporaire $SCRIPT_TMPDIR"
 	cd - > /dev/null && rm -rf "$TMPDIR"
 	echo "$SCRIPT_VOID"
 
