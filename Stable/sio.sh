@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation minimal pour les cours de BTS SIO
-# Version SIO 1.4.1
+# Version SIO 1.4.2
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>

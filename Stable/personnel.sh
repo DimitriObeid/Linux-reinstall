@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script de réinstallation personalisée
-# Version personnelle 1.4.1
+# Version personnelle 1.4.2
 
 # Pour débugguer ce script en cas de besoin, taper la commande :
 # sudo <shell utilisé> -x <nom du fichier>
