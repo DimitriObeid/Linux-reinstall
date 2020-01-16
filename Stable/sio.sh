@@ -102,7 +102,7 @@ handle_errors()
 	error_color=$2
 
 	if test "$error_color" = ""; then
-		error_color=$C_RED
+		error_color=$C_ROUGE
 	fi
 
 	echo "$VOID"
