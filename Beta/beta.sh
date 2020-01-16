@@ -548,8 +548,8 @@ pack_install tree
 echo "$SCRIPT_VOID"
 
 # Logiciels de cryptage et de sécurité
-cats_echo "INSTALLATION DES LOGICIELS DE CRYPTAGE ET DE SÉCURITÉ"
-pack_install veracrypt
+#cats_echo "INSTALLATION DES LOGICIELS DE CRYPTAGE ET DE SÉCURITÉ"
+#pack_install veracrypt
 
 # Développement
 cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
@@ -617,4 +617,3 @@ v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATI
 autoremove
 # Fin de l'installation
 is_installation_done
-#EOF
