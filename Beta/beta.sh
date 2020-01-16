@@ -38,8 +38,11 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 
 # DOSSIERS ET FICHIERS
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"
-SCRIPT_TMPPATH="$HOME/$SCRPIT_TMPDIR"
+SCRIPT_TMPPATH="$HOME/$SCRIPT_TMPDIR"
 
+
+# RESSOURCES
+SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
 
 ## TEXTE
 
@@ -324,7 +327,7 @@ pack_install()
 		$SCRIPT_SLEEP_INST
 
 		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		# ATTENTION 
+		# ATTENTION
 		"$@" "$package_name"
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
 		echo "$SCRIPT_VOID"
@@ -350,7 +353,7 @@ pack_install()
 			pack_manager_install dnf -y install
 			;;
 		debian)
-			pack_manager_install apt -y install 
+			pack_manager_install apt -y install
 			;;
 		gentoo)
 			pack_manager_install emerge
@@ -366,14 +369,54 @@ snap_install()
 }
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
-# Détection de Sudo
-#set_sudo()
-# {
-#	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
-#	
-#    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
-#	command -v sudo /dev/null 2>&1 || {}
-#}
+# Détection et installation de Sudo
+set_sudo()
+{
+	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
+
+    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
+
+	if test ! type "sudo" > /dev/null; then
+		j_echo "Sudo n'est pas installé sur votre système"
+	fi
+
+	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis mon dépôt Git : $SCRIPT_REPO (dans le dossier \"Ressources\")"
+	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
+	echo "REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
+	echo "$SCRIPT_VOID"
+
+	read_sudo()
+	{
+		read -r -p "Entrez votre réponse : " rep_sudo
+
+		case ${rep_sudo,,} in
+			"oui")
+				echo "$SCRIPT_VOID"
+
+				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
+				wget https://github.com/DimitriObeid/Linux-reinstall/blob/master/Ressources/sudoers
+
+				if test -f "sudoers"; then
+					mv "sudoers" /etc/
+				fi
+
+				return
+				;;
+			"non")
+				j_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
+				j_echo "Vous pourrez toujours le configurer plus tard"
+				echo "$SCRIPT_VOID"
+
+				return
+				;;
+			*)
+				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				read_sudo
+				;;
+		esac
+	}
+	read_sudo
+}
 
 # Suppression des paquets obsolètes
 autoremove()
@@ -385,9 +428,9 @@ autoremove()
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
 	read_autoremove()
 	{
-		read -r autoremove_rep
+		read -r rep_autoremove
 
-		case ${autoremove_rep,,} in
+		case ${rep_autoremove,,} in
 			"oui")
 				echo "$SCRIPT_VOID"
 
@@ -470,6 +513,16 @@ check_internet_connection
 # Mise à jour des paquets actuels
 dist_upgrade
 
+## INSTALLATIONS PRIORITAIRES
+script_header "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
+pack_install curl
+pack_install python-pip
+pack_install snapd
+pack_install wget
+echo "$SCRIPT_VOID"
+
+# Installation de sudo et configuration
+set_sudo
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
@@ -480,13 +533,7 @@ echo "$SCRIPT_VOID"
 
 sleep 3
 
-# Installations prioritaires
-cats_echo "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
-pack_install curl
-pack_install python-pip
-pack_install snapd
-pack_install wget
-echo "$SCRIPT_VOID"
+
 
 # Commandes
 cats_echo "INSTALLATION DES COMMANDES PRATIQUES"
