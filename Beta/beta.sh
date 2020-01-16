@@ -147,7 +147,7 @@ handle_errors()
 	# $SCRIPT_SLEEP_HEADER
 	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
 	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
-	echo "$error_color" "##> $error_result"
+	echo "$error_color" "##> ERREUR FATALE : $error_result"
 	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
@@ -156,7 +156,8 @@ handle_errors()
 	echo "$SCRIPT_VOID"
 
 	$SCRIPT_SLEEP_HEADER
-	r_echo "Une erreur s'est produite lors de l'installation --> $error_result --> Arrêt de l'installation"
+	r_echo "Une erreur fatale s'est produite : $error_result"
+	r_echo "Arrêt de l'installation"
 	echo "$SCRIPT_VOID"
 
 	exit 1
@@ -179,7 +180,7 @@ detect_root()
 		
 		r_echo "Abandon"
 
-		handle_errors "ERREUR : SCRIPT LANCÉ EN MODE SUPER-UTILISATEUR"
+		handle_errors "SCRIPT LANCÉ EN MODE SUPER-UTILISATEUR"
     fi
 }
 
@@ -201,13 +202,13 @@ get_dist_package_manager()
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle (aucune commande trouvée)
 	if test "$OS_FAMILY" = ""; then
-		handle_errors "ERREUR : LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
+		handle_errors "LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
 		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY)"
 	fi
 }
 
-# Demande à l'utilisateur s'il souhaite vraiment lancer le script, s'il a bien été exécuté en tant qu'utilisateur root
+# Demande à l'utilisateur s'il souhaite vraiment lancer le script, puis connecte l'utilisateur en mode super-utilisateur
 launch_script()
 {
 	script_header "LANCEMENT DU SCRIPT"
@@ -229,15 +230,6 @@ launch_script()
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
 				echo "$VOID"
-				
-				j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliquer toutes les modifications du script."
-				j_echo "Entrez votre mot de passe root pour continuer."
-				echo "$SCRIPT_VOID"
-
-				read -r -s -p "Entrez votre mot de passe : " password
-				echo "$SCRIPT_VOID"
-
-				v_echo "Vous avez entré le bon mot de passe"
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -271,7 +263,7 @@ check_internet_connection()
 	if ping -q -c 1 -W 1 google.com > /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 	else
-		handle_errors "ERREUR : AUCUNE CONNEXION À INTERNET"
+		handle_errors "AUCUNE CONNEXION À INTERNET"
 	fi
 }
 
@@ -363,13 +355,13 @@ snap_install()
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection de Sudo
-set_sudo()
-{
-	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
-	
-    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
-	command -v sudo /dev/null 2>&1 || {}
-}
+#set_sudo()
+# {
+#	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
+#	
+#    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
+#	command -v sudo /dev/null 2>&1 || {}
+#}
 
 # Suppression des paquets obsolètes
 autoremove()
@@ -438,6 +430,8 @@ is_installation_done()
 	script_header "FIN DE L'INSTALLATION"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
+	sudo -k
+
 	echo "$SCRIPT_VOID"
 }
 
@@ -453,6 +447,16 @@ v_echo "Début de l'installation"
 get_dist_package_manager
 # Assurance que l'utilisateur soit sûr de lancer le script
 launch_script
+	
+script_header "CONNEXION EN MODE SUPER-UTILISATEUR"
+
+j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliquer toutes les modifications du script."
+j_echo "Entrez votre mot de passe root pour continuer."
+echo "$SCRIPT_VOID"
+
+echo "Entrez votre mot de passe" | "$(sudo -s)" << EOF | tee -a > beta.sh
+echo "$SCRIPT_VOID"
+
 # Détection de la connexion à Internet
 check_internet_connection
 # Mise à jour des paquets actuels
@@ -552,3 +556,4 @@ v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATI
 autoremove
 # Fin de l'installation
 is_installation_done
+EOF
