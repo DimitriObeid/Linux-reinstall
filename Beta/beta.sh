@@ -234,7 +234,6 @@ launch_script()
 				echo "$SCRIPT_VOID"
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
-				echo "$SCRIPT_VOID"
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -377,10 +376,14 @@ set_sudo()
     j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
 
 	if test ! type "sudo" > /dev/null; then
-		j_echo "Sudo n'est pas installé sur votre système"
+		j_echo "Sudo n'est pas installé sur votre système."
+		pack_install sudo
 	fi
 
-	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis mon dépôt Git : $SCRIPT_REPO (dans le dossier \"Ressources\")"
+	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis mon dépôt Git : "
+	j_echo "$SCRIPT_REPO (dans le dossier \"Ressources\")"
+	echo "$SCRIPT_VOID"
+
 	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
 	echo "REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
 	echo "$SCRIPT_VOID"
@@ -393,11 +396,17 @@ set_sudo()
 			"oui")
 				echo "$SCRIPT_VOID"
 
+				j_echo "Entrez votre nom d'utilisateur, le script s'en servira pour vous garantir les droits de super-utilisateur"
+				echo "$SCRIPT_VOID"
+
+				read -r -p "Votre nom ? : " rep_sudo_name
+
 				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
 				wget https://github.com/DimitriObeid/Linux-reinstall/blob/master/Ressources/sudoers
 
 				if test -f "sudoers"; then
 					mv "sudoers" /etc/
+					usermod -aG root $rep_sudo_name
 				fi
 
 				return
@@ -405,7 +414,6 @@ set_sudo()
 			"non")
 				j_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
 				j_echo "Vous pourrez toujours le configurer plus tard"
-				echo "$SCRIPT_VOID"
 
 				return
 				;;
@@ -485,8 +493,8 @@ is_installation_done()
 	script_header "FIN DE L'INSTALLATION"
 
 	v_echo "Suppression du dossier temporaire $SCRIPT_TMPDIR"
-	cd - && rm -rf "$TMPDIR"
-	echo "SCRIPT_VOID"
+	cd - > /dev/null && rm -rf "$TMPDIR"
+	echo "$SCRIPT_VOID"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	sudo -k
@@ -519,7 +527,6 @@ pack_install curl
 pack_install python-pip
 pack_install snapd
 pack_install wget
-echo "$SCRIPT_VOID"
 
 # Installation de sudo et configuration
 set_sudo
@@ -532,7 +539,6 @@ v_echo "La partie d'installation de vos programmes commence véritablement"
 echo "$SCRIPT_VOID"
 
 sleep 3
-
 
 
 # Commandes
