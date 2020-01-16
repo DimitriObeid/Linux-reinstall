@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 {
 	if (argc != 2) {
 		cout << "Erreur : Seulement deux arguments sont attendus, ni plus ni moins" << endl;
+		return 84;
 	}
 	
 	ifstream stream(argv[1]);
