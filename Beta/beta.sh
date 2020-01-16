@@ -37,7 +37,8 @@ SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des me
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 # DOSSIERS ET FICHIERS
-TMPDIR="$HOME/Linux-reinstall.tmp.d"
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"
+SCRIPT_TMPPATH="$HOME/$SCRPIT_TMPDIR"
 
 
 ## TEXTE
@@ -172,19 +173,16 @@ handle_errors()
 # Détection de l'exécution du script en mode super-administrateur (root)
 detect_root()
 {
-    # Si le script n'est pas exécuté en root
-    if test "$EUID" -ne 0; then
-    	SCRIPT_USERNAME=$(whoami)
-	else
-		r_echo "Ne lancez pas tout de suite le script en mode super-administrateur"
-		r_echo "Si vous êtes déjà connecté en mode utilisateur root, veuillez vous reconnecter en mode utilisateur normal"
-		r_echo "Puis relancez le script en tapant uniquement"
-		r_echo "$SCRIPT_C_RESET$0"
-		echo "$SCRIPT_VOID"
-		
-		r_echo "Abandon"
-
-		handle_errors "SCRIPT LANCÉ EN MODE SUPER-UTILISATEUR"
+	if test "$EUID" -ne 0; then
+    	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
+    	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
+    	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
+    	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
+    	r_echo "$C_RESET	sudo $0"
+		r_echo "Ou connectez vous directement en tant que super-administrateur"
+		r_echo "Et tapez cette commande :"
+		r_echo "$C_RESET	$0"
+		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
     fi
 }
 
@@ -233,7 +231,7 @@ launch_script()
 				echo "$SCRIPT_VOID"
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
-				echo "$VOID"
+				echo "$SCRIPT_VOID"
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -256,9 +254,15 @@ launch_script()
 	read_launch_script
 }
 
+# Création d'un dossier temporaire pour y stocker des fichiers temporaires
 mktmpdir()
 {
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPATH"
 
+	if test ! -d "$SCRIPT_TMPDIR"; then
+		mkdir "$SCRIPT_TMPDIR"
+	fi
+	cd "$SCRIPT_TMPDIR" || handle_errors "LE DOSSIER $SCRIPT_TMPDIR N'EXISTE PAS"
 }
 
 ## CONNEXION À INTERNET ET MISES À JOUR
@@ -437,7 +441,9 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
 
-	rm -r "$TMPDIR"
+	v_echo "Suppression du dossier temporaire $SCRIPT_TMPDIR"
+	cd - && rm -rf "$TMPDIR"
+	echo "SCRIPT_VOID"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	sudo -k
@@ -459,17 +465,6 @@ get_dist_package_manager
 launch_script
 # Création du dossier temporaire où sont stockés les fichiers temporaires
 mktmpdir
-
-# Connexion en mode super-utilisateur
-script_header "CONNEXION EN MODE SUPER-UTILISATEUR"
-
-j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliquer toutes les modifications du script."
-j_echo "Entrez votre mot de passe root pour continuer."
-echo "$SCRIPT_VOID"
-
-echo "Entrez votre mot de passe : " | sudo -s << EOF | tee -a sudo.tmp
-echo "$SCRIPT_VOID"
-
 # Détection de la connexion à Internet
 check_internet_connection
 # Mise à jour des paquets actuels
@@ -569,5 +564,4 @@ v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATI
 autoremove
 # Fin de l'installation
 is_installation_done
-EOF
-
+#EOF
