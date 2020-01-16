@@ -43,26 +43,25 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5
     - **Mode d'emploi.odt :** Mode d'emploi d'exécution de chaque script.  
     - **README.md :** Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
-* *__4.2) Alpha :__*
-    - **alpha.sh :** Le fichier exécutable de la version Alpha. Il est régulièrement mis à jour.  
-    - **Documentation Alpha.odt :** La documentation de la version Alpha du projet. Elle est mise à jour dès que possible.  
-
-* *__4.3) Beta :__*
+* *__4.2) Beta :__*
     - **beta.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
     - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
-    - **paquets.xml :** Fichier de structuration de données contenant les noms des paquets
 
-* *__4.4) GUI :__*
+* *__4.3) GUI :__*
     - **.gitignore :** Fichier servant à ne pas inclure, dans les commits Git, les fichiers listés dedans (fichiers binaires, etc...).
     - **fenetreGUI.cpp :** Fichier source C++ contenant la définition des méthodes de la classe **"fenetreGUI"**.  
     - **fenetreGUI.h :** Fichier d'en-tête contenant la classe gérant l'affichage de la fenêtre principale.  
-    - **main.cpp :** Fichier source C++ contenant la fonction principale du programme **(main)**, fonction de début et de fin de **TOUT** programme écrit en C ou en C++.
+    - **main.cpp :** Fichier source C++ contenant la fonction principale du programme **(main)**, fonction de début et de fin de **TOUT** programme écrit en C ou en C++.  
 
-* *__4.5) Parser :__*
+* *__4.4) Parser :__*
     - **main.cpp :** Fichier source C++ contenant la fonction principale du programme de parsing du script shell.  
-    - **Makefile :** Fichier Makefile permettant de compiler tous les fichiers d'un projet avec des paramètres prédéfinis, le tout en une seule commande.
-    - **parser.cpp :** Fichier source C++ contenant les définitions des méthodes de la classe **"Parser"**.
-    - **parser.h :** Fichier d'en-tête (header) contenant la classe **"Parser"**, ses attributs et déclarations de méthodes et l'inclusion des en-têtes des librairies standard C++ (iostream, string, fstream, etc...).
+    - **Makefile :** Fichier Makefile permettant de compiler tous les fichiers d'un projet avec des paramètres prédéfinis, le tout en une seule commande.  
+    - **parser.cpp :** Fichier source C++ contenant les définitions des méthodes de la classe **"Parser"**.  
+    - **parser.h :** Fichier d'en-tête (header) contenant la classe **"Parser"**, ses attributs et déclarations de méthodes et l'inclusion des en-têtes des librairies standard C++ (iostream, string, fstream, etc...).  
+
+* *__4.5) Ressources :__*
+    - **paquets.xml :** Fichier de structuration de données contenant les noms des paquets.  
+    - **sudoers :** Fichier de configuration se trouvant dans le dossier **"/etc/"**, consignant la gestion des droits du super-utilisateur accordés aux utilisateurs de l'ordinateur.  
 
 * *__4.6) Stable :__*
     - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.
