@@ -93,14 +93,15 @@
             - A:\ **cats_echo() :** Affiche un texte en bleu cyan entouré de 5 dièses avant de remettre la couleur par défaut au texte suivant et de démarrer un chronomètre d'une seconde.  
             Cette fonction utilisée dans la partie d'installation de paquets pour afficher chaque message de changement de sous-catégories de paquets.  
             Il est ainsi plus facile de différencier ces messages (autrefois affichés en jaune sans être entourés de caractères spéciaux) aux messages d'installation de chaque paquet absent (toujours affichés en jaune).
-            - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
-            - C:\ **"get_dist_package_manager() :"** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
             - A:\ **j_echo() :** Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **launch_script() :** Voir la fonction **detect_root()** ci-dessus.
-            - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
             - A:\ **r_echo() :** Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **v_echo() :** Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
-
+            - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.
+            - C:\ **"get_dist_package_manager() :"** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
+            
+            - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
+           
         - **<u>1.2) Paquets</u> :**
             - A:\ **g++ :** Paquet installant le compilateur G++ pour le langage C++.
             - A:\ **gcc :** Paquet installant le compilateur GCC pour le langage C.
@@ -111,12 +112,12 @@
             - A:\ **wireshark :** Paquet installant Wireshark.
 
         - **<u>1.3) Variables</u> :**
-            - C:\ **$C_HEADER_LINE :** Renommée en **"$C_HEADER"**.
-            - A:\ **$COLS :** Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line() :** (suppression de la variable **$line_cols** au profit de cette nouvelle variable).
+           - A:\ **$COLS :** Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line() :** (suppression de la variable **$line_cols** au profit de cette nouvelle variable).
             - A:\ **$SCRIPT_VERSION :** Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).
-            - C:\ **SLEEP_TAB :** Renommée en **"$SLEEP_HEADER"**
             - A:\ **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.
-            
+
+            - C:\ **$C_HEADER_LINE :** Renommée en **"$C_HEADER"**.
+            - C:\ **SLEEP_TAB :** Renommée en **"$SLEEP_HEADER"**
             - C:\ **"TOUTES LES VARIABLES" :** **RENOMMAGE MASSIF !!** DÉSORMAIS, LEURS NOMS SONT PRÉCÉDÉS DU PRÉFIXE **$SCRIPT_** POUR ÉVITER TOUTE CONFUSION AVEC LES VARIABLES D'ENVIRONNEMENT (**QUI NE SONT PAS PRÉCÉDÉES DE CE PRÉFIXE**).
 
     - **<u>2) Corrections</u> :**
