@@ -454,7 +454,7 @@ j_echo "Vous allez être connecté en mode super-utilisateur pour pouvoir appliq
 j_echo "Entrez votre mot de passe root pour continuer."
 echo "$SCRIPT_VOID"
 
-echo "Entrez votre mot de passe" | "$(sudo -s)" << EOF | tee -a > beta.sh
+echo "Entrez votre mot de passe : " | sudo -s << EOF | tee -a beta.sh
 echo "$SCRIPT_VOID"
 
 # Détection de la connexion à Internet
