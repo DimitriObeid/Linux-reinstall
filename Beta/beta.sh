@@ -278,7 +278,7 @@ mktmpdir()
 		echo "$SCRIPT_VOID"
 
 		# Lectre de la réponse de l'utilisateur
-		read_tmpdir()
+		read_mktmpdir()
 		{
 			read -r -p "Entrez votre réponse : " rep_tmpdir
 
@@ -320,11 +320,11 @@ mktmpdir()
 					;;
 				*)
 					j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
-					read_tmpdir
+					read_mktmpdir
 					;;
 			esac  
 		}
-		read_tmpdir
+		read_mktmpdir
 	fi
 
 	echo "$SCRIPT_VOID"
