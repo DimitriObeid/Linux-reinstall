@@ -286,14 +286,14 @@ mktmpdir()
 			case ${rep_tmpdir,,} in
 				"oui")
 					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et "
-					cd $SCRIPT_TMPPATH
+					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPDIR N'EXISTE PAS"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement 
 					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
-						rm -rf *
+						rm -rf --*
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
 						if test ! "$(ls -A $SCRIPT_TMPDIR)"; then
@@ -312,6 +312,7 @@ mktmpdir()
 					echo "$SCRIPT_VOID"
 
 					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
+					# On se déplace vers le dossier temporaire fraîchement créé
 					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
 					v_echo "Déplacement vers le dossier $SCRIPT_TMPPATH effectué avec succès"
 					
@@ -475,7 +476,7 @@ set_sudo()
 					echo "$SCRIPT_VOID"
 
 					j_echo "Ajout de l'utilisateur $rep_sudo_name au groupe sudo"
-					usermod -aG root $rep_sudo_name
+					usermod -aG root "$rep_sudo_name"
 					echo "$SCRIPT_VOID"
 
 					v_echo "L'utilisateur $rep_sudo_name a été ajouté au groupe sudo avec succès"
