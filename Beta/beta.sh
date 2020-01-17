@@ -262,34 +262,51 @@ mktmpdir()
 {
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPATH"
 
+	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
 	if test ! -d "$SCRIPT_TMPPATH"; then
 		j_echo "Création du dossier temporaire"
+
+		# Création du dossier
 		mkdir "$SCRIPT_TMPPATH"
 		echo "$SCRIPT_VOID"
 		
 		v_echo "Le dossier $SCRIPT_TMPDIR a été créé avec succès"
-		echo "$SCRIPT_VOID"
+	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
 	else
 		j_echo "Un dossier portant exactement le même nom se trouve déjà dans votre dossier temporaire."
 		j_echo "Souhaitez vous écraser son contenu ? (oui/non)"
+		echo "$SCRIPT_VOID"
 
+		# Lectre de la réponse de l'utilisateur
 		read_tmpdir()
 		{
-			read -r -p "Entrez votre réponse" rep_tmpdir
+			read -r -p "Entrez votre réponse : " rep_tmpdir
 
-			case ${rep-tmpdir,,} in
+			# Dans le cas où l'utilisateur répond par ...
+			case ${rep_tmpdir,,} in
 				"oui")
-					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et suppression de son contenu"
-					cd $SCRIPT_TMPPATH && rm -rf *
-					echo "$SCRIPT_VOID"
+					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et "
+					cd $SCRIPT_TMPPATH
 
-					if test ! "$(ls -A $SCRIPT_TMPDIR)"; then
-						v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
+					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
+					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
+					# AVANT de supprimer tout le contenu récursivement 
+					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
+						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
+						rm -rf *
+
+						# On vérifie que le contenu du dossier a bien été intégralement supprimé
+						if test ! "$(ls -A $SCRIPT_TMPDIR)"; then
+							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
+						fi
 					fi
+					echo "$SCRIPT_VOID"
 
 					return
 					;;
 				"non")
+					echo "$SCRIPT_VOID"
+
 					j_echo "Le contenu du dossier $SCRIPT_TMPDIR ne sera pas supprimé."
 					j_echo "En revanche, les fichiers temporaires créés écraseront les fichiers homonymes"
 					echo "$SCRIPT_VOID"
