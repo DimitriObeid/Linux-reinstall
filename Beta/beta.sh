@@ -234,6 +234,7 @@ launch_script()
 				echo "$SCRIPT_VOID"
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
+				v_echo "C'est parti !!!"
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -262,17 +263,52 @@ mktmpdir()
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPATH"
 
 	if test ! -d "$SCRIPT_TMPPATH"; then
-		j_echo "Création du dossier"
+		j_echo "Création du dossier temporaire"
 		mkdir "$SCRIPT_TMPPATH"
 		echo "$SCRIPT_VOID"
 		
 		v_echo "Le dossier $SCRIPT_TMPDIR a été créé avec succès"
 		echo "$SCRIPT_VOID"
+	else
+		j_echo "Un dossier portant exactement le même nom se trouve déjà dans votre dossier temporaire."
+		j_echo "Souhaitez vous écraser son contenu ? (oui/non)"
+
+		read_tmpdir()
+		{
+			read -r -p "Entrez votre réponse" rep_tmpdir
+
+			case ${rep-tmpdir,,} in
+				"oui")
+					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et suppression de son contenu"
+					cd $SCRIPT_TMPPATH && rm -rf *
+					echo "$SCRIPT_VOID"
+
+					if test ! "$(ls -A $SCRIPT_TMPDIR)"; then
+						v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
+					fi
+
+					return
+					;;
+				"non")
+					j_echo "Le contenu du dossier $SCRIPT_TMPDIR ne sera pas supprimé."
+					j_echo "En revanche, les fichiers temporaires créés écraseront les fichiers homonymes"
+					echo "$SCRIPT_VOID"
+
+					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
+					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
+					v_echo "Déplacement vers le dossier $SCRIPT_TMPPATH effectué avec succès"
+					
+					return
+					;;
+				*)
+					j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+					read_tmpdir
+					;;
+			esac  
+		}
+		read_tmpdir
 	fi
 
-	v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
-	cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
-	v_echo "Déplacement vers le dossier $SCRIPT_TMPPATH effectué avec succès"
 	echo "$SCRIPT_VOID"
 }
 
