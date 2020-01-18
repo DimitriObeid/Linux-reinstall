@@ -225,9 +225,10 @@ launch_script()
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
 	read_launch_script()
 	{
-        # Demande à l'utilisateur d'entrer une réponse
+        # On demande à l'utilisateur d'entrer une réponse
 		read -r -p "Entrez votre réponse : " rep_launch
 
+		# Dans le cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non"
 		# Les deux virgules suivant directement le "launch" signifient que les mêmes réponses avec des majuscules sont permises
 		case ${rep_launch,,} in
 	        "oui")
@@ -253,7 +254,7 @@ launch_script()
 				;;
 	    esac
 	}
-	# Appel de la fonction "read_launch_script", car même si la fonction est définie dans la fonction "launch_script", elle n'est pas lue automatiquement
+	# Appel de la fonction "read_launch_script", car même si la fonction est définie dans la fonction "launch_script", ses instructions ne sont pas lues automatiquement
 	read_launch_script
 }
 
@@ -277,29 +278,35 @@ mktmpdir()
 		cd "$SCRIP_TMPPATH"
 		echo "$SCRIPT_VOID"
 
+		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
 		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
+		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
 			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH"
 		fi
 
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
-	# ET que ce même dossier est vide
+	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
 	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A $SCRIPT_TMPPATH)"; then
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
 		cd "$SCRIPT_TMPPATH"
 		echo "$SCRIPT_VOID"
 
+		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
 		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
+		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
 			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH"
 		fi
-	# Sinon, si le dossier 
+	
+	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
+	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
 	else
 		j_echo "Un dossier portant exactement le même nom se trouve déjà dans votre dossier temporaire."
 		j_echo "Souhaitez vous écraser son contenu ? (oui/non)"
@@ -308,6 +315,7 @@ mktmpdir()
 		# Lectre de la réponse de l'utilisateur
 		read_mktmpdir()
 		{
+			# On demande à l'utilisateur de rentrer une réponse
 			read -r -p "Entrez votre réponse : " rep_tmpdir
 
 			# Dans le cas où l'utilisateur répond par ...
@@ -348,6 +356,7 @@ mktmpdir()
 					
 					return
 					;;
+				# Autre chose que "oui" ou "non"
 				*)
 					j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 					read_mktmpdir
@@ -381,6 +390,8 @@ dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
+	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$OS_FAMILY", 
+	# puis on appelle sa commande de mise à jour des paquets installés
 	case "$OS_FAMILY" in
 		opensuse)
 			zypper -y update
