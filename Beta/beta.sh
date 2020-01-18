@@ -291,6 +291,7 @@ mktmpdir()
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
 	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
 	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A $SCRIPT_TMPPATH)"; then
+		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
 		cd "$SCRIPT_TMPPATH"
 		echo "$SCRIPT_VOID"
@@ -361,7 +362,7 @@ mktmpdir()
 					j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 					read_mktmpdir
 					;;
-			esac  
+			esac
 		}
 		read_mktmpdir
 	fi
