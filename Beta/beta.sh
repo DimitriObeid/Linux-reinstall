@@ -264,14 +264,42 @@ mktmpdir()
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
 	if test ! -d "$SCRIPT_TMPPATH"; then
-		j_echo "Création du dossier temporaire"
+		j_echo "Création du dossier temporaire $SCRPIT_TMPDIR dans votre dossier personnel : $HOME"
 
 		# Création du dossier
 		mkdir "$SCRIPT_TMPPATH"
 		echo "$SCRIPT_VOID"
 		
 		v_echo "Le dossier $SCRIPT_TMPDIR a été créé avec succès"
+		
+		# Déplacement vers le dossier temporaire
+		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
+		cd "$SCRIP_TMPPATH"
+		echo "$SCRIPT_VOID"
+
+		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
+			v_echo "Déplacement effectué avec succès"
+
+			return
+		else
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH"
+		fi
+
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
+	# ET que ce même dossier est vide
+	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A $SCRIPT_TMPPATH)"; then
+		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
+		cd "$SCRIPT_TMPPATH"
+		echo "$SCRIPT_VOID"
+
+		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
+			v_echo "Déplacement effectué avec succès"
+
+			return
+		else
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH"
+		fi
+	# Sinon, si le dossier 
 	else
 		j_echo "Un dossier portant exactement le même nom se trouve déjà dans votre dossier temporaire."
 		j_echo "Souhaitez vous écraser son contenu ? (oui/non)"
@@ -286,7 +314,7 @@ mktmpdir()
 			case ${rep_tmpdir,,} in
 				"oui")
 					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et "
-					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPDIR N'EXISTE PAS"
+					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
@@ -296,9 +324,11 @@ mktmpdir()
 						rm -rf --*
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A $SCRIPT_TMPDIR)"; then
+						if test ! "$(ls -A $SCRIPT_TMPPATH)"; then
 							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
 						fi
+					else
+						handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
 					fi
 					echo "$SCRIPT_VOID"
 
@@ -426,7 +456,10 @@ pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
-    snap install "$@"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
+	snap_name="@"
+	j_echo "Installation du paquet $snap_name" | cutstr
+
+    snap install "$snap_name"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
 	echo "$SCRIPT_VOID"
 }
 
