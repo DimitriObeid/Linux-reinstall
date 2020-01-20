@@ -100,11 +100,13 @@
             - A:\ **j_echo() :** Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **launch_script() :** Voir la fonction **detect_root()** ci-dessus.
             - A:\ **r_echo() :** Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
+            - A:\ **set_sudo() :** Détecte la commande "sudo" et la télécharge si elle n'est pas installée sur le système.
+            Modifie le contenu du fichier "/etc/sudoers", puis ajoute l'utilisateur actuel à la liste des sudoers, le tout avec son accord et avec l'obtention de son nom via l'appel système **"read"**.
             - A:\ **v_echo() :** Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
             
             - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.  
             La partie de demande de permission est modifiée. Désormais, le script ne doit pas s'exécuter en mode super-utilisateur pour que le script obtienne les valeurs des variables d'environnement quand le mode super-utilisateur est désactivé pour les utiliser au moment opportun.
-            - C:\ **"get_dist_package_manager() :"** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
+            - C:\ **get_dist_package_manager() :** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.
             
             - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
            
@@ -112,6 +114,7 @@
             - A:\ **g++ :** Paquet installant le compilateur G++ pour le langage C++.
             - A:\ **gcc :** Paquet installant le compilateur GCC pour le langage C.
             - A:\ **git :** Paquet installant le logiciel de gestion de versions décentralisé **"Git"** --> https://fr.wikipedia.org/wiki/Git
+            - A:\ **htop :** Paquet permettant de voir la liste des processus en cours d'exécution et d'intéragir avec plus facilement qu'avec la commande "top".
             - A:\ **make :** Paquet installant la commande **"make"**, extrêmement pratique pour compiler tous les fichiers d'un projet avec toutes les options souhaitées en une seule commande via un Makefile.
             - A:\ **umlet :** Paquet installant le logiciel UMLet.
             - A:\ **wine-stable :** Paquet installant Wine.
@@ -142,21 +145,18 @@
         - **Installation des paquets de LAMP :** Avec la modification de la fonction **pack_install()** apportée par cette version (voir la catégorie **"Ajouts..."**), les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
 
 
-# Prochaine version : 2.1
+# Future version : 2.1
 
 * Changelogs :
 
 
-# Future version : Alpha 3.0
+# Future version : 3.0
 
 * Changelogs :
-    - Ajout de la fonction **"set_sudo()"** pour télécharger sudo et ajouter l'utilisateur actuel à la liste des sudoers (**sudo** n'est pas installé de base sur Debian), avec obtention du nom de l'utilisateur normal au moment de lancer le script via l'appel système **"read"**.
-    - Pour l'instant : Demander à l'utilisateur d'écrire son nom via **"read"**.
     - Téléchargement des paquets de la logithèque de la distribution depuis des dépôts PPA.
-
-# Future version : 4.0
-
-* Changelogs :
     - Ajout de l'interface graphique.
     - Refonte des parties d'ajout des PPA et des paquets
         - Possible écriture dans un fichier XML et parsing de ce fichier (pour ajouter graphiquement des paquets et des dépôts PPA, puis les installer lorsque du clic sur le bouton d'exécution).
+
+
+# Future version : 4.0

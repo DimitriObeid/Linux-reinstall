@@ -259,7 +259,7 @@ launch_script()
 	read_launch_script
 }
 
-# Fonction de création de dossiers
+# Fonction de création rapide de dossiers
 makedir()
 {
 	dirpath=$1	# Emplacement de création du dossier
@@ -710,6 +710,7 @@ sleep 3
 
 # Commandes
 cats_echo "INSTALLATION DES COMMANDES PRATIQUES"
+pack_install htop
 pack_install neofetch
 pack_install tree
 echo "$SCRIPT_VOID"
