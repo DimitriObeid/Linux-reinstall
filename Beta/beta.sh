@@ -30,15 +30,16 @@ SCRIPT_SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégori
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
 SCRIPT_C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
-SCRIPT_C_JAUNE=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
-SCRIPT_C_PACK_CATS=$(tput setaf 6)		# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
+SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
+SCRIPT_C_PACK_CATS=$(tput setaf 6)	# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
 SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
 SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
-# DOSSIERS ET FICHIERS
-SCRIPT_TMPDIR="Linux-reinstall.tmp.d"
-SCRIPT_TMPPATH="$HOME/$SCRIPT_TMPDIR"
+# DOSSIER TEMPORAIRE
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
+SCRIPT_TMPPATH="$HOME"						# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+SCRIPT_TMPFULLPATH="$HOME/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # RESSOURCES
@@ -258,6 +259,23 @@ launch_script()
 	read_launch_script
 }
 
+# Fonction de création de dossiers
+makedir()
+{
+	dirpath=$1	# Emplacement de création du dossier
+	dirname=$2	# Nom du dossier
+
+	j_echo "Création du dossier temporaire $dirname dans votre dossier personnel : $dirpath"
+	mkdir "$dirpath/$dirname"
+	if test -d "$dirpath/$dirname"; then
+		v_echo "Le dossier $dirname a été créé avec succès dans le dossier $dirpath"
+
+		return
+	else
+		handle_errors "LE DOSSIER $dirname N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $dirpath"
+	fi
+}
+
 # Création d'un dossier temporaire pour y stocker des fichiers temporaires
 mktmpdir()
 {
@@ -265,17 +283,13 @@ mktmpdir()
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
 	if test ! -d "$SCRIPT_TMPPATH"; then
-		j_echo "Création du dossier temporaire $SCRIPT_TMPDIR dans votre dossier personnel : $HOME"
 
 		# Création du dossier
-		mkdir "$SCRIPT_TMPPATH"
-		echo "$SCRIPT_VOID"
-		
-		v_echo "Le dossier $SCRIPT_TMPDIR a été créé avec succès"
+		makedir "$SCRIPT_TMPPATH" "$SCRIPT_TMPDIR"
 		
 		# Déplacement vers le dossier temporaire
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+		cd "$SCRIPT_TMPFULLPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
@@ -285,7 +299,7 @@ mktmpdir()
 			return
 		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
 		fi
 
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
@@ -293,11 +307,11 @@ mktmpdir()
 	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
 		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+		cd "$SCRIPT_TMPFULLPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
+		if test "$(pwd)" == "$SCRIPT_TMPFULLPATH"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
@@ -322,22 +336,22 @@ mktmpdir()
 			# Dans le cas où l'utilisateur répond par ...
 			case ${rep_tmpdir,,} in
 				"oui")
-					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et "
-					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+					j_echo "Déplacement vers le dossier $SCRIPT_TMPFULLPATH"
+					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
-					# AVANT de supprimer tout le contenu récursivement 
+					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
 					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
-						rm -rf --*
+						rm -r -f --*
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
+						if test ! "$(ls -A "$SCRIPT_TMPDIR")"; then
 							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
 						fi
 					else
-						handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
+						handle_errors "LE DOSSIER $SCRIPT_TMPFULLPATH N'EXISTE PAS"
 					fi
 					echo "$SCRIPT_VOID"
 
@@ -347,7 +361,7 @@ mktmpdir()
 					echo "$SCRIPT_VOID"
 
 					j_echo "Le contenu du dossier $SCRIPT_TMPDIR ne sera pas supprimé."
-					j_echo "En revanche, les fichiers temporaires créés écraseront les fichiers homonymes"
+					j_echo "En revanche, les fichiers temporaires créés et téléchargés écraseront les fichiers homonymes"
 					echo "$SCRIPT_VOID"
 
 					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
@@ -493,7 +507,8 @@ set_sudo()
 	echo "$SCRIPT_VOID"
 
 	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
-	echo "REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
+	echo ">>>> REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
+	echo ">>>> Si vous avez déjà un fichier sudoers modifié, TOUS les changements effectués seront écrasés"
 	echo "$SCRIPT_VOID"
 
 	read_sudo()
@@ -504,7 +519,7 @@ set_sudo()
 			"oui")
 				echo "$SCRIPT_VOID"
 
-				j_echo "Entrez votre nom d'utilisateur, le script s'en servira pour vous garantir les droits de super-utilisateur"
+				j_echo "Entrez votre nom d'utilisateur, le script s'en sert pour vous garantir les droits de super-utilisateur"
 				echo "$SCRIPT_VOID"
 
 				read -r -p "Votre nom ? : " rep_sudo_name
@@ -517,7 +532,7 @@ set_sudo()
 				else
 					j_echo "Fichier \"sudoers\" téléchargé avec succès"
 					j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
-					cat "sudoers" /etc/
+					mv "sudoers" /etc/sudoers
 					echo "$SCRIPT_VOID"
 
 					j_echo "Ajout de l'utilisateur $rep_sudo_name au groupe sudo"
@@ -613,11 +628,33 @@ is_installation_done()
 	v_echo "Retour vers le dossier $OLDPWD et suppression du dossier temporaire $SCRIPT_TMPDIR"
     # On retourne vers le dossier d'origine (cd -), puis on redirige le texte affichant le dossier vers lequel on s'est redirigé
     # vers le périphérique nul ( > /dev/null). Enfin, on supprime le dossier temporaire
-	cd - > /dev/null && rm -rf "$TMPPATH"
+	cd - > /dev/null && rm -r -f "$TMPPATH"
 	echo "$SCRIPT_VOID"
 
+	# Copie du fichier de réinstallation vers "/usr/bin" pour que l'utilisateur puisse de nouveau appeler le script si besoin
+	j_echo "Souhaitez vous copier le fichier de réinstallation vers le dossier \"/usr/bin\" pour réappeler le script en cas de besoin ?"
+
+	read_cp_file()
+	{
+		read -r -p rep_cp_file
+		case ${rep_cp_file,,} in
+			"oui")
+				j_echo "Copie du ficher de réinstallation vers le dossier \"/usr/bin\""
+				cp /usr/bin/
+				;;
+			"non")
+				j_echo "Le fichier de réinstallation ne sera pas copié vers le dossier \"/usr/bin\""
+				;;
+			*)
+				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				read_cp_file
+				;;
+		esac
+	}
+	read_cp_file
+
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
-    # On 
+    # On tue le processus
 	sudo -k
 
 	echo "$SCRIPT_VOID"
@@ -655,8 +692,17 @@ set_sudo
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
 
+j_echo "Les logiciels téléchargés via la commande \"wget\" sont déplacés vers le nouveau dossier \"Logiciels.Linux-reinstall\","
+j_echo "localisé dans votre dossier personnel"
+sleep 1
+echo "$SCRIPT_VOID"
+
+makedir "$HOME" "Logiciels.Linux-reinstall"
+echo "$SCRIPT_VOID"
+
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 v_echo "La partie d'installation de vos programmes commence véritablement"
+sleep 1
 echo "$SCRIPT_VOID"
 
 sleep 3
@@ -677,6 +723,7 @@ cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Éditeur de code Atom
 snap_install code --classic		# Éditeur de code Visual Studio Code
 pack_install emacs
+wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && uz JMeriseEtudiant.zip
 pack_install g++
 pack_install gcc
 pack_install git
