@@ -265,7 +265,7 @@ mktmpdir()
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
 	if test ! -d "$SCRIPT_TMPPATH"; then
-		j_echo "Création du dossier temporaire $SCRPIT_TMPDIR dans votre dossier personnel : $HOME"
+		j_echo "Création du dossier temporaire $SCRIPT_TMPDIR dans votre dossier personnel : $HOME"
 
 		# Création du dossier
 		mkdir "$SCRIPT_TMPPATH"
@@ -275,7 +275,7 @@ mktmpdir()
 		
 		# Déplacement vers le dossier temporaire
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIP_TMPPATH"
+		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
@@ -285,15 +285,15 @@ mktmpdir()
 			return
 		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH"
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		fi
 
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
 	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
-	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A $SCRIPT_TMPPATH)"; then
+	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
 		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIPT_TMPPATH"
+		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
@@ -303,7 +303,7 @@ mktmpdir()
 			return
 		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH"
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		fi
 	
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
@@ -323,7 +323,7 @@ mktmpdir()
 			case ${rep_tmpdir,,} in
 				"oui")
 					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH et "
-					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
+					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
@@ -333,7 +333,7 @@ mktmpdir()
 						rm -rf --*
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A $SCRIPT_TMPPATH)"; then
+						if test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
 							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
 						fi
 					else
@@ -352,7 +352,7 @@ mktmpdir()
 
 					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
 					# On se déplace vers le dossier temporaire fraîchement créé
-					cd "$SCRIPT_TMPPATH" || handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
+					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 					v_echo "Déplacement vers le dossier $SCRIPT_TMPPATH effectué avec succès"
 					
 					return
@@ -515,9 +515,9 @@ set_sudo()
 				if ! test -f "sudoers"; then
 					handle_errors "FICHIER SUDOERS MANQUANT"
 				else
-					j_echo "Fichier \"sudoers\"téléchargé avec succès"
+					j_echo "Fichier \"sudoers\" téléchargé avec succès"
 					j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
-					mv "sudoers" /etc/
+					cat "sudoers" /etc/
 					echo "$SCRIPT_VOID"
 
 					j_echo "Ajout de l'utilisateur $rep_sudo_name au groupe sudo"
@@ -611,10 +611,13 @@ is_installation_done()
 	script_header "FIN DE L'INSTALLATION"
 
 	v_echo "Retour vers le dossier $OLDPWD et suppression du dossier temporaire $SCRIPT_TMPDIR"
-	cd - > /dev/null && rm -rf "$TMPDIR"
+    # On retourne vers le dossier d'origine (cd -), puis on redirige le texte affichant le dossier vers lequel on s'est redirigé
+    # vers le périphérique nul ( > /dev/null). Enfin, on supprime le dossier temporaire
+	cd - > /dev/null && rm -rf "$TMPPATH"
 	echo "$SCRIPT_VOID"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
+    # On 
 	sudo -k
 
 	echo "$SCRIPT_VOID"
