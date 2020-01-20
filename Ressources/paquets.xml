@@ -84,6 +84,15 @@
                 <script>&perso;</script>
             </paquet>
             <paquet>
+                <nom>htop</nom>
+                <description>
+                    ▪ Htop est un utilitaire permettant d'avoir une vue sur l'état des processus en cours d'exécution.
+
+                    ▪ Il s'agit d'une version plus pratique de l'utilitaire "top", permettant de géner les processus de manière interactive.
+                </description>
+                <script>&sio;</script>
+            </paquet>
+            <paquet>
                 <nom>neofetch</nom>
                 <description>
                     ▪ Cette commande permet d’afficher des informations concernant votre système d’exploitation, sur votre terminal,
@@ -125,6 +134,13 @@
         </categorie>
 
         <categorie cat="Développement">
+            <paquet>
+                <nom>arduino</nom>
+                <description>
+                    ▪ Arduino est un logiciel libre et open-source
+                </description>
+                <script>&perso;</script>
+            </paquet>
             <paquet>
                 <nom>emacs</nom>
                 <description>
