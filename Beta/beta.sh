@@ -286,7 +286,7 @@ mktmpdir()
 
 		# Création du dossier
 		makedir "$SCRIPT_TMPPATH" "$SCRIPT_TMPDIR"
-		
+
 		# Déplacement vers le dossier temporaire
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
 		cd "$SCRIPT_TMPFULLPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
@@ -338,13 +338,14 @@ mktmpdir()
 				"oui")
 					j_echo "Déplacement vers le dossier $SCRIPT_TMPFULLPATH"
 					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
+					echo "$SCRIPT_VOID"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
 					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
-						rm -r -f --*
+						rm -r -f *
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
 						if test ! "$(ls -A "$SCRIPT_TMPDIR")"; then
