@@ -40,7 +40,7 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 # Définition des chemins vers le dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
 SCRIPT_TMPPARENT="/home/$SCRIPT_USER_NAME"	# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
-SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPPATH="$SCRIPT_TMPPARENT$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # EXÉCUTION
