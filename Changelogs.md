@@ -132,6 +132,11 @@
 
             - C:\ **"TOUTES LES VARIABLES" :** **RENOMMAGE MASSIF !!** DÉSORMAIS, LES NOMS DE TOUTES LES VARIABLES CRÉÉES POUR LE SCRIPT SONT PRÉCÉDÉS DU PRÉFIXE **$SCRIPT_** POUR ÉVITER TOUTE CONFUSION AVEC LES VARIABLES D'ENVIRONNEMENT (**QUI NE SONT PAS PRÉCÉDÉES DE CE PRÉFIXE**).
 
+            - A:\ **$SCRIPT_TMPDIR :** Nom du dossier temporaire créé par le script.
+            - A:\ **$SCRIPT_TMPPARENT :** Chemin du dossier parent du dossier temporaire.
+            - A:\ **$SCRIPT_TMPPATH :** Chemin complet du dossier temporaire (chemin du dossier parent + Le nom du dossier temporaire).
+
+
     - **<u>2) Corrections</u> :**
         - **handle_errors() :** Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
 

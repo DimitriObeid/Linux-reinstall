@@ -39,8 +39,8 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 # DOSSIER TEMPORAIRE
 # Définition des chemins vers le dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
-SCRIPT_TMPPATH="/home/$SCRIPT_USER_NAME/"	# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
-SCRIPT_TMPFULLPATH="$HOME/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPPARENT="/home/$SCRIPT_USER_NAME/"	# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+SCRIPT_TMPPATH="$HOME/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # EXÉCUTION
@@ -99,7 +99,7 @@ draw_header_line()
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	if test "$line_color" != ""; then
+	if test "$line_color" -ne ""; then
 		echo -n -e "$line_color"
 	fi
 
@@ -113,7 +113,7 @@ draw_header_line()
 	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
-	if test "$line_color" != ""; then
+	if test "$line_color" -ne ""; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
 }
@@ -188,12 +188,24 @@ detect_root()
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$C_RESET	sudo $0"
+    	r_echo "$SCRIPT_C_RESET	sudo $0"
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
-		r_echo "$C_RESET	$0"
+		r_echo "$SCRIPT_C_RESET	$0"
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
     fi
+
+	if test -z "$SCRIPT_USER_NAME"; then
+		r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
+		r_echo "$SCRIPT_C_RESET	sudo $0 \$votre_nom"
+	else
+		if test -d "/home/$SCRIPT_USER_NAME" && $SCRIPT_USER_NAME -eq 1000; then
+			v_echo "Vous avez correctement entré votre nom d'utilisateur"
+			v_echo "Lancement du script"
+		else
+			handle_errors "MAUVAIS NOM D'UTILISATEUR RENTRÉ"
+		fi
+	fi
 }
 
 # Détection du gestionnaire de paquets de la distribution utilisée
@@ -206,17 +218,17 @@ get_dist_package_manager()
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-    command -v zypper &> /dev/null && OS_FAMILY="opensuse"
-    command -v pacman &> /dev/null && OS_FAMILY="archlinux"
-    command -v dnf &> /dev/null && OS_FAMILY="fedora"
-    command -v apt &> /dev/null && OS_FAMILY="debian"
-    command -v emerge &> /dev/null && OS_FAMILY="gentoo"
+    command -v zypper &> /dev/null && SCRIPT_OS_FAMILY="opensuse"
+    command -v pacman &> /dev/null && SCRIPT_OS_FAMILY="archlinux"
+    command -v dnf &> /dev/null && SCRIPT_OS_FAMILY="fedora"
+    command -v apt &> /dev/null && SCRIPT_OS_FAMILY="debian"
+    command -v emerge &> /dev/null && SCRIPT_OS_FAMILY="gentoo"
 
-	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $OS_FAMILY est toujours nulle (aucune commande trouvée)
-	if test "$OS_FAMILY" = ""; then
+	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $SCRIPT_OS_FAMILY est toujours nulle (aucune commande trouvée)
+	if test "$SCRIPT_OS_FAMILY" = ""; then
 		handle_errors "LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
 	else
-		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($OS_FAMILY)"
+		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($SCRIPT_OS_FAMILY)"
 	fi
 }
 
@@ -285,45 +297,45 @@ makedir()
 # Création d'un dossier temporaire pour y stocker des fichiers temporaires
 mktmpdir()
 {
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPATH"
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPARENT"
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
-	if test ! -d "$SCRIPT_TMPPATH"; then
+	if test ! -d "$SCRIPT_TMPPARENT"; then
 
 		# Création du dossier
-		makedir "$SCRIPT_TMPPATH" "$SCRIPT_TMPDIR"
+		makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
 
 		# Déplacement vers le dossier temporaire
-		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIPT_TMPFULLPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
+		j_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT"
+		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-			v_echo "Déplacement effectué avec succès"
-
-			return
-		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
-		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
-		fi
-
-	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
-	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
-	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
-		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
-		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIPT_TMPFULLPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
-		echo "$SCRIPT_VOID"
-
-		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" == "$SCRIPT_TMPFULLPATH"; then
+		if test "$(pwd)" -eq "$SCRIPT_TMPPARENT"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
 		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
 			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+		fi
+
+	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
+	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
+	elif test -d "$SCRIPT_TMPPARENT" && test ! "$(ls -A "$SCRIPT_TMPPARENT")"; then
+		v_echo "Le dossier $SCRIPT_TMPPARENT existe déjà"
+		j_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT"
+		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+		echo "$SCRIPT_VOID"
+
+		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
+		if test "$(pwd)" -eq "$SCRIPT_TMPPATH"; then
+			v_echo "Déplacement effectué avec succès"
+
+			return
+		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
+		else
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPARENT. lE DOSSIER EXISTE-T'IL ?"
 		fi
 	
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
@@ -342,23 +354,23 @@ mktmpdir()
 			# Dans le cas où l'utilisateur répond par ...
 			case ${rep_tmpdir,,} in
 				"oui")
-					j_echo "Déplacement vers le dossier $SCRIPT_TMPFULLPATH"
-					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPFULLPATH. lE DOSSIER EXISTE-T'IL ?"
+					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
+					cd "$SCRIPT_TMPPARENT" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 					echo "$SCRIPT_VOID"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
-					if test "$(pwd)" == "$SCRIPT_TMPPFULLATH"; then
+					if test "$(pwd)" -eq "$SCRIPT_TMPPATH"; then
 						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
 						rm -r -f *
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A "$SCRIPT_TMPFULLPATH")"; then
+						if test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
 							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
 						fi
 					else
-						handle_errors "LE DOSSIER $SCRIPT_TMPFULLPATH N'EXISTE PAS"
+						handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
 					fi
 					echo "$SCRIPT_VOID"
 
@@ -371,10 +383,10 @@ mktmpdir()
 					j_echo "En revanche, les fichiers temporaires créés et téléchargés écraseront les fichiers homonymes"
 					echo "$SCRIPT_VOID"
 
-					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPATH"
+					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPARENT"
 					# On se déplace vers le dossier temporaire fraîchement créé
-					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
-					v_echo "Déplacement vers le dossier $SCRIPT_TMPPATH effectué avec succès"
+					cd "$SCRIPT_TMPPARENT" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPARENT. lE DOSSIER EXISTE-T'IL ?"
+					v_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT effectué avec succès"
 					
 					return
 					;;
@@ -412,9 +424,9 @@ dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$OS_FAMILY", 
+	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_OS_FAMILY", 
 	# puis on appelle sa commande de mise à jour des paquets installés
-	case "$OS_FAMILY" in
+	case "$SCRIPT_OS_FAMILY" in
 		opensuse)
 			zypper -y update
 			;;
@@ -467,7 +479,7 @@ pack_install()
 	j_echo "Installation de $package_name"
 
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-	case $OS_FAMILY in
+	case $SCRIPT_OS_FAMILY in
 		opensuse)
 			pack_manager_install zypper -y install
 			;;
@@ -585,7 +597,7 @@ autoremove()
 				j_echo "Suppression des paquets"
 				echo "$SCRIPT_VOID"
 
-	    		case "$OS_FAMILY" in
+	    		case "$SCRIPT_OS_FAMILY" in
 	        		opensuse)
 	            		j_echo "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
 						j_echo "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
