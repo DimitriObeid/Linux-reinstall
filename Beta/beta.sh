@@ -199,7 +199,7 @@ detect_root()
 		r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
 		r_echo "$SCRIPT_C_RESET	sudo $0 \$votre_nom"
 	else
-		if test -d "/home/$SCRIPT_USER_NAME" && $SCRIPT_USER_NAME -eq 1000; then
+		if test -d "/home/$SCRIPT_USER_NAME" && $UID -eq 1000; then
 			v_echo "Vous avez correctement entré votre nom d'utilisateur"
 			v_echo "Lancement du script"
 		else
