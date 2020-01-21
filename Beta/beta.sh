@@ -37,9 +37,15 @@ SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des me
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 # DOSSIER TEMPORAIRE
+# Définition des chemins vers le dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
-SCRIPT_TMPPATH="$HOME"						# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+SCRIPT_TMPPATH="/home/$SCRIPT_USER_NAME/"	# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
 SCRIPT_TMPFULLPATH="$HOME/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+
+
+# EXÉCUTION
+# Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
+SCRIPT_USER_NAME=$1			# Premier argument à placer devant la commande d'exécution du script
 
 
 # RESSOURCES
