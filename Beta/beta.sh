@@ -193,19 +193,20 @@ detect_root()
 		r_echo "Et tapez cette commande :"
 		r_echo "$SCRIPT_C_RESET	$0"
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
-    fi
-
-	if test -z "$SCRIPT_USER_NAME"; then
-		r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
-		r_echo "$SCRIPT_C_RESET	sudo $0 \$votre_nom"
-		
-		handle_errors "AUCUN NOM D'UTILISATEUR RENTRÉ"
+    
 	else
-		if test -d "/home/$SCRIPT_USER_NAME" && $UID -eq 1000; then
-			v_echo "Vous avez correctement entré votre nom d'utilisateur"
-			v_echo "Lancement du script"
+		if test -z "$SCRIPT_USER_NAME"; then
+			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
+			r_echo "$SCRIPT_C_RESET	sudo $0 \$votre_nom"
+			
+			handle_errors "AUCUN NOM D'UTILISATEUR RENTRÉ"
 		else
-			handle_errors "MAUVAIS NOM D'UTILISATEUR RENTRÉ"
+			if test -d "/home/$SCRIPT_USER_NAME"; then
+				v_echo "Vous avez correctement entré votre nom d'utilisateur"
+				v_echo "Lancement du script"
+			else
+				handle_errors "MAUVAIS NOM D'UTILISATEUR RENTRÉ"
+			fi
 		fi
 	fi
 }
