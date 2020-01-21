@@ -15,6 +15,11 @@
 
 ################### DÉCLARATION DES VARIABLES ET AFFECTATION DE LEURS VALEURS ###################
 
+# ARGUMENTS
+# Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
+SCRIPT_USER_NAME=$1			# Premier argument à placer devant la commande d'exécution du script
+
+
 ## CHRONOMÈTRE
 
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
@@ -41,11 +46,6 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
 SCRIPT_TMPPARENT="/home/$SCRIPT_USER_NAME/"			# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
-
-
-# EXÉCUTION
-# Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
-SCRIPT_USER_NAME=$1			# Premier argument à placer devant la commande d'exécution du script
 
 
 # RESSOURCES
