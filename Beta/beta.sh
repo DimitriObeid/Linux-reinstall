@@ -99,7 +99,7 @@ draw_header_line()
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	if test "$line_color" -eq ""; then
+	if test "$line_color" == ""; then
 		echo -n -e "$line_color"
 	fi
 
@@ -113,7 +113,7 @@ draw_header_line()
 	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
-	if test "$line_color" -eq ""; then
+	if test "$line_color" == ""; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
 }
@@ -311,7 +311,7 @@ mktmpdir()
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" -eq "$SCRIPT_TMPPARENT"; then
+		if test "$(pwd)" == "$SCRIPT_TMPPARENT"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
@@ -329,7 +329,7 @@ mktmpdir()
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" -eq "$SCRIPT_TMPPATH"; then
+		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
@@ -361,7 +361,7 @@ mktmpdir()
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
-					if test "$(pwd)" -eq "$SCRIPT_TMPPATH"; then
+					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
 						rm -r -f *
 
