@@ -283,17 +283,17 @@ launch_script()
 # Fonction de création rapide de dossiers
 makedir()
 {
-	dirpath=$1	# Emplacement de création du dossier
+	dirparent=$1	# Emplacement de création du dossier
 	dirname=$2	# Nom du dossier
 
-	j_echo "Création du dossier temporaire $dirname dans votre dossier personnel : $dirpath"
-	mkdir "$dirpath/$dirname"
-	if test -d "$dirpath/$dirname"; then
-		v_echo "Le dossier $dirname a été créé avec succès dans le dossier $dirpath"
+	j_echo "Création du dossier temporaire $dirname dans le dossier \"$dirparent\""
+	mkdir "$dirparent/$dirname"
+	if test -d "$dirparent/$dirname"; then
+		v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 
 		return
 	else
-		handle_errors "LE DOSSIER $dirname N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $dirpath"
+		handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\""
 	fi
 }
 
@@ -306,7 +306,7 @@ mktmpdir()
 	if test ! -d "$SCRIPT_TMPPARENT"; then
 
 		# Création du dossier
-		makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
+		makedir "$SCRIPT_TMPDIR" "$SCRIPT_TMPDIR"
 
 		# Déplacement vers le dossier temporaire
 		j_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT"
@@ -314,7 +314,7 @@ mktmpdir()
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" == "$SCRIPT_TMPPARENT"; then
+		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
 			v_echo "Déplacement effectué avec succès"
 
 			return
@@ -325,9 +325,9 @@ mktmpdir()
 
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
 	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
-	elif test -d "$SCRIPT_TMPPARENT" && test ! "$(ls -A "$SCRIPT_TMPPARENT")"; then
-		v_echo "Le dossier $SCRIPT_TMPPARENT existe déjà"
-		j_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT"
+	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
+		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
+		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
 		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
