@@ -99,6 +99,8 @@
             Il est ainsi plus facile de différencier ces messages (autrefois affichés en jaune sans être entourés de caractères spéciaux) aux messages d'installation de chaque paquet absent (toujours affichés en jaune).
             - A:\ **j_echo() :** Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **launch_script() :** Voir la fonction **detect_root()** ci-dessus.
+            - A:\ **makedir() :** Crée un dossier à chaque fois qu'on l'appelle en lui passant en argument le nom du dossier à créer et son chemin.
+            - A:\ **mktmpdir :** : Crée un dossier temporaire où sont stockés les fichiers temporaires téléchargés.
             - A:\ **r_echo() :** Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.
             - A:\ **set_sudo() :** Détecte la commande "sudo" et la télécharge si elle n'est pas installée sur le système.
             Modifie le contenu du fichier "/etc/sudoers", puis ajoute l'utilisateur actuel à la liste des sudoers, le tout avec son accord et avec l'obtention de son nom via l'appel système **"read"**.
@@ -128,7 +130,7 @@
             - C:\ **$C_HEADER_LINE :** Renommée en **"$C_HEADER"**.
             - C:\ **SLEEP_TAB :** Renommée en **"$SLEEP_HEADER"**
 
-            - C:\ **"TOUTES LES VARIABLES" :** **RENOMMAGE MASSIF !!** DÉSORMAIS, LEURS NOMS SONT PRÉCÉDÉS DU PRÉFIXE **$SCRIPT_** POUR ÉVITER TOUTE CONFUSION AVEC LES VARIABLES D'ENVIRONNEMENT (**QUI NE SONT PAS PRÉCÉDÉES DE CE PRÉFIXE**).
+            - C:\ **"TOUTES LES VARIABLES" :** **RENOMMAGE MASSIF !!** DÉSORMAIS, LES NOMS DE TOUTES LES VARIABLES CRÉÉES POUR LE SCRIPT SONT PRÉCÉDÉS DU PRÉFIXE **$SCRIPT_** POUR ÉVITER TOUTE CONFUSION AVEC LES VARIABLES D'ENVIRONNEMENT (**QUI NE SONT PAS PRÉCÉDÉES DE CE PRÉFIXE**).
 
     - **<u>2) Corrections</u> :**
         - **handle_errors() :** Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).
@@ -143,6 +145,8 @@
         - Refonte et ajout de commentaires pour que l'utilisateur comprenne mieux le fonctionnement de certaines parties du script.
         - Séparation des options multiples pour éviter la confusion chez un débutant qui lit le script et veut le modifier.
         - **Installation des paquets de LAMP :** Avec la modification de la fonction **pack_install()** apportée par cette version (voir la catégorie **"Ajouts..."**), les paquets ne sont plus installés grâce à un tableau d'arguments, mais en liste, comme tous les autres paquets.
+        - **check_internet_connection() :** Remplacement du serveur DNS de Google par celui d'OpenDNS.
+        - Fin de l'affichage du caractère **"ERREUR"** avant la description de l'erreur fatale ayant eu lieu (**"handle_errors()"**).
 
 
 # Future version : 2.1
