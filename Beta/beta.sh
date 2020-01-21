@@ -343,12 +343,12 @@ mktmpdir()
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
-					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
+					if test "$(pwd)" == "$SCRIPT_TMPPFULLATH"; then
 						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
 						rm -r -f *
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A "$SCRIPT_TMPDIR")"; then
+						if test ! "$(ls -A "$SCRIPT_TMPFULLPATH")"; then
 							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
 						fi
 					else
