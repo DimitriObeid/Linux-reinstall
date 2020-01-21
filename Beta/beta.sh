@@ -99,7 +99,7 @@ draw_header_line()
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	if test "$line_color" == ""; then
+	if test "$line_color" != ""; then
 		echo -n -e "$line_color"
 	fi
 
@@ -113,7 +113,7 @@ draw_header_line()
 	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
-	if test "$line_color" == ""; then
+	if test "$line_color" != ""; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
 }
@@ -188,16 +188,16 @@ detect_root()
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$SCRIPT_C_RESET	sudo $0"
+    	r_echo "$SCRIPT_C_RESET	sudo $0 $USER"
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
-		r_echo "$SCRIPT_C_RESET	$0"
+		r_echo "$SCRIPT_C_RESET	$0 $USER"
+
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
-    
 	else
 		if test -z "$SCRIPT_USER_NAME"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
-			r_echo "$SCRIPT_C_RESET	sudo $0 \$votre_nom"
+			r_echo "$SCRIPT_C_RESET	sudo $0 $USER"
 			
 			handle_errors "AUCUN NOM D'UTILISATEUR RENTRÉ"
 		else
