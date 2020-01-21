@@ -390,8 +390,8 @@ check_internet_connection()
 {
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
-	# Si l'ordinateur est connecté à internet
-	if ping -q -c 1 -W 1 google.com > /dev/null; then
+	# Si l'ordinateur est connecté à internet (pour le savoir, on ping le serveur DNS d'OpenDNS (ping 1.1.1.1))
+	if ping -q -c 1 -W 1 opendns.com > /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 	else
 		handle_errors "AUCUNE CONNEXION À INTERNET"
