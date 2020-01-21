@@ -39,7 +39,7 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 # DOSSIER TEMPORAIRE
 # Définition des chemins vers le dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
-SCRIPT_TMPPARENT="/home/$SCRIPT_USER_NAME/"	# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+SCRIPT_TMPPARENT="/home/$SCRIPT_USER_NAME"	# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
 SCRIPT_TMPPATH="$HOME/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
@@ -358,7 +358,7 @@ mktmpdir()
 			case ${rep_tmpdir,,} in
 				"oui")
 					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-					cd "$SCRIPT_TMPPARENT" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 					echo "$SCRIPT_VOID"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
