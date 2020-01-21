@@ -99,7 +99,7 @@ draw_header_line()
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
 	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	if test "$line_color" -ne ""; then
+	if test "$line_color" -eq ""; then
 		echo -n -e "$line_color"
 	fi
 
@@ -113,7 +113,7 @@ draw_header_line()
 	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
 	# exemple.
-	if test "$line_color" -ne ""; then
+	if test "$line_color" -eq ""; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
 }
