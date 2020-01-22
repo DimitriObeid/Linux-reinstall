@@ -283,8 +283,8 @@ launch_script()
 # Fonction de création rapide de dossiers
 makedir()
 {
-	dirparent=$1	# Emplacement de création du dossier
-	dirname=$2		# Nom du dossier
+	dirparent=$1	# Emplacement de création du dossier depuis la racine (dossier parent)
+	dirname=$2		# Nom du dossier à créer dans son dossier parent
 
 	j_echo "Création du dossier temporaire $dirname dans le dossier \"$dirparent\""
 	mkdir "$dirparent/$dirname"
@@ -300,7 +300,7 @@ makedir()
 # Création d'un dossier temporaire pour y stocker des fichiers temporaires
 mktmpdir()
 {
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPARENT"
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS le dossier \"${SCRIPT_TMPPARENT}\""
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
 	if test ! -d "$SCRIPT_TMPPATH"; then
