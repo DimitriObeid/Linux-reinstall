@@ -44,7 +44,7 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 # DOSSIER TEMPORAIRE
 # Définition des chemins vers le dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
-SCRIPT_TMPPARENT="/home/$SCRIPT_USER_NAME/"			# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+SCRIPT_TMPPARENT="/home/${SCRIPT_USER_NAME}/"			# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
@@ -195,13 +195,13 @@ detect_root()
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 	else
-		if test -z "$SCRIPT_USER_NAME"; then
+		if test -z "${SCRIPT_USER_NAME}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
 			r_echo "$SCRIPT_C_RESET	sudo $0 $USER"
 			
 			handle_errors "AUCUN NOM D'UTILISATEUR RENTRÉ"
 		else
-			if test -d "/home/$SCRIPT_USER_NAME"; then
+			if test -d "/home/${SCRIPT_USER_NAME}"; then
 				v_echo "Vous avez correctement entré votre nom d'utilisateur"
 				v_echo "Lancement du script"
 			else
