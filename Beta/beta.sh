@@ -288,7 +288,7 @@ makedir()
 
 	j_echo "Création du dossier temporaire $dirname dans le dossier \"$dirparent\""
 	mkdir "$dirparent/$dirname"
-	if test -d "$dirparent/$dirname"; then
+	if test ! -d "$dirparent/$dirname"; then
 		v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 
 		return
@@ -303,7 +303,7 @@ mktmpdir()
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPARENT"
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
-	if test ! -d "${SCRIPT_TMPPATH}"; then
+	if test ! -d "$SCRIPT_TMPPATH"; then
 
 		# Création du dossier
 		makedir "$SCRIPT_TMPPARTENT" "$SCRIPT_TMPDIR"
