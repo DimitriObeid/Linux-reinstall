@@ -303,13 +303,13 @@ mktmpdir()
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPARENT"
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
-	if test ! -d "${SCRIPT_TMPPARENT}"; then
+	if test ! -d "${SCRIPT_TMPPATH}"; then
 
 		# Création du dossier
-		makedir "$SCRIPT_TMPDIR" "$SCRIPT_TMPDIR"
+		makedir "$SCRIPT_TMPPARTENT" "$SCRIPT_TMPDIR"
 
 		# Déplacement vers le dossier temporaire
-		j_echo "Déplacement vers le dossier ${SCRIPT_TMPPARENT}"
+		j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
 		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPARENT}. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
