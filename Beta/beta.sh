@@ -284,7 +284,7 @@ launch_script()
 makedir()
 {
 	dirparent=$1	# Emplacement de création du dossier
-	dirname=$2	# Nom du dossier
+	dirname=$2		# Nom du dossier
 
 	j_echo "Création du dossier temporaire $dirname dans le dossier \"$dirparent\""
 	mkdir "$dirparent/$dirname"
@@ -303,14 +303,14 @@ mktmpdir()
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE $SCRIPT_TMPDIR DANS $SCRIPT_TMPPARENT"
 
 	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
-	if test ! -d "$SCRIPT_TMPPARENT"; then
+	if test ! -d "${SCRIPT_TMPPARENT}"; then
 
 		# Création du dossier
 		makedir "$SCRIPT_TMPDIR" "$SCRIPT_TMPDIR"
 
 		# Déplacement vers le dossier temporaire
-		j_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT"
-		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+		j_echo "Déplacement vers le dossier ${SCRIPT_TMPPARENT}"
+		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPARENT}. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
