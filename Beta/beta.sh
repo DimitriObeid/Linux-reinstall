@@ -310,7 +310,7 @@ mktmpdir()
 
 		# Déplacement vers le dossier temporaire
 		j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
-		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPARENT}. lE DOSSIER EXISTE-T'IL ?"
+		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
@@ -338,7 +338,7 @@ mktmpdir()
 			return
 		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
 		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPARENT. lE DOSSIER EXISTE-T'IL ?"
+			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 		fi
 	
 	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
