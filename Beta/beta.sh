@@ -306,7 +306,7 @@ mktmpdir()
 	if test ! -d "$SCRIPT_TMPPATH"; then
 
 		# Création du dossier
-		makedir "$SCRIPT_TMPPARTENT" "$SCRIPT_TMPDIR"
+		makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
 
 		# Déplacement vers le dossier temporaire
 		j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
