@@ -303,7 +303,7 @@ makedir()
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
 	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
-	elif test -d "$dirpath" && test "$(ls -A $dirpath)"; then
+	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
 		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
 		j_echo "Souhaitez vous écraser TOUT son contenu ? (oui/non)"
 		echo "$SCRIPT_VOID"
@@ -320,34 +320,30 @@ makedir()
 					echo "$SCRIPT_VOID"
 
 					j_echo "Déplacement vers le dossier cible pour supprimer récursivement son contenu en toute sécurité"
-					cd "$dirpath" && echo "$(pwd)"
+					cd "$dirpath" || handle_errors "LE DOSSIER \"$dirpath\" N'EXISTE PAS" && pwd
 					echo "$SCRIPT_VOID"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
 					if test -d "$(pwd)" == "$dirpath"; then
-						j_echo "Suppression du contenu du dossier $dirpath"
-						echo "$(rm -r -f *)"
+						j_echo "Suppression du contenu du dossier \"$dirpath\""
+						rm -r -f *
 						echo "$SCRIPT_VOID"
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
 						if test ! "$(ls -A "$dirname")"; then
 							v_echo "Le contenu du dosssier $dirpath a été effacé avec succès. Retour vers le dossier d'origine"
-							cd -
+							cd - || handle_errors "RETOUR VERS LE DOSSIER D'ORIGINE IMPOSSIBLE"
 							echo "$SCRIPT_VOID"
 
 							# On teste si le retour vers le dossier d'origine a bien été effectué avec succès
 							if test -d "$(pwd)" == "$OLDPWD"; then
 								v_echo "Retour vers le dossier \"$PWD\" effectué avec succès"
-							else
-								handle_errors "RETOUR VERS LE DOSSIER D'ORIGINE IMPOSSIBLE"
 							fi
 						else
 							handle_errors "LE CONTENU DU DOSSIER \"$dirpath\" N'A PAS PU ÊTRE SUPPRIMÉ RÉCURSIVEMENT"
 						fi
-					else
-						handle_errors "LE DOSSIER \"$dirpath\" N'EXISTE PAS"
 					fi
 					echo "$SCRIPT_VOID"
 
@@ -375,6 +371,8 @@ makedir()
 	# ET que ce dossier est vide
 	else test -d "$dirpath"
 		v_echo "Le dossier \"$dirpath\" existe déjà"
+		echo "$SCRIPT_VOID"
+		
 		return
 	fi
 }
@@ -518,10 +516,8 @@ set_sudo()
 
     j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
 
-	if test ! type "sudo" > /dev/null; then
-		j_echo "Sudo n'est pas installé sur votre système."
-		pack_install sudo
-	fi
+	command -v sudo > /dev/null 2>&1 || { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo ;} \
+	&& { v_echo "La commande \"sudo\" est déjà installée sur votre système" ;}
 
 	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis mon dépôt Git : "
 	j_echo "$SCRIPT_REPO (dans le dossier \"Ressources\")"
