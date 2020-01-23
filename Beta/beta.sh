@@ -394,7 +394,7 @@ mktmpdir()
 
 	# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
 	if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-		v_echo "Déplacement effectué avec succès"
+		v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
 
 		return
 	# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
