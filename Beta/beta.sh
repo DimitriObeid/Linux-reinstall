@@ -373,7 +373,7 @@ makedir()
 	
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
 	# ET que ce dossier est vide
-	else test -d "$dirpath"; then
+	else test -d "$dirpath"
 		v_echo "Le dossier \"$dirpath\" existe déjà"
 		return
 	fi
