@@ -17,8 +17,8 @@
 
 # ARGUMENTS
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
-SCRIPT_USER_NAME=$1			# Premier argument à placer devant la commande d'exécution du script
-
+SCRIPT_USER_NAME=$1		# Premier argument : Le nom du compte de l'utilisateur
+SCRIPT_PWD=$2			# Deuxième argument : Le nom du dossier dans lequel le fichier d'installation se trouve
 
 ## CHRONOMÈTRE
 
@@ -41,11 +41,12 @@ SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'af
 SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
-# DOSSIER TEMPORAIRE
-# Définition des chemins vers le dossier temporaire
+# DOSSIERS CRÉÉS
+# Définition du dossier parent des dossiers créés
+SCRIPT_PARENTDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+# Création du dossier temporaire et définition des chemins vers ce dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
-SCRIPT_TMPPARENT="/home/${SCRIPT_USER_NAME}"			# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
-SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPPATH="$SCRIPT_PARENTDIR/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # RESSOURCES
@@ -201,9 +202,9 @@ detect_root()
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 	else
-		if test -z "${SCRIPT_USER_NAME}"; then
-			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script"
-			r_echo "$SCRIPT_C_RESET	sudo $0 $USER"
+		if test -z "${SCRIPT_USER_NAME} ${SCRIPT_PWD}"; then
+			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script, puis celui de votre"
+			r_echo "$SCRIPT_C_RESET	sudo $0 $USER $PWD"
 			
 			handle_errors "AUCUN NOM D'UTILISATEUR RENTRÉ"
 		else
@@ -334,7 +335,7 @@ makedir()
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
 						if test ! "$(ls -A "$dirname")"; then
 							v_echo "Le contenu du dosssier $dirpath a été effacé avec succès. Retour vers le dossier d'origine"
-							cd - || handle_errors "RETOUR VERS LE DOSSIER D'ORIGINE IMPOSSIBLE"
+							cd - || handle_errors "RETOUR VERS LE DOSSIER D'ORIGINE IMPOSSIBLE" && v_echo ""
 							echo "$SCRIPT_VOID"
 
 							# On teste si le retour vers le dossier d'origine a bien été effectué avec succès
@@ -380,27 +381,15 @@ makedir()
 # Création d'un dossier temporaire pour y stocker des fichiers temporaires
 mktmpdir()
 {
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS le dossier \"${SCRIPT_TMPPARENT}\""
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS le dossier \"${SCRIPT_PARENTDIR}\""
 
 	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
-	makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
+	makedir "$SCRIPT_PARENTDIR" "$SCRIPT_TMPDIR"
 
 	# Déplacement vers le dossier temporaire
 	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
-	cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?"
-	echo "$SCRIPT_VOID"
-
-	# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-	if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-		v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
-
-		return
-	# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
-	else
-		handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
-	fi
-
-	echo "$SCRIPT_VOID"
+	cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?" \
+		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"; echo "$SCRIPT_VOID"
 }
 
 ## CONNEXION À INTERNET ET MISES À JOUR
@@ -508,6 +497,39 @@ snap_install()
 	echo "$SCRIPT_VOID"
 }
 
+software_install()
+{
+#	wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
+#	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
+
+	soft_name=$1					# Nom du logiciel à télécharger
+	wget_dl=$2						# Commande de téléchargement du fichier
+	link=$3							# Lien du fichier à télécharger
+	dirparent=$4					# Nom du dossier parent (Logiciels.Linux-reinstall.d) du logiciel à créer
+	dirname=$5						# Nom du dossier à créer
+	file=$6							# Nom du fichier compressé
+	uncomp=$7						# Commande de décompression
+	dirpath="$dirparent/$dirname"	# Chemin complet du dossier de décompression d'un dossier
+
+	j_echo "Téléchargement du logiciel $soft_name"
+	$wget_dl "$link" || { r_echo "Impossible de télécharger le fichier"; r_echo "Abandon"; return; } \
+		&& v_echo "Le fichier \"$file\" a été téléchargé avec succès"; echo "$SCRIPT_VOID"
+
+	makedir "$dirparent" "$dirname"
+
+	j_echo "Déplacement du fichier compressé \"$file\" vers le dossier \"$dirpath\""
+	mv "$file" "$dirpath" || { r_echo "Le fichier compressé \"$file\" n'a pas été déplacé vers le dossier \"$dirpath\""; return; } \
+		&& v_echo "Le fichier \"$file\" a été déplacé avec succès vers le dossier \"$dirpath\""; echo "$SCRIPT_VOID"
+
+	j_echo "Décompression du fichier compressé \"$file\""
+	$uncomp "$dirpath/$file" || { r_echo "Impossible de décompresser le fichier $file"; return; } \
+		&& v_echo "Le fichier \"$file\" a été décompressé avec succès dans le dossier \"$dirpath\""; echo "$SCRIPT_VOID"
+
+	j_echo "Suppression du fichier compressé \"$file\""
+	rm "$dirpath/$file" || { r_echo "La suppression du fichier \"$file\" a échouée"; return; } && \
+		v_echo "Le fichier \"$file\" a été supprimé avec succès"; echo "$SCRIPT_VOID"
+}
+
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection et installation de Sudo
 set_sudo()
@@ -586,7 +608,7 @@ autoremove()
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
 	read_autoremove()
 	{
-		read -r rep_autoremove
+		read -r -p "Entrez votre réponse : " rep_autoremove
 
 		case ${rep_autoremove,,} in
 			"oui")
@@ -653,7 +675,7 @@ is_installation_done()
 
 	read_cp_file()
 	{
-		read -r -p rep_cp_file
+		read -r -p "Entrez votre réponse : " rep_cp_file
 		case ${rep_cp_file,,} in
 			"oui")
 				j_echo "Copie du ficher de réinstallation vers le dossier \"/usr/bin\""
@@ -714,7 +736,8 @@ j_echo "localisé dans votre dossier personnel"
 sleep 1
 echo "$SCRIPT_VOID"
 
-makedir "$HOME" "Logiciels.Linux-reinstall"
+software_dir="Logiciels.Linux-reinstall.d"
+makedir "$SCRIPT_PARENTDIR" "$software_dir"
 echo "$SCRIPT_VOID"
 
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
@@ -741,7 +764,8 @@ cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Éditeur de code Atom
 snap_install code --classic		# Éditeur de code Visual Studio Code
 pack_install emacs
-wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && uz JMeriseEtudiant.zip
+wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
+	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
 pack_install g++
 pack_install gcc
 pack_install git
