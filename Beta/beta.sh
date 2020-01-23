@@ -330,13 +330,13 @@ mktmpdir()
 	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
 	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
 		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
-		j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+		j_echo "Déplacement vers le dossier \"$SCRIPT_TMPPATH\""
+		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER \"$SCRIPT_TMPPATH\". lE DOSSIER EXISTE-T'IL ?"
 		echo "$SCRIPT_VOID"
 
 		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
 		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-			v_echo "Déplacement effectué avec succès"
+			v_echo "Déplacement dans le dossier \"$(pwd)\" effectué avec succès"
 
 			return
 		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
