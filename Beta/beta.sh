@@ -174,7 +174,10 @@ handle_errors()
 	echo "$SCRIPT_VOID"
 
 	$SCRIPT_SLEEP_HEADER
-	r_echo "Une erreur fatale s'est produite : $error_result"
+	r_echo "Une erreur fatale s'est produite :" 
+	r_echo "$error_result"
+	echo "$SCRIPT_VOID"
+
 	r_echo "Arrêt de l'installation"
 	echo "$SCRIPT_VOID"
 
@@ -288,95 +291,63 @@ makedir()
 {
 	dirparent=$1	# Emplacement de création du dossier depuis la racine (dossier parent)
 	dirname=$2		# Nom du dossier à créer dans son dossier parent
+	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
 
-	j_echo "Création du dossier temporaire $dirname dans le dossier \"$dirparent\""
-	mkdir "$dirparent/$dirname"
-	if test ! -d "$dirparent/$dirname"; then
+	if test ! -d "$dirpath"; then
+		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
+		echo "$SCRIPT_VOID"
+
+		mkdir "$dirpath" || handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)"
 		v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
-
 		return
-	else
-		handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)"
-	fi
-}
 
-# Création d'un dossier temporaire pour y stocker des fichiers temporaires
-mktmpdir()
-{
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS le dossier \"${SCRIPT_TMPPARENT}\""
-
-	# Si le dossier "Linux-reinstall.tmp.d" n'existe pas dans le dossier personnel de l'utilisateur
-	if test ! -d "$SCRIPT_TMPPATH"; then
-
-		# Création du dossier
-		makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
-
-		# Déplacement vers le dossier temporaire
-		j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
-		cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?"
-		echo "$SCRIPT_VOID"
-
-		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-			v_echo "Déplacement effectué avec succès"
-
-			return
-		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
-		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
-		fi
-
-	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
-	# ET que ce même dossier est TOTALEMENT vide (même pas un seul fichier caché)
-	elif test -d "$SCRIPT_TMPPATH" && test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
-		v_echo "Le dossier $SCRIPT_TMPPATH existe déjà"
-		j_echo "Déplacement vers le dossier \"$SCRIPT_TMPPATH\""
-		cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER \"$SCRIPT_TMPPATH\". lE DOSSIER EXISTE-T'IL ?"
-		echo "$SCRIPT_VOID"
-
-		# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
-		if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-			v_echo "Déplacement dans le dossier \"$(pwd)\" effectué avec succès"
-
-			return
-		# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
-		else
-			handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
-		fi
-	
-	# Sinon, si le dossier "Linux-reinstall.tmp.d" existe déjà dans le dossier personnel de l'utilisateur
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent
 	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
-	else
-		j_echo "Un dossier portant exactement le même nom se trouve déjà dans votre dossier temporaire."
-		j_echo "Souhaitez vous écraser son contenu ? (oui/non)"
+	elif test -d "$dirpath" && test "$(ls -A $dirpath)"; then
+		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
+		j_echo "Souhaitez vous écraser TOUT son contenu ? (oui/non)"
 		echo "$SCRIPT_VOID"
 
 		# Lectre de la réponse de l'utilisateur
-		read_mktmpdir()
+		read_makedir()
 		{
 			# On demande à l'utilisateur de rentrer une réponse
-			read -r -p "Entrez votre réponse : " rep_tmpdir
+			read -r -p "Entrez votre réponse : " rep_makedir
 
 			# Dans le cas où l'utilisateur répond par ...
-			case ${rep_tmpdir,,} in
+			case ${rep_makedir,,} in
 				"oui")
-					j_echo "Déplacement vers le dossier $SCRIPT_TMPPATH"
-					cd "$SCRIPT_TMPPATH" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
+					echo "$SCRIPT_VOID"
+
+					j_echo "Déplacement vers le dossier cible pour supprimer récursivement son contenu en toute sécurité"
+					cd "$dirpath" && echo "$(pwd)"
 					echo "$SCRIPT_VOID"
 
 					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
 					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
 					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
-					if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
-						j_echo "Suppression du contenu du dossier $SCRIPT_TMPDIR"
-						rm -r -f *
+					if test -d "$(pwd)" == "$dirpath"; then
+						j_echo "Suppression du contenu du dossier $dirpath"
+						echo "$(rm -r -f *)"
+						echo "$SCRIPT_VOID"
 
 						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A "$SCRIPT_TMPPATH")"; then
-							v_echo "Le contenu du dosssier $SCRIPT_TMPDIR a été effacé avec succès"
+						if test ! "$(ls -A "$dirname")"; then
+							v_echo "Le contenu du dosssier $dirpath a été effacé avec succès. Retour vers le dossier d'origine"
+							cd -
+							echo "$SCRIPT_VOID"
+
+							# On teste si le retour vers le dossier d'origine a bien été effectué avec succès
+							if test -d "$(pwd)" == "$OLDPWD"; then
+								v_echo "Retour vers le dossier \"$PWD\" effectué avec succès"
+							else
+								handle_errors "RETOUR VERS LE DOSSIER D'ORIGINE IMPOSSIBLE"
+							fi
+						else
+							handle_errors "LE CONTENU DU DOSSIER \"$dirpath\" N'A PAS PU ÊTRE SUPPRIMÉ RÉCURSIVEMENT"
 						fi
 					else
-						handle_errors "LE DOSSIER $SCRIPT_TMPPATH N'EXISTE PAS"
+						handle_errors "LE DOSSIER \"$dirpath\" N'EXISTE PAS"
 					fi
 					echo "$SCRIPT_VOID"
 
@@ -385,25 +356,50 @@ mktmpdir()
 				"non")
 					echo "$SCRIPT_VOID"
 
-					j_echo "Le contenu du dossier $SCRIPT_TMPDIR ne sera pas supprimé."
+					j_echo "Le contenu du dossier \"$dirpath\" ne sera pas supprimé."
 					j_echo "En revanche, les fichiers temporaires créés et téléchargés écraseront les fichiers homonymes"
 					echo "$SCRIPT_VOID"
-
-					v_echo "Changement de dossier : Déplacement vers le dossier $SCRIPT_TMPPARENT"
-					# On se déplace vers le dossier temporaire fraîchement créé
-					cd "$SCRIPT_TMPPARENT" || "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPARENT. lE DOSSIER EXISTE-T'IL ?"
-					v_echo "Déplacement vers le dossier $SCRIPT_TMPPARENT effectué avec succès"
 					
 					return
 					;;
 				# Autre chose que "oui" ou "non"
 				*)
 					j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
-					read_mktmpdir
+					read_makepdir
 					;;
 			esac
 		}
-		read_mktmpdir
+		read_makedir
+	
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent
+	# ET que ce dossier est vide
+	else test -d "$dirpath"; then
+		v_echo "Le dossier \"$dirpath\" existe déjà"
+		return
+	fi
+}
+
+# Création d'un dossier temporaire pour y stocker des fichiers temporaires
+mktmpdir()
+{
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS le dossier \"${SCRIPT_TMPPARENT}\""
+
+	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
+	makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
+
+	# Déplacement vers le dossier temporaire
+	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
+	cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?"
+	echo "$SCRIPT_VOID"
+
+	# Si, en appellant la commande d'affichage du chemin du dossier actuel, on récupère EXACTEMENT le chemin du dossier temporaire
+	if test "$(pwd)" == "$SCRIPT_TMPPATH"; then
+		v_echo "Déplacement effectué avec succès"
+
+		return
+	# Sinon, si on recupère pas EXACTEMENT le chemin du dossier temporaire
+	else
+		handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER $SCRIPT_TMPPATH. lE DOSSIER EXISTE-T'IL ?"
 	fi
 
 	echo "$SCRIPT_VOID"
