@@ -98,17 +98,20 @@ draw_header_line()
 	line_char=$1	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 
-	# Pour définir la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
+	# Définition de la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
 		echo -n -e "$line_color"
 	fi
 
-	# Pour afficher le caractère souhaité sur toute la ligne
+	# Affichage du caractère souhaité sur toute la ligne. Pur cela, on commence à la première colonne (1), 
+	# puis on affiche chaque caractère (..) jusqu'à la fin de la ligne, délimité par la valeur retournée par
+	# "tput cols" (affichage du nombre de colonnes séparant la bordure gauche de la bordure droite de la zone
+	# de texte du terminal), dont la variable "$SCRIPT_COLS" stocke la commande d'exécution.
 	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
 		echo -n "$line_char"
 	done
 
-	# Pour définir (ici, réintialiser) la couleur des caractères suivant le dernier caractère de la ligne du header.
+	# Définition (ici, réintialisation) la couleur des caractères suivant le dernier caractère de la ligne du header.
 	# En pratique, La couleur des caractères suivants est déjà encodée quand ils sont appelés. Cette réinitialisation
 	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
 	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
@@ -123,7 +126,7 @@ script_header()
 {
 	header_string=$1
 
-	# Pour définir la couleur de la ligne du caractère souhaité
+	# Définition de la couleur de la ligne du caractère souhaité
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
@@ -135,7 +138,7 @@ script_header()
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
 	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$header_color"
-	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
+	# Affichage une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
 	echo "$header_color" "##>" "$header_string"
 	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$header_color"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
@@ -161,7 +164,7 @@ handle_errors()
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
 	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
-	# Pour afficher une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
+	# Affichage d'une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
 	echo "$error_color" "##> ERREUR FATALE : $error_result"
 	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
@@ -461,7 +464,7 @@ pack_install()
 	# d'installation de votre distribution.
 	package_name=$1
 
-	# Pour éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
+	# Cette fonction permet d'éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	pack_manager_install()
 	{
 		$SCRIPT_SLEEP_INST
