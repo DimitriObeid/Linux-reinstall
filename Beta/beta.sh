@@ -188,7 +188,7 @@ handle_errors()
 
 ## DÉFINITION DES FONCTIONS D'EXÉCUTION
 # Détection de l'exécution du script en mode super-administrateur (root)
-detect_root()
+script_init()
 {
 	if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
@@ -202,14 +202,14 @@ detect_root()
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 	else
-		if test -z "${SCRIPT_USER_NAME} ${SCRIPT_PWD}"; then
+		if test -z "${SCRIPT_USER_NAME}" || test -z "${SCRIPT_PWD}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script, puis celui de votre"
-			r_echo "$SCRIPT_C_RESET	sudo $0 $USER $PWD"
+			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
 			
-			handle_errors "AUCUN NOM D'UTILISATEUR RENTRÉ"
+			handle_errors "MAUVAIS ARGUMENTS ENTRÉ"
 		else
 			if test -d "/home/${SCRIPT_USER_NAME}"; then
-				v_echo "Vous avez correctement entré votre nom d'utilisateur"
+				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le nom du dossier actuel"
 				v_echo "Lancement du script"
 			else
 				handle_errors "MAUVAIS NOM D'UTILISATEUR RENTRÉ"
@@ -375,7 +375,7 @@ mktmpdir()
 	# Déplacement vers le dossier temporaire
 	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
 	cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?" \
-		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"; echo "$SCRIPT_VOID"
+		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
 }
 
 ## CONNEXION À INTERNET ET MISES À JOUR
@@ -451,26 +451,32 @@ pack_install()
 	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
 	# Sinon, le script installe le paquet manquant.
 
-	j_echo "Installation de $package_name"
+	command -v "$package_name" > /dev/null || \
+	{
+		j_echo "Installation de $package_name"
 
-	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-	case $SCRIPT_OS_FAMILY in
-		opensuse)
-			pack_manager_install zypper -y install
-			;;
-		archlinux)
-			pack_manager_install pacman --noconfirm -S
-			;;
-		fedora)
-			pack_manager_install dnf -y install
-			;;
-		debian)
-			pack_manager_install apt -y install
-			;;
-		gentoo)
-			pack_manager_install emerge
-			;;
-	esac
+		# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+		case $SCRIPT_OS_FAMILY in
+			opensuse)
+				pack_manager_install zypper -y install
+				;;
+			archlinux)
+				pack_manager_install pacman --noconfirm -S
+				;;
+			fedora)
+				pack_manager_install dnf -y install
+				;;
+			debian)
+				pack_manager_install apt -y install
+				;;
+			gentoo)
+				pack_manager_install emerge
+				;;
+		esac
+	} \
+	&& v_echo "Le paquet $package_name est déjà installé sur votre système"
+	
+	return
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
@@ -725,7 +731,7 @@ is_installation_done()
 
 ## APPEL DES FONCTIONS DE CONSTRUCTION
 # Détection du mode super-administrateur (root)
-detect_root
+script_init
 # Affichage du header de bienvenue
 script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX VERSION $SCRIPT_VERSION !!!!!"
 v_echo "Début de l'installation"
@@ -746,6 +752,10 @@ pack_install curl
 pack_install python-pip
 pack_install snapd
 pack_install wget
+
+command -v curl python-pip snapd wget > /dev/null 2>&1 \
+	|| handle_errors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" \
+	&& v_echo "Les commandes importantes d'installation ont été installées avec succès"
 
 # Installation de sudo et configuration
 set_sudo
