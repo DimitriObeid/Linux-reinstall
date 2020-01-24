@@ -43,10 +43,11 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 
 # DOSSIERS CRÉÉS
 # Définition du dossier parent des dossiers créés
-SCRIPT_PARENTDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
-SCRIPT_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
-SCRIPT_TMPPATH="$SCRIPT_PARENTDIR/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"			# Nom du dossier temporaire
+SCRIPT_TMPPATH="$SCRIPT_HOMEDIR/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # RESSOURCES
@@ -59,16 +60,15 @@ SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
 # Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
 # (une ligne de chaque caractère).
 SCRIPT_HEADER_LINE_CHAR="-"
-# Affichage de colonnes sur le terminal
-SCRIPT_COLS=$(tput cols)
-# Nombre de dièses (hash) précédant et suivant une chaîne de caractères
-SCRIPT_HASH="#####"
-# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
-SCRIPT_TAB=">>>>"
+SCRIPT_COLS=$(tput cols)	# Affichage de colonnes sur le terminal
+SCRIPT_HASH="#####"			# Nombre de dièses (hash) précédant et suivant une chaîne de caractères
+SCRIPT_TAB=">>>>"			# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
+
 # Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
-SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"
-SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"
-SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"
+SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons
+SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 chevrons
+SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 chevrons
+
 # Saut de ligne
 SCRIPT_VOID=""
 
@@ -85,10 +85,13 @@ SCRIPT_VERSION="2.0"
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
 cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET"; $SCRIPT_SLEEP_INST_CAT;}
+
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET";}
+
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET";}
+
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET";}
 
@@ -194,14 +197,16 @@ script_init()
 	if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
+		echo "$SCRIPT_VOID"
+		
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$SCRIPT_C_RESET	sudo $0 $USER"
+    	r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
 		echo "$SCRIPT_VOID"
 
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
-		r_echo "$SCRIPT_C_RESET	$0 $USER"
+		r_echo "$SCRIPT_C_RESET	$0 $USER \$PWD"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 
@@ -214,23 +219,35 @@ script_init()
 			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
 			
 			handle_errors "UN OU PLUSIEURS ARGUMENTS MANQUANTS"
-			
-		# Si le nom d'utilisateur entré ne correspond pas au nom de l'utilisateur
-		elif test ${SCRIPT_USER_NAME} != "$"; then
 
-		# Si le chemin du fichier passé en deuxième argument ne correspond pas à son chemin réel
-		elif test "$(pwd)" != "${SCRIPT_PWD}"; then
-			r_echo "Veuillez entrer le bon chemin de votre fichier depuis la racine"
-			echo "$SCRIPT_VOID"
-
-			r_echo "Si vous vous trouvez dans le même dossier que le script, vous pouvez entrer la variable d'environnement \"$PWD\""
-			r_echo "pour entrer plus rapidement le chemin"
-			
-			handle_errors "LE CHEMIN DU FICHIER \"beta.sh\" NE CORRESPOND PAS"
+		# Sinon, si les deux arguments attendus sont entrés
 		else
-			if test -d "/home/${SCRIPT_USER_NAME}"; then
+			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
+			if test ! -d "/home/${SCRIPT_USER_NAME}"; then
+				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
+				echo "$SCRIPT_VOID"
+				
+				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
+			# Si la chaîne de caractères de sortie de la commande "pwd" ne correspond pas au chemin d'exécution du fichier
+			elif test "$(pwd)" != "${SCRIPT_PWD}"; then
+				r_echo "Veuillez entrer le bon chemin de votre fichier depuis la racine"
+				echo "$SCRIPT_VOID"
+
+				r_echo "Astuce : Si vous vous trouvez dans le même dossier que le script, vous pouvez entrer la variable d'environnement \"$PWD\""
+				r_echo "pour entrer plus rapidement le chemin"
+				
+				handle_errors "LE CHEMIN DU FICHIER SHELL NE CORRESPOND PAS"
+			# Si aucun des deux arguments ne correspondent à ce qui est attendu
+			elif test ! -d "/home/${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
+				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin de votre fichier depuis la racine"
+				
+				handle_errors "LE NOM D'UTILISATEUR ET LE CHEMIN NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DE VOTRE FICHIER SHELL"
+			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
+			elif test -d "/home/${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
 				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le nom du dossier actuel"
 				v_echo "Lancement du script"
+
+				return
 			fi
 		fi
 	fi
@@ -385,10 +402,10 @@ makedir()
 # Création d'un dossier temporaire pour y stocker des fichiers temporaires
 mktmpdir()
 {
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS le dossier \"${SCRIPT_PARENTDIR}\""
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$PWD\""
 
 	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
-	makedir "$SCRIPT_PARENTDIR" "$SCRIPT_TMPDIR"
+	makedir "$PWD" "$SCRIPT_TMPDIR"
 
 	# Déplacement vers le dossier temporaire
 	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
@@ -787,7 +804,7 @@ sleep 1
 echo "$SCRIPT_VOID"
 
 software_dir="Logiciels.Linux-reinstall.d"
-makedir "$SCRIPT_PARENTDIR" "$software_dir"
+makedir "$SCRIPT_HOMEDIR" "$software_dir"
 echo "$SCRIPT_VOID"
 
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
