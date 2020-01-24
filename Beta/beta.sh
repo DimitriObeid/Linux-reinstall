@@ -190,29 +190,47 @@ handle_errors()
 # Détection de l'exécution du script en mode super-administrateur (root)
 script_init()
 {
+	# Si le script n'est pas lancé en mode super-utilistaeur
 	if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
     	r_echo "$SCRIPT_C_RESET	sudo $0 $USER"
+		echo "$SCRIPT_VOID"
+
 		r_echo "Ou connectez vous directement en tant que super-administrateur"
 		r_echo "Et tapez cette commande :"
 		r_echo "$SCRIPT_C_RESET	$0 $USER"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+
+	# Sinon, si le script est lancé en mode super-utilisateur
 	else
+		# Si un seul ou aucun des deux arguments attendus n'est entré
 		if test -z "${SCRIPT_USER_NAME}" || test -z "${SCRIPT_PWD}"; then
-			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script, puis celui de votre"
+			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
+			r_echo "puis celui du chemin du fichier Shell depuis la racine."
 			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
 			
-			handle_errors "MAUVAIS ARGUMENTS ENTRÉ"
+			handle_errors "UN OU PLUSIEURS ARGUMENTS MANQUANTS"
+			
+		# Si le nom d'utilisateur entré ne correspond pas au nom de l'utilisateur
+		elif test ${SCRIPT_USER_NAME} != "$"; then
+
+		# Si le chemin du fichier passé en deuxième argument ne correspond pas à son chemin réel
+		elif test "$(pwd)" != "${SCRIPT_PWD}"; then
+			r_echo "Veuillez entrer le bon chemin de votre fichier depuis la racine"
+			echo "$SCRIPT_VOID"
+
+			r_echo "Si vous vous trouvez dans le même dossier que le script, vous pouvez entrer la variable d'environnement \"$PWD\""
+			r_echo "pour entrer plus rapidement le chemin"
+			
+			handle_errors "LE CHEMIN DU FICHIER \"beta.sh\" NE CORRESPOND PAS"
 		else
 			if test -d "/home/${SCRIPT_USER_NAME}"; then
 				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le nom du dossier actuel"
 				v_echo "Lancement du script"
-			else
-				handle_errors "MAUVAIS NOM D'UTILISATEUR RENTRÉ"
 			fi
 		fi
 	fi
@@ -482,8 +500,8 @@ pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
+	j_echo "Installation du paquet $snap_name"
 	snap_name="@"
-	j_echo "Installation du paquet $snap_name" | cutstr
 
     snap install "$snap_name"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
 	echo "$SCRIPT_VOID"
