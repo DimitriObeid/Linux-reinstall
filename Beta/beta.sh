@@ -290,16 +290,17 @@ launch_script()
 # Fonction de création rapide de dossiers
 makedir()
 {
-	dirparent=$1	# Emplacement de création du dossier depuis la racine (dossier parent)
-	dirname=$2		# Nom du dossier à créer dans son dossier parent
+	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
+	dirname=$2						# Nom du dossier à créer dans son dossier parent
 	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
 
 	if test ! -d "$dirpath"; then
 		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
 		echo "$SCRIPT_VOID"
 
-		mkdir "$dirpath" || handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)"
-		v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
+		mkdir "$dirpath" \
+			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
+			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
@@ -320,32 +321,17 @@ makedir()
 				"oui")
 					echo "$SCRIPT_VOID"
 
-					j_echo "Déplacement vers le dossier cible pour supprimer récursivement son contenu en toute sécurité"
-					cd "$dirpath" || handle_errors "LE DOSSIER \"$dirpath\" N'EXISTE PAS" && pwd
-					echo "$SCRIPT_VOID"
+					j_echo "Suppression du contenu du dossier \"$dirpath\""
 
-					# MESURE DE SÉCURITÉ !!! NE PAS ENLEVER LA CONDITION SUIVANTE !!!
-					# On vérifie que l'on se trouve bien dans le dossier "Linux-reinstall.tmp.d"
-					# AVANT de supprimer tout le contenu récursivement (-r) ET de force (-f)
-					if test -d "$(pwd)" == "$dirpath"; then
-						j_echo "Suppression du contenu du dossier \"$dirpath\""
-						rm -r -f *
-						echo "$SCRIPT_VOID"
-
-						# On vérifie que le contenu du dossier a bien été intégralement supprimé
-						if test ! "$(ls -A "$dirname")"; then
-							v_echo "Le contenu du dosssier $dirpath a été effacé avec succès. Retour vers le dossier d'origine"
-							cd - || handle_errors "RETOUR VERS LE DOSSIER D'ORIGINE IMPOSSIBLE" && v_echo ""
+					# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
+					# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
+					rm -r -f "${dirpath/:?}/"* \
+						|| { 
+							r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
+							r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
 							echo "$SCRIPT_VOID"
-
-							# On teste si le retour vers le dossier d'origine a bien été effectué avec succès
-							if test -d "$(pwd)" == "$OLDPWD"; then
-								v_echo "Retour vers le dossier \"$PWD\" effectué avec succès"
-							fi
-						else
-							handle_errors "LE CONTENU DU DOSSIER \"$dirpath\" N'A PAS PU ÊTRE SUPPRIMÉ RÉCURSIVEMENT"
-						fi
-					fi
+							} \
+						&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
 					echo "$SCRIPT_VOID"
 
 					return
@@ -370,7 +356,7 @@ makedir()
 	
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
 	# ET que ce dossier est vide
-	else test -d "$dirpath"
+	elif test -d "$dirpath"; then
 		v_echo "Le dossier \"$dirpath\" existe déjà"
 		echo "$SCRIPT_VOID"
 		
@@ -538,14 +524,19 @@ set_sudo()
 
     j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
 
-	command -v sudo > /dev/null 2>&1 || { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo ;} \
-	&& { v_echo "La commande \"sudo\" est déjà installée sur votre système" ;}
+	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
+	command -v sudo > /dev/null 2>&1 \
+		|| { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo ;} \
+		&& { v_echo "La commande \"sudo\" est déjà installée sur votre système"; echo "$SCRIPT_VOID"; }
 
-	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis mon dépôt Git : "
-	j_echo "$SCRIPT_REPO (dans le dossier \"Ressources\")"
+	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis "
+	j_echo "le dossier des fichiers ressources de mon dépôt Git : "
+	j_echo "\"$SCRIPT_REPO/tree/master/Ressources\""
 	echo "$SCRIPT_VOID"
 
 	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
+	echo "$SCRIPT_VOID"
+
 	echo ">>>> REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
 	echo ">>>> Si vous avez déjà un fichier sudoers modifié, TOUS les changements effectués seront écrasés"
 	echo "$SCRIPT_VOID"
@@ -558,38 +549,42 @@ set_sudo()
 			"oui")
 				echo "$SCRIPT_VOID"
 
-				j_echo "Entrez votre nom d'utilisateur, le script s'en sert pour vous garantir les droits de super-utilisateur"
+				# Téléchargement du fichier sudoers configuré
+				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
+				echo "$SCRIPT_VOID"
+				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers \
+					|| { r_echo "Impossible de télécharger le fichier \"sudoers\""; return; } \
+					&& j_echo "Fichier \"sudoers\" téléchargé avec succès"
 				echo "$SCRIPT_VOID"
 
-				read -r -p "Votre nom ? : " rep_sudo_name
+				# Déplacement du fichier vers le dossier "/etc/"
+				j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
+				echo "$SCRIPT_VOID"
 
-				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
-				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers
+				mv "sudoers" /etc/sudoers \
+					|| { r_echo "Impossible de déplacer le fichier \"sudoers\" vers le dossier \"/etc/\""; return; } \
+					&& { v_echo "Fichier sudoers déplacé avec succès vers le dossier "; }
+				echo "$SCRIPT_VOID"
 
-				if ! test -f "sudoers"; then
-					handle_errors "FICHIER SUDOERS MANQUANT"
-				else
-					j_echo "Fichier \"sudoers\" téléchargé avec succès"
-					j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
-					mv "sudoers" /etc/sudoers
-					echo "$SCRIPT_VOID"
-
-					j_echo "Ajout de l'utilisateur $rep_sudo_name au groupe sudo"
-					usermod -aG root "$rep_sudo_name"
-					echo "$SCRIPT_VOID"
-
-					v_echo "L'utilisateur $rep_sudo_name a été ajouté au groupe sudo avec succès"
-				fi
+				# Ajout de l'utilisateur au groupe "sudo"
+				j_echo "Ajout de l'utilisateur ${SCRIPT_USER_NAME} au groupe sudo"
+				usermod -aG root "${SCRIPT_USER_NAME}" \
+					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USER_NAME\" à la liste des sudoers"; return; } \
+					&& { v_echo "L'utilisateur ${SCRIPT_USER_NAME} a été ajouté au groupe sudo avec succès"; }					
 
 				return
 				;;
 			"non")
+				echo "$SCRIPT_VOID"
+
 				j_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
 				j_echo "Vous pourrez toujours le configurer plus tard"
 
 				return
 				;;
 			*)
+				echo "$SCRIPT_VOID"
+
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				read_sudo
 				;;
@@ -641,6 +636,7 @@ autoremove()
 				echo "$SCRIPT_VOID"
 
 				v_echo "Auto-suppression des paquets obsolètes effectuée avec succès"
+
 				return
 				;;
 			"non")
@@ -648,9 +644,12 @@ autoremove()
 
 				v_echo "Les paquets obsolètes ne seront pas supprimés"
 				v_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
+				
 				return
 				;;
 			*)
+				echo "$SCRIPT_VOID"
+
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				read_autoremove
 				;;
@@ -678,13 +677,19 @@ is_installation_done()
 		read -r -p "Entrez votre réponse : " rep_cp_file
 		case ${rep_cp_file,,} in
 			"oui")
+				echo "$SCRIPT_VOID"
+
 				j_echo "Copie du ficher de réinstallation vers le dossier \"/usr/bin\""
 				cp /usr/bin/
 				;;
 			"non")
+				echo "$SCRIPT_VOID"
+
 				j_echo "Le fichier de réinstallation ne sera pas copié vers le dossier \"/usr/bin\""
 				;;
 			*)
+				echo "$SCRIPT_VOID"
+
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				read_cp_file
 				;;
