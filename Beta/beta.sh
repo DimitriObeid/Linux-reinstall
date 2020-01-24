@@ -488,32 +488,38 @@ software_install()
 #	wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
 #	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
 
-	soft_name=$1					# Nom du logiciel à télécharger
-	wget_dl=$2						# Commande de téléchargement du fichier
-	link=$3							# Lien du fichier à télécharger
-	dirparent=$4					# Nom du dossier parent (Logiciels.Linux-reinstall.d) du logiciel à créer
-	dirname=$5						# Nom du dossier à créer
-	file=$6							# Nom du fichier compressé
-	uncomp=$7						# Commande de décompression
-	dirpath="$dirparent/$dirname"	# Chemin complet du dossier de décompression d'un dossier
+	link=$1									# Lien du fichier à télécharger
+	dirparent="Logiciels.Linux-reinstall.d"	# Nom du dossier parent du logiciel à créer
+	dirname=$2								# Nom du dossier à créer
+	file=$3									# Nom du fichier compressé
+	uncomp=$4								# Commande de décompression
+	dirpath="$dirparent/$dirname"			# Chemin complet du dossier de décompression d'un dossier
 
 	j_echo "Téléchargement du logiciel $soft_name"
-	$wget_dl "$link" || { r_echo "Impossible de télécharger le fichier"; r_echo "Abandon"; return; } \
+	wget "$link" \
+		|| { r_echo "Impossible de télécharger le fichier"; r_echo "Abandon"; return; } \
 		&& v_echo "Le fichier \"$file\" a été téléchargé avec succès"; echo "$SCRIPT_VOID"
 
 	makedir "$dirparent" "$dirname"
 
 	j_echo "Déplacement du fichier compressé \"$file\" vers le dossier \"$dirpath\""
-	mv "$file" "$dirpath" || { r_echo "Le fichier compressé \"$file\" n'a pas été déplacé vers le dossier \"$dirpath\""; return; } \
-		&& v_echo "Le fichier \"$file\" a été déplacé avec succès vers le dossier \"$dirpath\""; echo "$SCRIPT_VOID"
+	mv "$file" "$dirpath" \
+		|| { r_echo "Le fichier compressé \"$file\" n'a pas été déplacé vers le dossier \"$dirpath\""; return; } \
+		&& v_echo "Le fichier \"$file\" a été déplacé avec succès vers le dossier \"$dirpath\""
+	echo "$SCRIPT_VOID"
 
 	j_echo "Décompression du fichier compressé \"$file\""
-	$uncomp "$dirpath/$file" || { r_echo "Impossible de décompresser le fichier $file"; return; } \
-		&& v_echo "Le fichier \"$file\" a été décompressé avec succès dans le dossier \"$dirpath\""; echo "$SCRIPT_VOID"
+	$uncomp "$dirpath/$file" \
+		|| { r_echo "Impossible de décompresser le fichier $file"; return; } \
+		&& v_echo "Le fichier \"$file\" a été décompressé avec succès dans le dossier \"$dirpath\""
+	echo "$SCRIPT_VOID"
 
 	j_echo "Suppression du fichier compressé \"$file\""
 	rm "$dirpath/$file" || { r_echo "La suppression du fichier \"$file\" a échouée"; return; } && \
-		v_echo "Le fichier \"$file\" a été supprimé avec succès"; echo "$SCRIPT_VOID"
+		v_echo "Le fichier \"$file\" a été supprimé avec succès"
+	echo "$SCRIPT_VOID"
+
+	return
 }
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
@@ -591,6 +597,8 @@ set_sudo()
 		esac
 	}
 	read_sudo
+
+	return
 }
 
 # Suppression des paquets obsolètes
@@ -656,6 +664,8 @@ autoremove()
 		esac
 	}
 	read_autoremove
+
+	return
 }
 
 # Fin de l'installation
@@ -680,12 +690,18 @@ is_installation_done()
 				echo "$SCRIPT_VOID"
 
 				j_echo "Copie du ficher de réinstallation vers le dossier \"/usr/bin\""
-				cp /usr/bin/
+				cp /usr/bin/ \
+					|| { r_echo "Le fichier n'a pas pu être copié dans le dossier \"/usr/bin/\""; return; } \
+					&& v_echo "Le fichier a été copié dans le dossier \"/usr/bin/\" avec succès"
+
+				return
 				;;
 			"non")
 				echo "$SCRIPT_VOID"
 
 				j_echo "Le fichier de réinstallation ne sera pas copié vers le dossier \"/usr/bin\""
+				
+				return
 				;;
 			*)
 				echo "$SCRIPT_VOID"
@@ -700,8 +716,9 @@ is_installation_done()
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
     # On tue le processus
 	sudo -k
-
 	echo "$SCRIPT_VOID"
+	
+	return
 }
 
 ################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
@@ -769,8 +786,9 @@ cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Éditeur de code Atom
 snap_install code --classic		# Éditeur de code Visual Studio Code
 pack_install emacs
-wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
-	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
+software_install "JMerise" "wget" "https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip" ""
+#wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
+#	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
 pack_install g++
 pack_install gcc
 pack_install git
