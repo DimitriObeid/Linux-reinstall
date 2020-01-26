@@ -240,14 +240,12 @@ script_init()
 			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
 			if test "$(pwd)" != "/home/${SCRIPT_USER_NAME}/*"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
-				echo "$SCRIPT_VOID"
 				
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
 			# Si la chaîne de caractères de sortie de la commande "pwd" ne correspond pas au chemin d'exécution du fichier
 			elif test "$(pwd)" != "${SCRIPT_PWD}"; then
 				r_echo "Veuillez entrer le bon chemin de votre fichier depuis la racine"
-				echo "$SCRIPT_VOID"
 
 				r_echo "Astuce : Si vous vous trouvez dans le même dossier que le script, vous pouvez entrer la variable d'environnement \"$PWD\""
 				r_echo "pour entrer plus rapidement le chemin"
