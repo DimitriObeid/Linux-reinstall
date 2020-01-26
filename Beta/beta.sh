@@ -238,7 +238,7 @@ script_init()
 		# Sinon, si les deux arguments attendus sont entrés
 		else
 			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
-			if test ! -d "/home/${SCRIPT_USER_NAME}" || test "$(pwd)" != "/home/${SCRIPT_USER_NAME}"; then
+			if test "$(pwd)" != "/home/${SCRIPT_USER_NAME}/*"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 				
