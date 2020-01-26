@@ -205,7 +205,7 @@ script_init()
     	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
 		echo "$SCRIPT_VOID"
-		
+
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
     	r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
@@ -223,49 +223,54 @@ script_init()
 		if test -z "${SCRIPT_USER_NAME}" && test -z "${SCRIPT_PWD}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			r_echo "puis celui du chemin du fichier Shell depuis la racine."
-			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
-			
+			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur \$PWD"
+
 			handle_errors "TOUS LES ARGUMENTS MANQUENT À L'APPEL"
-		
+
 		# Si un seul des deux arguments attendus n'est entré
 		elif test -z "${SCRIPT_USER_NAME}" || test -z "${SCRIPT_PWD}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			r_echo "puis celui du chemin du fichier Shell depuis la racine."
-			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
-			
+			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur \$PWD"
+
 			handle_errors "UN ARGUMENT MANQUE À L'APPEL"
 
 		# Sinon, si les deux arguments attendus sont entrés
 		else
 			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
-			# On exécute la commande "pwd" pour afficher 
-			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != ${SCRIPT_USER_NAME}; then
+			# On exécute la commande "pwd" pour afficher le chemin du dossier actuel, puis on coupe
+			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
-				
+
 				r_echo "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
 				r_echo "veuillez copier ou déplacer le script dans un répertoire de votre dossier personnel et réexécuter le script."
-				
+
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
-			# Si la chaîne de caractères de sortie de la commande "pwd" ne correspond pas au chemin d'exécution du fichier
+			# Si la chaîne de caractères de sortie de la commande "pwd" ne correspond pas au chemin du dossier actuel
 			elif test "$(pwd)" != "${SCRIPT_PWD}"; then
-				r_echo "Veuillez entrer le bon chemin de votre fichier depuis la racine"
+				r_echo "Veuillez entrer le bon chemin du dossier actuel depuis la racine"
+				echo "$SCRIPT_VOID"
 
-				r_echo "Astuce : Si vous vous trouvez dans le même dossier que le script, vous pouvez entrer la variable d'environnement \"$PWD\""
-				r_echo "pour entrer plus rapidement le chemin"
-				
-				handle_errors "LE CHEMIN DU FICHIER SHELL NE CORRESPOND PAS"
+				r_echo "Astuce : Pour éviter de rentrer manuellement le chemin complet du dossier actuel, vous pouvez entrer la"
+				r_echo "variable d'environnement \"$PWD\" pour rentrer plus rapidement le chemin"
+				echo "$SCRIPT_VOID"
+
+				r_echo "ATTENTION : SI VOUS AVEZ MANUELLEMENT ENTRÉ LE CHEMIN DU DOSSIER ACTUEL,"
+				r_echo "VEILLEZ À NE SURTOUT PAS AJOUTER DE SLASH APRÈS LE NOM DU DOSSIER ACTUEL !"
+
+				handle_errors "LE CHEMIN DU DOSSIER ACTUEL NE CORRESPOND PAS"
 
 			# Si aucun des deux arguments ne correspondent à ce qui est attendu
-			elif test ! -d "/home/${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
-				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin de votre fichier depuis la racine"
+			elif test ! "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
+				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
 				
-				handle_errors "LE NOM D'UTILISATEUR ET LE CHEMIN NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DE VOTRE FICHIER SHELL"
+				handle_errors "LE NOM D'UTILISATEUR ET LE CHEMIN NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DU DOSSIER ACTUEL"
 
 			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
-			elif test -d "/home/${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
-				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le nom du dossier actuel"
+			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
+				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le chemin du dossier actuel"
 				v_echo "Lancement du script"
 
 				return
