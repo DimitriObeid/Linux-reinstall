@@ -238,8 +238,13 @@ script_init()
 		# Sinon, si les deux arguments attendus sont entrés
 		else
 			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
-			if test ${SCRIPT_USER_NAME} != "$(pwd | cut -d '/' -f-3)"; then
+			# On exécute la commande "pwd" pour afficher 
+			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != ${SCRIPT_USER_NAME}; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
+				echo "$SCRIPT_VOID"
+				
+				r_echo "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
+				r_echo "veuillez copier ou déplacer le script dans un répertoire de votre dossier personnel et réexécuter le script."
 				
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
