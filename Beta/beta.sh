@@ -107,8 +107,11 @@ draw_header_line()
 		echo -n -e "$line_color"
 	fi
 
-	# Affichage du caractère souhaité sur toute la ligne. Pur cela, on commence à la première colonne (1), 
-	# puis on affiche chaque caractère (..) jusqu'à la fin de la ligne, délimité par la valeur retournée par
+	# Affichage du caractère souhaité sur toute la ligne. Pour cela, on commence à la lire à partir de la première colonne (1), 
+	# puis, on parcourt toute la colonne jusqu'à la fin de la ligne. À chaque fin de boucle, un caractère est affiché, coloré
+	# selon l'encodage de la couleur stocké dans la variable 
+	
+	# délimité par la valeur retournée par
 	# "tput cols" (affichage du nombre de colonnes séparant la bordure gauche de la bordure droite de la zone
 	# de texte du terminal), dont la variable "$SCRIPT_COLS" stocke la commande d'exécution.
 	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
@@ -128,9 +131,12 @@ draw_header_line()
 # Affichage du texte des headers
 script_header()
 {
-	header_string=$1
+	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
-	# Définition de la couleur de la ligne du caractère souhaité
+	# Définition de la couleur de la ligne du caractère souhaité.
+	# Il s'agit du même code définissant la première condition de la fonction "draw_header_line", 
+	# mais il a été réécrit ici pour définir l'affichage de la couleur sur chaque caractère lors de l'appel de la 
+	# fonction "script_header()", car les conditions d'une fonction ne peuvent pas être utilisées depuis une autre fonction
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
@@ -157,8 +163,9 @@ script_header()
 # Fonction de gestion d'erreurs fatales (impossibles à corriger)
 handle_errors()
 {
-	error_result=$1
+	error_result=$1		# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
+	# Même chose que dans la première condition de la fonction "script_header"
 	if test "$error_color" = ""; then
 		error_color=$SCRIPT_C_ROUGE
 	fi
@@ -212,22 +219,31 @@ script_init()
 
 	# Sinon, si le script est lancé en mode super-utilisateur
 	else
-		# Si un seul ou aucun des deux arguments attendus n'est entré
-		if test -z "${SCRIPT_USER_NAME}" || test -z "${SCRIPT_PWD}"; then
+		# Si aucun des deux arguments attendus n'est entré
+		if test -z "${SCRIPT_USER_NAME}" && test -z "${SCRIPT_PWD}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			r_echo "puis celui du chemin du fichier Shell depuis la racine."
 			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
 			
-			handle_errors "UN OU PLUSIEURS ARGUMENTS MANQUANTS"
+			handle_errors "TOUS LES ARGUMENTS MANQUENT À L'APPEL"
+		
+		# Si un seul des deux arguments attendus n'est entré
+		elif test -z "${SCRIPT_USER_NAME}" || test -z "${SCRIPT_PWD}"; then
+			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
+			r_echo "puis celui du chemin du fichier Shell depuis la racine."
+			r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
+			
+			handle_errors "UN ARGUMENT MANQUE À L'APPEL"
 
 		# Sinon, si les deux arguments attendus sont entrés
 		else
 			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
-			if test ! -d "/home/${SCRIPT_USER_NAME}"; then
+			if test ! -d "/home/${SCRIPT_USER_NAME}" || test "$(pwd)" != "/home/${SCRIPT_USER_NAME}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 				
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
+
 			# Si la chaîne de caractères de sortie de la commande "pwd" ne correspond pas au chemin d'exécution du fichier
 			elif test "$(pwd)" != "${SCRIPT_PWD}"; then
 				r_echo "Veuillez entrer le bon chemin de votre fichier depuis la racine"
@@ -237,11 +253,13 @@ script_init()
 				r_echo "pour entrer plus rapidement le chemin"
 				
 				handle_errors "LE CHEMIN DU FICHIER SHELL NE CORRESPOND PAS"
+
 			# Si aucun des deux arguments ne correspondent à ce qui est attendu
 			elif test ! -d "/home/${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin de votre fichier depuis la racine"
 				
 				handle_errors "LE NOM D'UTILISATEUR ET LE CHEMIN NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DE VOTRE FICHIER SHELL"
+
 			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
 			elif test -d "/home/${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
 				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le nom du dossier actuel"
@@ -312,7 +330,11 @@ launch_script()
 	            ;;
             # Si une réponse différente de "oui" ou de "non" est rentrée
 			*)
+				echo "$SCRIPT_VOID"
+
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
+				echo "$SCRIPT_VOID"
+				
 				# On rappelle la fonction "read_launch_script" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée
 				read_launch_script
 				;;
@@ -529,12 +551,13 @@ software_install()
 #	wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
 #	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
 
-	link=$1									# Lien du fichier à télécharger
-	dirparent="Logiciels.Linux-reinstall.d"	# Nom du dossier parent du logiciel à créer
-	dirname=$2								# Nom du dossier à créer
-	file=$3									# Nom du fichier compressé
-	uncomp=$4								# Commande de décompression
-	dirpath="$dirparent/$dirname"			# Chemin complet du dossier de décompression d'un dossier
+	link=$1							# Lien du fichier à télécharger
+	# Nom du dossier parent du logiciel à créer
+	dirparent="/home/${SCRIPT_USER_NAME}/Logiciels.Linux-reinstall.d"
+	dirname=$2						# Nom du dossier à créer
+	file=$3							# Nom du fichier compressé
+	uncomp=$4						# Commande de décompression
+	dirpath="$dirparent/$dirname"	# Chemin complet du dossier de décompression d'un dossier
 
 	j_echo "Téléchargement du logiciel $soft_name"
 	wget "$link" \
@@ -556,8 +579,8 @@ software_install()
 	echo "$SCRIPT_VOID"
 
 	j_echo "Suppression du fichier compressé \"$file\""
-	rm "$dirpath/$file" || { r_echo "La suppression du fichier \"$file\" a échouée"; return; } && \
-		v_echo "Le fichier \"$file\" a été supprimé avec succès"
+	rm "$dirpath/$file" || { r_echo "La suppression du fichier \"$file\" a échouée"; return; } \
+		&& v_echo "Le fichier \"$file\" a été supprimé avec succès"
 	echo "$SCRIPT_VOID"
 
 	return
@@ -714,10 +737,10 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
 
-	v_echo "Retour vers le dossier $OLDPWD et suppression du dossier temporaire $SCRIPT_TMPDIR"
+	v_echo "Retour vers le dossier ${SCRIPT_PWD} et suppression du dossier temporaire $SCRIPT_TMPDIR"
     # On retourne vers le dossier d'origine (cd -), puis on redirige le texte affichant le dossier vers lequel on s'est redirigé
     # vers le périphérique nul ( > /dev/null). Enfin, on supprime le dossier temporaire
-	cd - > /dev/null && rm -r -f "$TMPPATH"
+	cd ${SCRIPT_PWD} > /dev/null && rm -r -f "$TMPPATH"
 	echo "$SCRIPT_VOID"
 
 	# Copie du fichier de réinstallation vers "/usr/bin" pour que l'utilisateur puisse de nouveau appeler le script si besoin
