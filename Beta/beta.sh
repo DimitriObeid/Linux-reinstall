@@ -135,7 +135,7 @@ script_header()
 
 	# Définition de la couleur de la ligne du caractère souhaité.
 	# Il s'agit du même code définissant la première condition de la fonction "draw_header_line", 
-	# mais il a été réécrit ici pour définir l'affichage de la couleur sur chaque caractère lors de l'appel de la 
+	# mais il a été réécrit ici pour définir l'affichage de la véritable couleur sur chaque caractère lors de l'appel de la 
 	# fonction "script_header()", car les conditions d'une fonction ne peuvent pas être utilisées depuis une autre fonction
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne.
