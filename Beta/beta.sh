@@ -556,12 +556,13 @@ software_install()
 #	wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
 #	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
 
-	link=$1							# Lien du fichier à télécharger
+	cmd=$1							# Commande de téléchargement
+	link=$2							# Lien du fichier à télécharger
 	# Nom du dossier parent du logiciel à créer
 	dirparent="/home/${SCRIPT_USER_NAME}/Logiciels.Linux-reinstall.d"
-	dirname=$2						# Nom du dossier à créer
-	file=$3							# Nom du fichier compressé
-	uncomp=$4						# Commande de décompression
+	dirname=$3						# Nom du dossier à créer
+	file=$4							# Nom du fichier compressé
+	uncomp=$5						# Commande de décompression
 	dirpath="$dirparent/$dirname"	# Chemin complet du dossier de décompression d'un dossier
 
 	j_echo "Téléchargement du logiciel $soft_name"
