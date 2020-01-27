@@ -441,6 +441,8 @@ mktmpdir()
 	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
 	cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?" \
 		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
+
+	return
 }
 
 ## CONNEXION À INTERNET ET MISES À JOUR
