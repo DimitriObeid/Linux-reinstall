@@ -107,10 +107,10 @@ draw_header_line()
 		echo -n -e "$line_color"
 	fi
 
-	# Affichage du caractère souhaité sur toute la ligne. Pour cela, on commence à la lire à partir de la première colonne (1), 
+	# Affichage du caractère souhaité sur toute la ligne. Pour cela, on commence à la lire à partir de la première colonne (1),
 	# puis, on parcourt toute la colonne jusqu'à la fin de la ligne. À chaque fin de boucle, un caractère est affiché, coloré
-	# selon l'encodage de la couleur stocké dans la variable 
-	
+	# selon l'encodage de la couleur stocké dans la variable
+
 	# délimité par la valeur retournée par
 	# "tput cols" (affichage du nombre de colonnes séparant la bordure gauche de la bordure droite de la zone
 	# de texte du terminal), dont la variable "$SCRIPT_COLS" stocke la commande d'exécution.
@@ -134,8 +134,8 @@ script_header()
 	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
 	# Définition de la couleur de la ligne du caractère souhaité.
-	# Il s'agit du même code définissant la première condition de la fonction "draw_header_line", 
-	# mais il a été réécrit ici pour définir l'affichage de la véritable couleur sur chaque caractère lors de l'appel de la 
+	# Il s'agit du même code définissant la première condition de la fonction "draw_header_line",
+	# mais il a été réécrit ici pour définir l'affichage de la véritable couleur sur chaque caractère lors de l'appel de la
 	# fonction "script_header()", car les conditions d'une fonction ne peuvent pas être utilisées depuis une autre fonction
 	if test "$header_color" = ""; then
         # Définition de la couleur de la ligne.
@@ -185,7 +185,7 @@ handle_errors()
 	echo "$SCRIPT_VOID"
 
 	$SCRIPT_SLEEP_HEADER
-	r_echo "Une erreur fatale s'est produite :" 
+	r_echo "Une erreur fatale s'est produite :"
 	r_echo "$error_result"
 	echo "$SCRIPT_VOID"
 
@@ -265,7 +265,7 @@ script_init()
 			# Si aucun des deux arguments ne correspondent à ce qui est attendu
 			elif test ! "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
-				
+
 				handle_errors "LE NOM D'UTILISATEUR ET LE CHEMIN NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DU DOSSIER ACTUEL"
 
 			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
@@ -342,7 +342,7 @@ launch_script()
 
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				echo "$SCRIPT_VOID"
-				
+
 				# On rappelle la fonction "read_launch_script" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée
 				read_launch_script
 				;;
@@ -391,7 +391,7 @@ makedir()
 					# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
 					# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
 					rm -r -f "${dirpath/:?}/"* \
-						|| { 
+						|| {
 							r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 							r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
 							echo "$SCRIPT_VOID"
@@ -407,7 +407,7 @@ makedir()
 					j_echo "Le contenu du dossier \"$dirpath\" ne sera pas supprimé."
 					j_echo "En revanche, les fichiers temporaires créés et téléchargés écraseront les fichiers homonymes"
 					echo "$SCRIPT_VOID"
-					
+
 					return
 					;;
 				# Autre chose que "oui" ou "non"
@@ -418,13 +418,13 @@ makedir()
 			esac
 		}
 		read_makedir
-	
+
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
 	# ET que ce dossier est vide
 	elif test -d "$dirpath"; then
 		v_echo "Le dossier \"$dirpath\" existe déjà"
 		echo "$SCRIPT_VOID"
-		
+
 		return
 	fi
 }
@@ -464,7 +464,7 @@ dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_OS_FAMILY", 
+	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_OS_FAMILY",
 	# puis on appelle sa commande de mise à jour des paquets installés
 	case "$SCRIPT_OS_FAMILY" in
 		opensuse)
@@ -540,7 +540,7 @@ pack_install()
 		esac
 	} \
 	&& v_echo "Le paquet $package_name est déjà installé sur votre système"
-	
+
 	return
 }
 
@@ -648,7 +648,7 @@ set_sudo()
 				j_echo "Ajout de l'utilisateur ${SCRIPT_USER_NAME} au groupe sudo"
 				usermod -aG root "${SCRIPT_USER_NAME}" \
 					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USER_NAME\" à la liste des sudoers"; return; } \
-					&& { v_echo "L'utilisateur ${SCRIPT_USER_NAME} a été ajouté au groupe sudo avec succès"; }					
+					&& { v_echo "L'utilisateur ${SCRIPT_USER_NAME} a été ajouté au groupe sudo avec succès"; }
 
 				return
 				;;
@@ -724,7 +724,7 @@ autoremove()
 
 				v_echo "Les paquets obsolètes ne seront pas supprimés"
 				v_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
-				
+
 				return
 				;;
 			*)
@@ -748,7 +748,7 @@ is_installation_done()
 	v_echo "Retour vers le dossier ${SCRIPT_PWD} et suppression du dossier temporaire $SCRIPT_TMPDIR"
     # On retourne vers le dossier d'origine (cd -), puis on redirige le texte affichant le dossier vers lequel on s'est redirigé
     # vers le périphérique nul ( > /dev/null). Enfin, on supprime le dossier temporaire
-	cd ${SCRIPT_PWD} > /dev/null && rm -r -f "$TMPPATH"
+	cd "${SCRIPT_PWD}" > /dev/null && rm -r -f "$TMPPATH"
 	echo "$SCRIPT_VOID"
 
 	# Copie du fichier de réinstallation vers "/usr/bin" pour que l'utilisateur puisse de nouveau appeler le script si besoin
@@ -764,7 +764,9 @@ is_installation_done()
 				j_echo "Copie du ficher de réinstallation vers le dossier \"/usr/bin\""
 				cp /usr/bin/ \
 					|| { r_echo "Le fichier n'a pas pu être copié dans le dossier \"/usr/bin/\""; return; } \
-					&& v_echo "Le fichier a été copié dans le dossier \"/usr/bin/\" avec succès"
+					&& v_echo "Le fichier a été copié dans le dossier \"/usr/bin/\" avec succès"; \
+					v_echo "Appelez le directement dans le terminal en tapant simplement$C_RESET \"beta.sh\"$C_VERT"
+				echo "$SCRIPT_VOID"
 
 				return
 				;;
@@ -772,7 +774,8 @@ is_installation_done()
 				echo "$SCRIPT_VOID"
 
 				j_echo "Le fichier de réinstallation ne sera pas copié vers le dossier \"/usr/bin\""
-				
+				echo "$SCRIPT_VOID"
+
 				return
 				;;
 			*)
@@ -789,7 +792,7 @@ is_installation_done()
     # On tue le processus
 	sudo -k
 	echo "$SCRIPT_VOID"
-	
+
 	return
 }
 
