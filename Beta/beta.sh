@@ -47,7 +47,7 @@ SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporai
 
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"			# Nom du dossier temporaire
-SCRIPT_TMPPATH="$SCRIPT_HOMEDIR/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPPATH="${SCRIPT_PWD}/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # RESSOURCES
