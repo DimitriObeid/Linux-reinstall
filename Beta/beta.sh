@@ -621,7 +621,7 @@ set_sudo()
 	echo ">>>> Si vous avez déjà un fichier sudoers modifié, TOUS les changements effectués seront écrasés"
 	echo "$SCRIPT_VOID"
 
-	read_sudo()
+	read_set_sudo()
 	{
 		read -r -p "Entrez votre réponse : " rep_sudo
 
@@ -666,11 +666,11 @@ set_sudo()
 				echo "$SCRIPT_VOID"
 
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
-				read_sudo
+				read_set_sudo
 				;;
 		esac
 	}
-	read_sudo
+	read_set_sudo
 
 	return
 }
