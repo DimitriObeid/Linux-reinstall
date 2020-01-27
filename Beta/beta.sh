@@ -515,34 +515,28 @@ pack_install()
 		$SCRIPT_SLEEP_INST
 	}
 
-	# On cherche à savoir si le paquet souhaité est déjà installé sur le disque en utilisant des redirections.
-	# Si c'est le cas, le script affiche que le paquet est déjà installé et ne perd pas de temps à le réinstaller.
-	# Sinon, le script installe le paquet manquant.
+	j_echo "Installation de $package_name"
 
-	command -v "$package_name" > /dev/null || \
-	{
-		j_echo "Installation de $package_name"
+	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+	case $SCRIPT_OS_FAMILY in
+		opensuse)
+			pack_manager_install zypper -y install
+			;;
+		archlinux)
+			pack_manager_install pacman --noconfirm -S
+			;;
+		fedora)
+			pack_manager_install dnf -y install
+			;;
+		debian)
+			pack_manager_install apt -y install
+			;;
+		gentoo)
+			pack_manager_install emerge
+			;;
+	esac
 
-		# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-		case $SCRIPT_OS_FAMILY in
-			opensuse)
-				pack_manager_install zypper -y install
-				;;
-			archlinux)
-				pack_manager_install pacman --noconfirm -S
-				;;
-			fedora)
-				pack_manager_install dnf -y install
-				;;
-			debian)
-				pack_manager_install apt -y install
-				;;
-			gentoo)
-				pack_manager_install emerge
-				;;
-		esac
-	} \
-	&& v_echo "Le paquet $package_name est déjà installé sur votre système"
+	v_echo "Le paquet $package_name est déjà installé sur votre système"
 
 	return
 }
@@ -550,10 +544,10 @@ pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
-	j_echo "Installation du paquet $snap_name"
-	snap_name="$@"
+	snap_name="$@" # Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
+	j_echo "Installation du paquet \"$snap_name\""
 
-    snap install "$snap_name"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
+    snap install "$snap_name"
 	echo "$SCRIPT_VOID"
 }
 
@@ -834,6 +828,7 @@ command -v curl python-pip snapd wget > /dev/null 2>&1 \
 set_sudo
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
+# Affichage du message de création du dossier "Logiciels.Linux-reinstall.d"
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
 
 j_echo "Les logiciels téléchargés via la commande \"wget\" sont déplacés vers le nouveau dossier \"Logiciels.Linux-reinstall\","
@@ -841,9 +836,9 @@ j_echo "localisé dans votre dossier personnel"
 sleep 1
 echo "$SCRIPT_VOID"
 
+# Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
 software_dir="Logiciels.Linux-reinstall.d"
 makedir "$SCRIPT_HOMEDIR" "$software_dir"
-echo "$SCRIPT_VOID"
 
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 v_echo "La partie d'installation de vos programmes commence véritablement"
@@ -851,7 +846,6 @@ sleep 1
 echo "$SCRIPT_VOID"
 
 sleep 3
-
 
 # Commandes
 cats_echo "INSTALLATION DES COMMANDES PRATIQUES"
