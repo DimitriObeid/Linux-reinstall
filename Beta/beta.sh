@@ -435,7 +435,7 @@ mktmpdir()
 	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$PWD\""
 
 	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
-	makedir "$PWD" "$SCRIPT_TMPDIR"
+	makedir "${SCRIPT_PWD}" "$SCRIPT_TMPDIR"
 
 	# Déplacement vers le dossier temporaire
 	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
