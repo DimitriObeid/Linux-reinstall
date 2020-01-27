@@ -244,7 +244,7 @@ script_init()
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
 
-				handle_errors "LES DEUX ARGUMENTS NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DU DOSSIER ACTUEL"
+				handle_errors "LES DEUX ARGUMENTS NE CORRESPONDENT Ni À VOTRE NOM D'UTILISATEUR, NI AU CHEMIN DU DOSSIER ACTUEL"
             # Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
 			# On exécute la commande "pwd" pour afficher le chemin du dossier actuel, puis on coupe
 			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
@@ -368,6 +368,8 @@ makedir()
 		mkdir "$dirpath" \
 			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
+		echo "$SCRIPT_VOID"
+		
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
