@@ -551,7 +551,7 @@ pack_install()
 snap_install()
 {
 	j_echo "Installation du paquet $snap_name"
-	snap_name="@"
+	snap_name="$@"
 
     snap install "$snap_name"    # Utilisation d'un tableau dynamique d'arguments pour ajouter des options
 	echo "$SCRIPT_VOID"
