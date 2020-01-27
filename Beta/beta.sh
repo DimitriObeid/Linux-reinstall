@@ -609,9 +609,9 @@ set_sudo()
 		|| { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo ;} \
 		&& { v_echo "La commande \"sudo\" est déjà installée sur votre système"; echo "$SCRIPT_VOID"; }
 
-	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré depuis "
-	j_echo "le dossier des fichiers ressources de mon dépôt Git : "
-	j_echo "\"$SCRIPT_REPO/tree/master/Ressources\""
+	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré"
+	j_echo "depuis le dossier des fichiers ressources de mon dépôt Git : "
+	echo ">>>> \"$SCRIPT_REPO/tree/master/Ressources\""
 	echo "$SCRIPT_VOID"
 
 	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
