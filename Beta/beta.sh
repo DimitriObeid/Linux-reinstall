@@ -633,16 +633,16 @@ set_sudo()
 
 				# Téléchargement du fichier sudoers configuré
 				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
+				sleep 1
 				echo "$SCRIPT_VOID"
+
 				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers \
 					|| { r_echo "Impossible de télécharger le fichier \"sudoers\""; return; } \
-					&& j_echo "Fichier \"sudoers\" téléchargé avec succès"
+					&& v_echo "Fichier \"sudoers\" téléchargé avec succès"
 				echo "$SCRIPT_VOID"
 
 				# Déplacement du fichier vers le dossier "/etc/"
 				j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
-				echo "$SCRIPT_VOID"
-
 				mv "sudoers" /etc/sudoers \
 					|| { r_echo "Impossible de déplacer le fichier \"sudoers\" vers le dossier \"/etc/\""; return; } \
 					&& { v_echo "Fichier sudoers déplacé avec succès vers le dossier "; }
