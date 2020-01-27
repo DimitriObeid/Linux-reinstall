@@ -238,9 +238,16 @@ script_init()
 
 		# Sinon, si les deux arguments attendus sont entrés
 		else
-			# Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
+            # Si aucun des deux arguments ne correspondent à ce qui est attendu
+            # Ne pas deplacer cette condition après les autres conditions, sinon seule la sortie d'erreur
+            # de la condition de vérification du premier argument sera prise en compte.
+			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
+				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
+
+				handle_errors "LES DEUX ARGUMENTS NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DU DOSSIER ACTUEL"
+            # Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
 			# On exécute la commande "pwd" pour afficher le chemin du dossier actuel, puis on coupe
-			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
+			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 
@@ -262,12 +269,6 @@ script_init()
 				r_echo "VEILLEZ À NE SURTOUT PAS AJOUTER DE SLASH APRÈS LE NOM DU DOSSIER ACTUEL !"
 
 				handle_errors "LE CHEMIN DU DOSSIER ACTUEL NE CORRESPOND PAS"
-
-			# Si aucun des deux arguments ne correspondent à ce qui est attendu
-			elif test ! "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
-				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
-
-				handle_errors "LE NOM D'UTILISATEUR ET LE CHEMIN NE CORRESPONDENT PAS À VOTRE NOM D'UTILISATEUR ET AU CHEMIN DU DOSSIER ACTUEL"
 
 			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
 			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
@@ -507,11 +508,13 @@ pack_install()
 		$SCRIPT_SLEEP_INST
 
 		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		# ATTENTION
+		# ATTENTION à ne pas mettre le "$@" et le "$package_name" entre les mêmes guillemets, sinon le nom du paquet à installer sera considéré comme 
+		# faisant partie du tableau d'arguments stockant la commande d'installation complète du gestionnaire de paquets
 		"$@" "$package_name"
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
 		echo "$SCRIPT_VOID"
 
+		# Appel de la commande "sleep" mettant en pause le script pendant 0,5 secondes, le temps que l'utilisateur voit si un paquet a bien été installé
 		$SCRIPT_SLEEP_INST
 	}
 
