@@ -104,7 +104,6 @@
             - A:\ **r_echo() :** Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.  
             - A:\ **set_sudo() :** Détecte la commande "sudo" et la télécharge si elle n'est pas installée sur le système.  
             Modifie le contenu du fichier "/etc/sudoers", puis ajoute l'utilisateur actuel à la liste des sudoers, le tout avec son accord et avec l'obtention de son nom via l'appel système **"read"**.  
-            - A:\ **"software_install() :"** Télécharge directement des fichiers de logiciels (généralement compressés) depuis les sources d'un site Internet.  
             - A:\ **v_echo() :** Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.  
 
             - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.  

@@ -365,8 +365,6 @@ makedir()
 
 	if test ! -d "$dirpath"; then
 		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
-		echo "$SCRIPT_VOID"
-
 		mkdir "$dirpath" \
 			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
@@ -429,7 +427,6 @@ makedir()
 	# ET que ce dossier est vide
 	elif test -d "$dirpath"; then
 		v_echo "Le dossier \"$dirpath\" existe déjà"
-		echo "$SCRIPT_VOID"
 
 		return
 	fi
@@ -570,47 +567,6 @@ snap_install()
 	return
 }
 
-software_install()
-{
-#	wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
-#	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
-
-	cmd=$1							# Commande de téléchargement
-	link=$2							# Lien du fichier à télécharger
-	# Nom du dossier parent du logiciel à créer
-	dirparent="/home/${SCRIPT_USER_NAME}/Logiciels.Linux-reinstall.d"
-	dirname=$3						# Nom du dossier à créer
-	file=$4							# Nom du fichier compressé
-	uncomp=$5						# Commande de décompression
-	dirpath="$dirparent/$dirname"	# Chemin complet du dossier de décompression d'un dossier
-
-	j_echo "Téléchargement du logiciel $soft_name"
-	wget "$link" \
-		|| { r_echo "Impossible de télécharger le fichier"; r_echo "Abandon"; return; } \
-		&& v_echo "Le fichier \"$file\" a été téléchargé avec succès"; echo "$SCRIPT_VOID"
-
-	makedir "$dirparent" "$dirname"
-
-	j_echo "Déplacement du fichier compressé \"$file\" vers le dossier \"$dirpath\""
-	mv "$file" "$dirpath" \
-		|| { r_echo "Le fichier compressé \"$file\" n'a pas été déplacé vers le dossier \"$dirpath\""; return; } \
-		&& v_echo "Le fichier \"$file\" a été déplacé avec succès vers le dossier \"$dirpath\""
-	echo "$SCRIPT_VOID"
-
-	j_echo "Décompression du fichier compressé \"$file\""
-	$uncomp "$dirpath/$file" \
-		|| { r_echo "Impossible de décompresser le fichier $file"; return; } \
-		&& v_echo "Le fichier \"$file\" a été décompressé avec succès dans le dossier \"$dirpath\""
-	echo "$SCRIPT_VOID"
-
-	j_echo "Suppression du fichier compressé \"$file\""
-	rm "$dirpath/$file" || { r_echo "La suppression du fichier \"$file\" a échouée"; return; } \
-		&& v_echo "Le fichier \"$file\" a été supprimé avec succès"
-	echo "$SCRIPT_VOID"
-
-	return
-}
-
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection et installation de Sudo
 set_sudo()
@@ -697,6 +653,7 @@ autoremove()
 	script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 
 	j_echo "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
+	echo "$SCRIPT_VOID"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
 	read_autoremove()
@@ -766,7 +723,7 @@ is_installation_done()
 	v_echo "Retour vers le dossier ${SCRIPT_PWD} et suppression du dossier temporaire $SCRIPT_TMPDIR"
     # On retourne vers le dossier d'origine (cd -), puis on redirige le texte affichant le dossier vers lequel on s'est redirigé
     # vers le périphérique nul ( > /dev/null). Enfin, on supprime le dossier temporaire
-	cd "${SCRIPT_PWD}" > /dev/null && rm -r -f "$TMPPATH"
+	cd "${SCRIPT_PWD}" > /dev/null && rm -r -f "$SCRIPT_TMPPATH"
 	echo "$SCRIPT_VOID"
 
 	# Copie du fichier de réinstallation vers "/usr/bin" pour que l'utilisateur puisse de nouveau appeler le script si besoin
@@ -886,9 +843,6 @@ cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Éditeur de code Atom
 snap_install code --classic		# Éditeur de code Visual Studio Code
 pack_install emacs
-software_install "JMerise" "wget" "https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip" ""
-#wget https://www.jfreesoft.com/JMerise/JMeriseEtudiant.zip && makedir "$software_dir" "JMerise" \
-#	&& mv JMeriseEtudiant.zip $software_dir/JMerise && unzip JMeriseEtudiant.zip
 pack_install g++
 pack_install gcc
 pack_install git
