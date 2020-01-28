@@ -136,7 +136,7 @@
 
             - A:\ **$SCRIPT_USER_NAME :** Cette variable garde en mémoire le nom de l'utilisateur passé en premier argument.
             - A:\ **$SCRIPT_PARENTDIR :** Chemin du dossier parent du dossier temporaire.  
-            - A:\ **$SCRIPT_PWD :** Cette variable garde en mémoire le chemin du dossier actuel lors de l'exécution du script, passé en deuxième argument.
+            - A:\ **$SCRIPT_PWD :** Cette variable garde en mémoire le chemin du dossier actuel lors de l'exécution du script, passé en deuxième argument.  
             - A:\ **$SCRIPT_TMPDIR :** Nom du dossier temporaire créé par le script.  
             - A:\ **$SCRIPT_TMPPATH :** Chemin complet du dossier temporaire (chemin du dossier parent + Le nom du dossier temporaire).  
 

@@ -26,10 +26,10 @@ SCRIPT_PWD=$2			# Deuxième argument : Le nom du dossier dans lequel le fichier 
 # Pour changer le timer, changer la valeur de "sleep".
 # Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-SCRIPT_SLEEP="$(sleep .5)"		# Temps d'affichage d'un texte de sous-étape
-SCRIPT_SLEEP_HEADER=sleep\ 1.5 	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
-SCRIPT_SLEEP_INST=sleep\ .5    	# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
-SCRIPT_SLEEP_INST_CAT=sleep\ 1 	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
+SCRIPT_SLEEP=sleep\ .5			# Temps d'affichage d'un texte de sous-étape
+SCRIPT_SLEEP_HEADER=sleep\ 1.5	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
+SCRIPT_SLEEP_INST=sleep\ .5		# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
+SCRIPT_SLEEP_INST_CAT=sleep\ 1	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 
 ## COULEURS
@@ -127,6 +127,8 @@ draw_header_line()
 	if test "$line_color" != ""; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
+
+	return
 }
 
 # Affichage du texte des headers
