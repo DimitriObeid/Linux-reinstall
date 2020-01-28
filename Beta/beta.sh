@@ -369,7 +369,7 @@ makedir()
 			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 		echo "$SCRIPT_VOID"
-		
+
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
@@ -458,7 +458,17 @@ check_internet_connection()
 	# Si l'ordinateur est connecté à internet (pour le savoir, on ping le serveur DNS d'OpenDNS (ping 1.1.1.1))
 	if ping -q -c 1 -W 1 opendns.com > /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
+
+		return
 	else
+		r_echo "Aucune connexion à Internet n'est détectée"
+		j_echo "Suppression du dossier temporaire"
+		echo "$SCRIPT_VOID"
+
+		rm -r -f "$SCRIPT_TMPPATH" \
+			|| r_echo "Suppression du dossier temporaire impossible" \
+			&& v_echo "Le ddosier temporaire a été supprimé avec succès"
+
 		handle_errors "AUCUNE CONNEXION À INTERNET"
 	fi
 }
@@ -493,6 +503,8 @@ dist_upgrade()
 	echo "$SCRIPT_VOID"
 
 	v_echo "Mise à jour du système effectuée avec succès"
+
+	return
 }
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
@@ -510,7 +522,7 @@ pack_install()
 		$SCRIPT_SLEEP_INST
 
 		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		# ATTENTION à ne pas mettre le "$@" et le "$package_name" entre les mêmes guillemets, sinon le nom du paquet à installer sera considéré comme 
+		# ATTENTION à ne pas mettre le "$@" et le "$package_name" entre les mêmes guillemets, sinon le nom du paquet à installer sera considéré comme
 		# faisant partie du tableau d'arguments stockant la commande d'installation complète du gestionnaire de paquets
 		"$@" "$package_name"
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
@@ -541,8 +553,6 @@ pack_install()
 			;;
 	esac
 
-	v_echo "Le paquet $package_name est déjà installé sur votre système"
-
 	return
 }
 
@@ -554,6 +564,8 @@ snap_install()
 
     snap install "$snap_name"
 	echo "$SCRIPT_VOID"
+
+	return
 }
 
 software_install()

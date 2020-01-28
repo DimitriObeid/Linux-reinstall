@@ -100,20 +100,20 @@
             - A:\ **j_echo() :** Affiche un texte en jaune avec 4 chevrons avant de remettre la couleur par défaut au texte suivant.  
             - A:\ **launch_script() :** Voir la fonction **detect_root()** ci-dessus.  
             - A:\ **makedir() :** Crée un dossier à chaque fois qu'on l'appelle en lui passant en argument le nom du dossier à créer et son chemin.  
-            - A:\ **mktmpdir :** : Crée un dossier temporaire où sont stockés les fichiers temporaires téléchargés.  
+            - A:\ **mktmpdir :** : Crée un dossier temporaire où sont stockés les fichiers temporaires téléchargés, supprime son contenu s'il en possède déjà selon l'autorisation donnée par l'utilisateur.  
             - A:\ **r_echo() :** Affiche un texte en rouge avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.  
             - A:\ **set_sudo() :** Détecte la commande "sudo" et la télécharge si elle n'est pas installée sur le système.  
             Modifie le contenu du fichier "/etc/sudoers", puis ajoute l'utilisateur actuel à la liste des sudoers, le tout avec son accord et avec l'obtention de son nom via l'appel système **"read"**.  
             - A:\ **"software_install() :"** Télécharge directement des fichiers de logiciels (généralement compressés) depuis les sources d'un site Internet.  
             - A:\ **v_echo() :** Affiche un texte en vert avec 8 chevrons avant de remettre la couleur par défaut au texte suivant.  
-            
+
             - C:\ **detect_root() :** Séparation des éléments de cette fonction. Il ne reste plus que la partie effectuant la gestion d'erreur de lancement du script en mode utilisateur normal, la partie de demande de permission pour le lancement ayant été déplacée dans une nouvelle fonction appelée **launch_script()**.  
             La partie de demande de permission est modifiée. Désormais, le script ne doit pas s'exécuter en mode super-utilisateur pour que le script obtienne les valeurs des variables d'environnement quand le mode super-utilisateur est désactivé pour les utiliser au moment opportun.  
-            Le nom de cette fonction **"detect_root"** a été changé par **"script_init()"** le vendredi 24 janvier 2020, vers 14h32, suite à la détection des arguments, qui fait que cette fonction ne gère plus seulement le lancement du script en mode super-utilisateur.  
+            Le nom de cette fonction **"detect_root"** a été changé par **"script_init()"** le vendredi 24 janvier 2020, vers 14h32, suite à la détection des arguments, qui fait que cette fonction ne gère plus seulement le lancement du script en mode super-utilisateur, mais aussi le nombre d'arguments passés, ainsi que leur valeur.  
             - C:\ **get_dist_package_manager() :** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.  
-            
+
             - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
-           
+
         - **<u>1.2) Paquets</u> :**
             - A:\ **g++ :** Paquet installant le compilateur G++ pour le langage C++.  
             - A:\ **gcc :** Paquet installant le compilateur GCC pour le langage C.  
