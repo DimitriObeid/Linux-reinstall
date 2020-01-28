@@ -848,6 +848,13 @@ command -v curl python-pip snapd wget > /dev/null 2>&1 \
 set_sudo
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
+# Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
+script_header "CRÉATION DU DOSSIER D'INSTALALTION DES LOGICIELS"
+
+software_dir="Logiciels.Linux-reinstall.d"
+j_echo "Création du dossier \"$software_dir\" dans votre dossier personnel"
+makedir "$SCRIPT_HOMEDIR" "$software_dir"
+
 # Affichage du message de création du dossier "Logiciels.Linux-reinstall.d"
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
 
@@ -855,10 +862,6 @@ j_echo "Les logiciels téléchargés via la commande \"wget\" sont déplacés ve
 j_echo "localisé dans votre dossier personnel"
 sleep 1
 echo "$SCRIPT_VOID"
-
-# Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
-software_dir="Logiciels.Linux-reinstall.d"
-makedir "$SCRIPT_HOMEDIR" "$software_dir"
 
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 v_echo "La partie d'installation de vos programmes commence véritablement"
