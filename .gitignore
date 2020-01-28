@@ -10,6 +10,7 @@ Parser/obj/
 .directory
 .~lock.Mode d'emploi.odt#
 Beta/.~lock.Documentation Beta.odt#
+Beta/.~lock.Mode d'emploi Beta.odt#
 Beta/beta_gui.sh
 GUI/GUI.pro
 GUI/GUI.pro.user
