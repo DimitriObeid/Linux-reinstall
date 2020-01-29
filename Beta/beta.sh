@@ -401,7 +401,6 @@ makedir()
 							echo "$SCRIPT_VOID"
 							} \
 						&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
-					echo "$SCRIPT_VOID"
 
 					return
 					;;
@@ -410,7 +409,6 @@ makedir()
 
 					j_echo "Le contenu du dossier \"$dirpath\" ne sera pas supprimé."
 					j_echo "En revanche, les fichiers temporaires créés et téléchargés écraseront les fichiers homonymes"
-					echo "$SCRIPT_VOID"
 
 					return
 					;;
@@ -439,6 +437,7 @@ mktmpdir()
 
 	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
 	makedir "${SCRIPT_PWD}" "$SCRIPT_TMPDIR"
+	echo "$SCRIPT_VOID"
 
 	# Déplacement vers le dossier temporaire
 	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
@@ -773,6 +772,7 @@ script_header "CRÉATION DU DOSSIER D'INSTALALTION DES LOGICIELS"
 software_dir="Logiciels.Linux-reinstall.d"
 j_echo "Création du dossier \"$software_dir\" dans votre dossier personnel"
 makedir "$SCRIPT_HOMEDIR" "$software_dir"
+echo "$SCRIPT_VOID"
 
 # Affichage du message de création du dossier "Logiciels.Linux-reinstall.d"
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
