@@ -246,7 +246,7 @@ script_init()
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
 
-				handle_errors "LES DEUX ARGUMENTS NE CORRESPONDENT Ni À VOTRE NOM D'UTILISATEUR, NI AU CHEMIN DU DOSSIER ACTUEL"
+				handle_errors "LES DEUX ARGUMENTS NE CORRESPONDENT NI À VOTRE NOM D'UTILISATEUR, NI AU CHEMIN DU DOSSIER ACTUEL"
             # Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
 			# On exécute la commande "pwd" pour afficher le chemin du dossier actuel, puis on coupe
 			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
@@ -270,7 +270,7 @@ script_init()
 				r_echo "ATTENTION : SI VOUS AVEZ MANUELLEMENT ENTRÉ LE CHEMIN DU DOSSIER ACTUEL,"
 				r_echo "VEILLEZ À NE SURTOUT PAS AJOUTER DE SLASH APRÈS LE NOM DU DOSSIER ACTUEL !"
 
-				handle_errors "LE CHEMIN DU DOSSIER ACTUEL NE CORRESPOND PAS"
+				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS AU CHEMIN DU DOSSIER ACTUEL"
 
 			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
 			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
