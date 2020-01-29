@@ -721,47 +721,9 @@ is_installation_done()
 	script_header "FIN DE L'INSTALLATION"
 
 	v_echo "Retour vers le dossier ${SCRIPT_PWD} et suppression du dossier temporaire $SCRIPT_TMPDIR"
-    # On retourne vers le dossier d'origine (cd -), puis on redirige le texte affichant le dossier vers lequel on s'est redirigé
-    # vers le périphérique nul ( > /dev/null). Enfin, on supprime le dossier temporaire
-	cd "${SCRIPT_PWD}" > /dev/null && rm -r -f "$SCRIPT_TMPPATH"
+    # On retourne vers le dossier d'origine, puis on supprime le dossier temporaire
+	cd "${SCRIPT_PWD}" && rm -r -f "$SCRIPT_TMPPATH"
 	echo "$SCRIPT_VOID"
-
-	# Copie du fichier de réinstallation vers "/usr/bin" pour que l'utilisateur puisse de nouveau appeler le script si besoin
-	j_echo "Souhaitez vous copier le fichier de réinstallation vers le dossier \"/usr/bin\" pour réappeler le script en cas de besoin ?"
-
-	read_cp_file()
-	{
-		read -r -p "Entrez votre réponse : " rep_cp_file
-		case ${rep_cp_file,,} in
-			"oui")
-				echo "$SCRIPT_VOID"
-
-				j_echo "Copie du ficher de réinstallation vers le dossier \"/usr/bin\""
-				cp /usr/bin/ \
-					|| { r_echo "Le fichier n'a pas pu être copié dans le dossier \"/usr/bin/\""; return; } \
-					&& v_echo "Le fichier a été copié dans le dossier \"/usr/bin/\" avec succès"; \
-					v_echo "Appelez le directement dans le terminal en tapant simplement$C_RESET \"beta.sh\"$C_VERT"
-				echo "$SCRIPT_VOID"
-
-				return
-				;;
-			"non")
-				echo "$SCRIPT_VOID"
-
-				j_echo "Le fichier de réinstallation ne sera pas copié vers le dossier \"/usr/bin\""
-				echo "$SCRIPT_VOID"
-
-				return
-				;;
-			*)
-				echo "$SCRIPT_VOID"
-
-				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
-				read_cp_file
-				;;
-		esac
-	}
-	read_cp_file
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
     # On tue le processus
@@ -833,10 +795,6 @@ pack_install htop
 pack_install neofetch
 pack_install tree
 echo "$SCRIPT_VOID"
-
-# Logiciels de cryptage et de sécurité
-#cats_echo "INSTALLATION DES LOGICIELS DE CRYPTAGE ET DE SÉCURITÉ"
-#pack_install veracrypt
 
 # Développement
 cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
