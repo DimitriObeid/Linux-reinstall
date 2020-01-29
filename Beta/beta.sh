@@ -523,7 +523,10 @@ pack_install()
 		# ATTENTION à ne pas mettre le "$@" et le "$package_name" entre les mêmes guillemets, sinon le nom du paquet à installer sera considéré comme
 		# faisant partie du tableau d'arguments stockant la commande d'installation complète du gestionnaire de paquets
 		"$@" "$package_name"
-		v_echo "Le paquet \"$package_name\" a été correctement installé"
+		
+        command -v "$package_name" > /dev/null \
+            || r_echo "Le paquet $package_name n'a pas été installé sur votre système" \
+            && v_echo "Le paquet \"$package_name\" a été correctement installé"
 		echo "$SCRIPT_VOID"
 
 		# Appel de la commande "sleep" mettant en pause le script pendant 0,5 secondes, le temps que l'utilisateur voit si un paquet a bien été installé
@@ -550,7 +553,7 @@ pack_install()
 			pack_manager_install emerge
 			;;
 	esac
-
+	
 	return
 }
 
@@ -770,7 +773,6 @@ set_sudo
 script_header "CRÉATION DU DOSSIER D'INSTALALTION DES LOGICIELS"
 
 software_dir="Logiciels.Linux-reinstall.d"
-j_echo "Création du dossier \"$software_dir\" dans votre dossier personnel"
 makedir "$SCRIPT_HOMEDIR" "$software_dir"
 echo "$SCRIPT_VOID"
 
