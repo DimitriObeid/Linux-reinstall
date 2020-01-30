@@ -368,7 +368,6 @@ makedir()
 		mkdir "$dirpath" \
 			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
-		echo "$SCRIPT_VOID"
 
 		return
 
@@ -398,7 +397,7 @@ makedir()
 						|| {
 							r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 							r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
-							echo "$SCRIPT_VOID"
+							return
 							} \
 						&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
 
@@ -675,13 +674,13 @@ autoremove()
 						j_echo "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
 	            		;;
 	        		archlinux)
-	            		pacman -Qdt
+	            		pacman --noconfirm -Qdt
 	            		;;
 	        		fedora)
-	            		dnf autoremove
+	            		dnf -y autoremove
 	            		;;
 	        		debian)
-	            		apt autoremove
+	            		apt -y autoremove
 	            		;;
 	        		gentoo)
 	            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
@@ -770,7 +769,7 @@ set_sudo
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 # Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
-script_header "CRÉATION DU DOSSIER D'INSTALALTION DES LOGICIELS"
+script_header "CRÉATION DU DOSSIER D'INSTALLATION DES LOGICIELS"
 
 software_dir="Logiciels.Linux-reinstall.d"
 makedir "$SCRIPT_HOMEDIR" "$software_dir"
