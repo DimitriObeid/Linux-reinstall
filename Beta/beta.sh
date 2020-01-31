@@ -18,7 +18,6 @@
 # ARGUMENTS
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
 SCRIPT_USER_NAME=$1		# Premier argument : Le nom du compte de l'utilisateur
-SCRIPT_PWD=$2			# Deuxième argument : Le nom du dossier dans lequel le fichier d'installation se trouve
 
 ## CHRONOMÈTRE
 
@@ -48,7 +47,7 @@ SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporai
 
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"			# Nom du dossier temporaire
-SCRIPT_TMPPATH="${SCRIPT_PWD}/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPPATH="${SCRIPT_HOMEDIR}/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # RESSOURCES
@@ -222,34 +221,18 @@ script_init()
 
 	# Sinon, si le script est lancé en mode super-utilisateur
 	else
-		# Si aucun des deux arguments attendus n'est entré
-		if test -z "${SCRIPT_USER_NAME}" && test -z "${SCRIPT_PWD}"; then
+		# Si aucun argument n'est entré
+		if test -z "${SCRIPT_USER_NAME}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			r_echo "puis celui du chemin du fichier Shell depuis la racine."
 			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur \$PWD"
 
-			handle_errors "TOUS LES ARGUMENTS MANQUENT À L'APPEL"
+			handle_errors "L'ARGUMENT MANQUE À L'APPEL"
 
-		# Si un seul des deux arguments attendus n'est entré
-		elif test -z "${SCRIPT_USER_NAME}" || test -z "${SCRIPT_PWD}"; then
-			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
-			r_echo "puis celui du chemin du fichier Shell depuis la racine."
-			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur \$PWD"
-
-			handle_errors "UN ARGUMENT MANQUE À L'APPEL"
-
-		# Sinon, si les deux arguments attendus sont entrés
+		# Sinon, si l'argument attendu est entré
 		else
-            # Si aucun des deux arguments ne correspondent à ce qui est attendu
-            # Ne pas deplacer cette condition après les autres conditions, sinon seule la sortie d'erreur
-            # de la condition de vérification du premier argument sera prise en compte.
-			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}" && test "$(pwd)" != "${SCRIPT_PWD}"; then
-				r_echo "Veuillez entrer correctement votre nom d'utilisateur ET le chemin du dossier actuel depuis le dossier racine"
-
-				handle_errors "LES DEUX ARGUMENTS NE CORRESPONDENT NI À VOTRE NOM D'UTILISATEUR, NI AU CHEMIN DU DOSSIER ACTUEL"
-            # Si le nom d'utilisateur passé en premier argument est incorrect (vérification du nom du dossier personnel de l'utilisateur actuel)
-			# On exécute la commande "pwd" pour afficher le chemin du dossier actuel, puis on coupe
-			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
+            # Si la veleur de l'argument ne correspond pas au nom de l'utilisateur
+			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 
@@ -258,23 +241,9 @@ script_init()
 
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
-			# Si la chaîne de caractères de sortie de la commande "pwd" ne correspond pas au chemin du dossier actuel
-			elif test "$(pwd)" != "${SCRIPT_PWD}"; then
-				r_echo "Veuillez entrer le bon chemin du dossier actuel depuis la racine"
-				echo "$SCRIPT_VOID"
-
-				r_echo "Astuce : Pour éviter de rentrer manuellement le chemin complet du dossier actuel, vous pouvez entrer la"
-				r_echo "variable d'environnement \"$PWD\" pour rentrer plus rapidement le chemin"
-				echo "$SCRIPT_VOID"
-
-				r_echo "ATTENTION : SI VOUS AVEZ MANUELLEMENT ENTRÉ LE CHEMIN DU DOSSIER ACTUEL,"
-				r_echo "VEILLEZ À NE SURTOUT PAS AJOUTER DE SLASH APRÈS LE NOM DU DOSSIER ACTUEL !"
-
-				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS AU CHEMIN DU DOSSIER ACTUEL"
-
-			# Sinon, si les valeurs des deux arguments correspondent aux valeurs attendues
-			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USER_NAME}" && test "$(pwd)" == "${SCRIPT_PWD}"; then
-				v_echo "Vous avez correctement entré votre nom d'utilisateur ET le chemin du dossier actuel"
+			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
+			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USER_NAME}"; then
+				v_echo "Vous avez correctement entré votre nom d'utilisateur"
 				v_echo "Lancement du script"
 
 				return
@@ -454,24 +423,6 @@ makedir()
 	fi
 }
 
-# Création d'un dossier temporaire pour y stocker des fichiers temporaires
-mktmpdir()
-{
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$PWD\""
-
-	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
-	makedir "${SCRIPT_PWD}" "$SCRIPT_TMPDIR"
-	echo "$SCRIPT_VOID"
-
-	# Déplacement vers le dossier temporaire
-	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
-	cd "$SCRIPT_TMPPATH" \
-		|| handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?" \
-		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
-
-	return
-}
-
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
 pack_install()
@@ -545,8 +496,8 @@ pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
-	snap_name=$@ # Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
-	j_echo "Installation du paquet \"$snap_name\""
+	snap_name="$*" # Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
+#	j_echo "Installation du paquet \"$snap_name\""
 
     snap install "$snap_name"
 	echo "$SCRIPT_VOID"
@@ -593,14 +544,14 @@ set_sudo()
 				sleep 1
 				echo "$SCRIPT_VOID"
 
-				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers \
+				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers -O "$SCRIPT_TMPPATH/sudoers" \
 					|| { r_echo "Impossible de télécharger le fichier \"sudoers\""; return; } \
 					&& v_echo "Fichier \"sudoers\" téléchargé avec succès"
 				echo "$SCRIPT_VOID"
 
 				# Déplacement du fichier vers le dossier "/etc/"
 				j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
-				mv "sudoers" /etc/sudoers \
+				mv "$SCRIPT_TMPPATH/sudoers" /etc/sudoers \
 					|| { r_echo "Impossible de déplacer le fichier \"sudoers\" vers le dossier \"/etc/\""; return; } \
 					&& { v_echo "Fichier sudoers déplacé avec succès vers le dossier "; }
 				echo "$SCRIPT_VOID"
@@ -617,7 +568,6 @@ set_sudo()
 				echo "$SCRIPT_VOID"
 
 				j_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
-				j_echo "Vous pourrez toujours le configurer plus tard"
 
 				return
 				;;
@@ -707,9 +657,10 @@ is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
 
-	v_echo "Retour vers le dossier ${SCRIPT_PWD} et suppression du dossier temporaire $SCRIPT_TMPDIR"
-    # On retourne vers le dossier d'origine, puis on supprime le dossier temporaire
-	cd "${SCRIPT_PWD}" && rm -r -f "$SCRIPT_TMPPATH"
+	v_echo "Suppression du dossier temporaire $SCRIPT_TMPPATH"
+	rm -r -f "$SCRIPT_TMPPATH" \
+		|| r_echo "Suppression du dossier temporaire impossible. Essayez de le supprimer à la main" \
+		&& v_echo "Le dossier temporaire \"$SCRIPT_TMPPATH\" a été supprimé avec succès"
 	echo "$SCRIPT_VOID"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
@@ -725,28 +676,35 @@ is_installation_done()
 ## APPEL DES FONCTIONS DE CONSTRUCTION
 # Détection du mode super-administrateur (root)
 script_init
+
 # Affichage du header de bienvenue
 script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX VERSION $SCRIPT_VERSION !!!!!"
 v_echo "Début de l'installation"
+
 # Détection du gestionnaire de paquets de la distribution utilisée
 get_dist_package_manager
+
 # Assurance que l'utilisateur soit sûr de lancer le script
 launch_script
-# Création du dossier temporaire où sont stockés les fichiers temporaires
-mktmpdir
+
 # Détection de la connexion à Internet
 check_internet_connection
+
 # Mise à jour des paquets actuels
 dist_upgrade
+
+# Création du dossier temporaire où sont stockés les fichiers temporaires
+script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$SCRIPT_HOMEDIR\""
+makedir "$SCRIPT_HOMEDIR" "$SCRIPT_TMPDIR"
+
 
 ## INSTALLATIONS PRIORITAIRES
 script_header "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 pack_install curl
-pack_install python-pip
 pack_install snapd
 pack_install wget
 
-command -v curl python-pip snapd wget > /dev/null 2>&1 \
+command -v curl snapd wget > /dev/null 2>&1 \
 	|| handle_errors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" \
 	&& v_echo "Les commandes importantes d'installation ont été installées avec succès"
 
@@ -759,7 +717,6 @@ script_header "CRÉATION DU DOSSIER D'INSTALLATION DES LOGICIELS"
 
 software_dir="Logiciels.Linux-reinstall.d"
 makedir "$SCRIPT_HOMEDIR" "$software_dir"
-echo "$SCRIPT_VOID"
 
 # Affichage du message de création du dossier "Logiciels.Linux-reinstall.d"
 script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
@@ -772,6 +729,8 @@ echo "$SCRIPT_VOID"
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 v_echo "La partie d'installation de vos programmes commence véritablement"
 sleep 1
+echo "$SCRIPT_VOID"
+
 echo "$SCRIPT_VOID"
 
 sleep 3
