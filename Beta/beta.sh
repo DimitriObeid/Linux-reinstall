@@ -356,115 +356,21 @@ launch_script()
 	read_launch_script
 }
 
-# Fonction de création rapide de dossiers
-makedir()
-{
-	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
-	dirname=$2						# Nom du dossier à créer dans son dossier parent
-	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
-
-	if test ! -d "$dirpath"; then
-		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
-		mkdir "$dirpath" \
-			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
-			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
-
-		return
-
-	# Sinon, si le dossier à créer existe déjà dans son dossier parent
-	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
-	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
-		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
-		j_echo "Souhaitez vous écraser TOUT son contenu ? (oui/non)"
-		echo "$SCRIPT_VOID"
-
-		# Lectre de la réponse de l'utilisateur
-		read_makedir()
-		{
-			# On demande à l'utilisateur de rentrer une réponse
-			read -r -p "Entrez votre réponse : " rep_makedir
-
-			# Dans le cas où l'utilisateur répond par ...
-			case ${rep_makedir,,} in
-				"oui")
-					echo "$SCRIPT_VOID"
-
-					j_echo "Suppression du contenu du dossier \"$dirpath\""
-
-					# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
-					# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
-					rm -r -f "${dirpath/:?}/"* \
-						|| {
-							r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
-							r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
-							return
-							} \
-						&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
-
-					return
-					;;
-				"non")
-					echo "$SCRIPT_VOID"
-
-					j_echo "Le contenu du dossier \"$dirpath\" ne sera pas supprimé."
-					j_echo "En revanche, les fichiers temporaires créés et téléchargés écraseront les fichiers homonymes"
-
-					return
-					;;
-				# Autre chose que "oui" ou "non"
-				*)
-					j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
-					read_makepdir
-					;;
-			esac
-		}
-		read_makedir
-
-	# Sinon, si le dossier à créer existe déjà dans son dossier parent
-	# ET que ce dossier est vide
-	elif test -d "$dirpath"; then
-		v_echo "Le dossier \"$dirpath\" existe déjà"
-
-		return
-	fi
-}
-
-# Création d'un dossier temporaire pour y stocker des fichiers temporaires
-mktmpdir()
-{
-	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$PWD\""
-
-	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
-	makedir "${SCRIPT_PWD}" "$SCRIPT_TMPDIR"
-	echo "$SCRIPT_VOID"
-
-	# Déplacement vers le dossier temporaire
-	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
-	cd "$SCRIPT_TMPPATH" || handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?" \
-		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
-
-	return
-}
-
 ## CONNEXION À INTERNET ET MISES À JOUR
 # Vérification de la connexion à Internet
 check_internet_connection()
 {
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
-	# Si l'ordinateur est connecté à internet (pour le savoir, on ping le serveur DNS d'OpenDNS (ping 1.1.1.1))
+	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS (ping 1.1.1.1))
 	if ping -q -c 1 -W 1 opendns.com > /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 
 		return
+	# Sinon, si l'ordinateur n'est pas connecté à Internet
 	else
 		r_echo "Aucune connexion à Internet n'est détectée"
-		j_echo "Suppression du dossier temporaire"
 		echo "$SCRIPT_VOID"
-
-		rm -r -f "$SCRIPT_TMPPATH" \
-			|| r_echo "Suppression du dossier temporaire impossible" \
-			&& v_echo "Le ddosier temporaire a été supprimé avec succès"
 
 		handle_errors "AUCUNE CONNEXION À INTERNET"
 	fi
@@ -504,6 +410,68 @@ dist_upgrade()
 	return
 }
 
+## CRÉATION DE DOSSIERS
+# Fonction de création rapide de dossiers
+makedir()
+{
+	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
+	dirname=$2						# Nom du dossier à créer dans son dossier parent
+	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
+
+	if test ! -d "$dirpath"; then
+		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
+		mkdir "$dirpath" \
+			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
+			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
+
+		return
+
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent
+	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
+	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
+		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
+		j_echo "Suppression du contenu du dossier \"$dirpath\""
+		echo "$SCRIPT_VOID"
+
+		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
+		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
+		rm -r -f "${dirpath/:?}/"* \
+			|| {
+				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
+				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
+				return
+				} \
+			&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
+
+			return
+
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent
+	# ET que ce dossier est vide
+	elif test -d "$dirpath"; then
+		v_echo "Le dossier \"$dirpath\" existe déjà"
+
+		return
+	fi
+}
+
+# Création d'un dossier temporaire pour y stocker des fichiers temporaires
+mktmpdir()
+{
+	script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$PWD\""
+
+	# Création du dossier "Linux-reinstall.tmp.d" via la fonction "makedir"
+	makedir "${SCRIPT_PWD}" "$SCRIPT_TMPDIR"
+	echo "$SCRIPT_VOID"
+
+	# Déplacement vers le dossier temporaire
+	j_echo "Déplacement vers le dossier ${SCRIPT_TMPPATH}"
+	cd "$SCRIPT_TMPPATH" \
+		|| handle_errors "IMPOSSIBLE DE SE DÉPLACER VERS LE DOSSIER ${SCRIPT_TMPPATH}. lE DOSSIER EXISTE-T'IL ?" \
+		&& v_echo "Déplacement vers le dossier \"$PWD\" effectué avec succès"
+
+	return
+}
+
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
 pack_install()
@@ -512,6 +480,24 @@ pack_install()
 	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" suivant la commande
 	# d'installation de votre distribution.
 	package_name=$1
+
+	pack_manager_check_pack()
+	{
+		case $SCRIPT_OS_FAMILY in
+			opensuse)
+				;;
+			archlinux)
+				;;
+			fedora)
+				dnf list "$package_name"
+				;;
+			debian)
+				dpkg -s "$package_name"
+				;;
+			gentoo)
+				;;
+		esac
+	}
 
 	# Cette fonction permet d'éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
 	pack_manager_install()
@@ -522,7 +508,7 @@ pack_install()
 		# ATTENTION à ne pas mettre le "$@" et le "$package_name" entre les mêmes guillemets, sinon le nom du paquet à installer sera considéré comme
 		# faisant partie du tableau d'arguments stockant la commande d'installation complète du gestionnaire de paquets
 		"$@" "$package_name"
-		
+
         command -v "$package_name" > /dev/null \
             || r_echo "Le paquet $package_name n'a pas été installé sur votre système" \
             && v_echo "Le paquet \"$package_name\" a été correctement installé"
@@ -552,14 +538,14 @@ pack_install()
 			pack_manager_install emerge
 			;;
 	esac
-	
+
 	return
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
-	snap_name="$@" # Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
+	snap_name=$@ # Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
 	j_echo "Installation du paquet \"$snap_name\""
 
     snap install "$snap_name"
