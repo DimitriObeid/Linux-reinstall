@@ -19,6 +19,7 @@
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
 SCRIPT_USER_NAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 
+
 ## CHRONOMÈTRE
 
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
@@ -41,17 +42,19 @@ SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'af
 SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
+
 # DOSSIERS CRÉÉS
 # Définition du dossier parent des dossiers créés
 SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
 
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
-SCRIPT_TMPDIR="Linux-reinstall.tmp.d"			# Nom du dossier temporaire
-SCRIPT_TMPPATH="${SCRIPT_HOMEDIR}/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"	# Nom du dossier temporaire
+SCRIPT_TMPPATH="/tmp/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
+
 
 ## TEXTE
 
@@ -160,6 +163,8 @@ script_header()
 	echo "$SCRIPT_VOID"
 
 	$SCRIPT_SLEEP_HEADER
+
+	return
 }
 
 # Fonction de gestion d'erreurs fatales (impossibles à corriger)
@@ -199,12 +204,12 @@ handle_errors()
 
 
 ## DÉFINITION DES FONCTIONS D'EXÉCUTION
-# Détection de l'exécution du script en mode super-administrateur (root)
+# Détection de l'exécution du script en mode super-utilisateur (root)
 script_init()
 {
-	# Si le script n'est pas lancé en mode super-utilistaeur
+	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
-    	r_echo "Ce script doit être exécuté en tant que super-administrateur (root)."
+    	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)."
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
 		echo "$SCRIPT_VOID"
 
@@ -213,21 +218,20 @@ script_init()
     	r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
 		echo "$SCRIPT_VOID"
 
-		r_echo "Ou connectez vous directement en tant que super-administrateur"
+		r_echo "Ou connectez vous directement en tant que super-utilisateur"
 		r_echo "Et tapez cette commande :"
 		r_echo "$SCRIPT_C_RESET	$0 $USER \$PWD"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 
-	# Sinon, si le script est lancé en mode super-utilisateur
+	# Sinon, si le script est lancé en mode super-utilisateur, on vérifie que la commande d'exécution du script soit accompagnée d'un argument
 	else
 		# Si aucun argument n'est entré
 		if test -z "${SCRIPT_USER_NAME}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
-			r_echo "puis celui du chemin du fichier Shell depuis la racine."
 			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur \$PWD"
 
-			handle_errors "L'ARGUMENT MANQUE À L'APPEL"
+			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
 
 		# Sinon, si l'argument attendu est entré
 		else
@@ -247,6 +251,8 @@ script_init()
 				v_echo "Lancement du script"
 
 				return
+			else
+				handle_errors "UNE ERREUR INCONNUE A EU LIEU LORS DE L'EXÉCUTION DU SCRIPT"
 			fi
 		fi
 	fi
@@ -299,6 +305,8 @@ launch_script()
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
 				v_echo "C'est parti !!!"
+
+				return
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -389,7 +397,7 @@ makedir()
 
 	if test ! -d "$dirpath"; then
 		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
-		mkdir "$dirpath" \
+		mkdir -v "$dirpath" \
 			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 
@@ -404,7 +412,7 @@ makedir()
 
 		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
 		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
-		rm -r -f "${dirpath/:?}/"* \
+		rm -r -f -v "${dirpath/:?}/"* \
 			|| {
 				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
@@ -432,58 +440,46 @@ pack_install()
 	# d'installation de votre distribution.
 	package_name=$1
 
-	pack_manager_check_pack()
+	pack_full_install()
 	{
-		case $SCRIPT_OS_FAMILY in
-			opensuse)
-				;;
-			archlinux)
-				;;
-			fedora)
-				dnf list "$package_name"
-				;;
-			debian)
-				dpkg -s "$package_name"
-				;;
-			gentoo)
-				;;
-		esac
-	}
-
-	# Cette fonction permet d'éviter de retaper ce qui ne fait pas partie de la commande d'installation pour chaque gestionnaire de paquets
-	pack_manager_install()
-	{
+		search_cmd="$*"			# Commande complète de recherche de paquets
+		install_cmd="$*"		# Commande complète d'installation de paquets
+		
 		$SCRIPT_SLEEP_INST
 
-		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		# ATTENTION à ne pas mettre le "$@" et le "$package_name" entre les mêmes guillemets, sinon le nom du paquet à installer sera considéré comme
-		# faisant partie du tableau d'arguments stockant la commande d'installation complète du gestionnaire de paquets
-		"$@" "$package_name"
-
-        command -v "$package_name" > /dev/null \
-            || r_echo "Le paquet $package_name n'a pas été installé sur votre système" \
-            && v_echo "Le paquet \"$package_name\" a été correctement installé"
-		echo "$SCRIPT_VOID"
+		echo "${search_cmd}" &> /dev/null \
+			 || { j_echo "Installation du paquet $package_name"; "${install_cmd}" \
+			 	|| { 
+						r_echo "Impossible de télécharger le paquet $package_name. Existe-t'-il dans la base données du gestionnaire de paquets ?"
+						return; 
+					} \
+				&& { 
+						v_echo "Le paquet $package_name a été installé avec succès sur votre système";
+					}; \
+				} \
+			 && v_echo "Le paquet $package_name est déjà installé sur votre système"
 
 		# Appel de la commande "sleep" mettant en pause le script pendant 0,5 secondes, le temps que l'utilisateur voit si un paquet a bien été installé
 		$SCRIPT_SLEEP_INST
-	}
 
-	j_echo "Installation de $package_name"
+		echo "$SCRIPT_VOID"
+	}
 
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
 	case $SCRIPT_OS_FAMILY in
 		opensuse)
-			pack_manager_install zypper -y install
+			#	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
+
 			;;
 		archlinux)
 			pack_manager_install pacman --noconfirm -S
 			;;
 		fedora)
-			pack_manager_install dnf -y install
+			pack_full_install "$(dnf search "$package_name")" "$(dnf -y install "$package_name")"
+			return
 			;;
 		debian)
-			pack_manager_install apt -y install
+			pack_full_install "$(dpkg -s "$package_name")" "$(apt -y install "$package_name")"
 			;;
 		gentoo)
 			pack_manager_install emerge
@@ -496,10 +492,14 @@ pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
-	snap_name="$*" # Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
-#	j_echo "Installation du paquet \"$snap_name\""
+	# Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
+	j_echo "Installation du paquet \"$*\""
 
-    snap install "$snap_name"
+    snap install "$*"
+
+	snap list "$@" | cut \
+		|| { r_echo "Le paquet \"$*\" n'a pas pu être installé sur votre système"; return; } \
+		&& v_echo "Le paquet \"$*\" a été installé avec succès sur votre système"
 	echo "$SCRIPT_VOID"
 
 	return
