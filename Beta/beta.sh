@@ -492,14 +492,17 @@ pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 snap_install()
 {
+	snap_cut_cmd="$(cut -d - -f1)"
+	snap_cut="$* | $snap_cut"
+
 	# Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
 	j_echo "Installation du paquet \"$*\""
 
     snap install "$*"
 
-	snap list "$*" | cut -d - -f 1 \
-		|| { r_echo "Le paquet \"$*\" n'a pas pu être installé sur votre système"; return; } \
-		&& v_echo "Le paquet \"$*\" a été installé avec succès sur votre système"
+	snap list "$*" | $snap_cut_cmd \
+		|| { r_echo "Le paquet \"$snap_cut\" n'a pas pu être installé sur votre système"; return; } \
+		&& v_echo "Le paquet \"$snap_cut\" a été installé avec succès sur votre système"
 	echo "$SCRIPT_VOID"
 
 	return
@@ -567,7 +570,7 @@ set_sudo()
 			"non")
 				echo "$SCRIPT_VOID"
 
-				j_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
+				v_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
 
 				return
 				;;
