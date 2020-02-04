@@ -500,7 +500,7 @@ snap_install()
 
     snap install "$*"
 
-	snap list "$*" | $snap_cut_cmd \
+	snap list "$*" | "$snap_cut_cmd" \
 		|| { r_echo "Le paquet \"$snap_cut\" n'a pas pu être installé sur votre système"; return; } \
 		&& v_echo "Le paquet \"$snap_cut\" a été installé avec succès sur votre système"
 	echo "$SCRIPT_VOID"
