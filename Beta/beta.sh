@@ -43,14 +43,16 @@ SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des me
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
 
 
-# DOSSIERS CRÉÉS
-# Définition du dossier parent des dossiers créés
-SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"		# Dossier parent du dossier temporaire (dossier personnel de l'utilisateur)
+# DOSSIERS ET FICHIERS CRÉÉS
+# Définition du dossier personnel de l'utilisateur
+SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"	# Dossier personnel de l'utilisateur
 
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
-SCRIPT_TMPDIR="Linux-reinstall.tmp.d"	# Nom du dossier temporaire
-SCRIPT_TMPPATH="/tmp/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
+SCRIPT_TMPPATH="/tmp/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
 
+# Création de fichiers
+SCRIPT_LOG="Linux-reinstall.log"
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -87,16 +89,17 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET"; $SCRIPT_SLEEP_INST_CAT;}
+cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" 2>&1 \
+ 	| tee $SCRIPT_HOMEDIR/$SCRIPT_LOG; $SCRIPT_SLEEP_INST_CAT;}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP;}
+j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee $SCRIPT_HOMEDIR/$SCRIPT_LOG; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP;}
+r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" 2>&1 | tee $SCRIPT_HOMEDIR/$SCRIPT_LOG; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP;}
+v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" 2>&1 | tee $SCRIPT_HOMEDIR/$SCRIPT_LOG; $SCRIPT_SLEEP;}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -306,7 +309,19 @@ launch_script()
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
 				v_echo "C'est parti !!!"
 
-				return
+				j_echo "Création du fichier log \"$SCRIPT_LOG\" dans le dossier \"$SCRIPT_HOMEDIR\""
+
+				if test ! -f "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
+					touch "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
+						&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans votre dossier personnel"
+
+					return
+				else
+					v_echo "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans votre dossier personnel"
+
+					return
+				fi
+
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
@@ -346,9 +361,6 @@ check_internet_connection()
 		return
 	# Sinon, si l'ordinateur n'est pas connecté à Internet
 	else
-		r_echo "Aucune connexion à Internet n'est détectée"
-		echo "$SCRIPT_VOID"
-
 		handle_errors "AUCUNE CONNEXION À INTERNET"
 	fi
 }
@@ -444,16 +456,16 @@ pack_install()
 	{
 		search_cmd="$*"			# Commande complète de recherche de paquets
 		install_cmd="$*"		# Commande complète d'installation de paquets
-		
+
 		$SCRIPT_SLEEP_INST
 
 		echo "${search_cmd}" &> /dev/null \
 			 || { j_echo "Installation du paquet $package_name"; "${install_cmd}" \
-			 	|| { 
+			 	|| {
 						r_echo "Impossible de télécharger le paquet $package_name. Existe-t'-il dans la base données du gestionnaire de paquets ?"
-						return; 
+						return;
 					} \
-				&& { 
+				&& {
 						v_echo "Le paquet $package_name a été installé avec succès sur votre système";
 					}; \
 				} \
