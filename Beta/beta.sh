@@ -55,7 +55,7 @@ SCRIPT_TMPPATH="/tmp/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
 SCRIPT_LOG="Linux-reinstall.log"
 
 # Redirections
-SCRIPT_OUT_ERR=$(>> $SCRIPT_HOMEDIR/$SCRIPT_LOG 2>&1)
+SCRIPT_OUT_ERR=">> $SCRIPT_HOMEDIR/$SCRIPT_LOG 2>&1"
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -93,16 +93,16 @@ SCRIPT_VERSION="2.0"
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
 cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	$SCRIPT_OUT_ERR; $SCRIPT_SLEEP_INST_CAT;}
+	"$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP_INST_CAT;}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" $SCRIPT_OUT_ERR; $SCRIPT_SLEEP;}
+j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" "$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" $SCRIPT_OUT_ERR; $SCRIPT_SLEEP;}
+r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" "$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" $SCRIPT_OUT_ERR; $SCRIPT_SLEEP;}
+v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" "$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP;}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
