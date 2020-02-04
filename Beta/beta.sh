@@ -493,13 +493,13 @@ pack_install()
 snap_install()
 {
 	# Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
-	j_echo "Installation du paquet \"$*\""
+	j_echo "Installation du paquet \"$@\""
 
-    snap install "$*"
+    snap install "$@"
 
-	snap list "$@" | cut \
-		|| { r_echo "Le paquet \"$*\" n'a pas pu être installé sur votre système"; return; } \
-		&& v_echo "Le paquet \"$*\" a été installé avec succès sur votre système"
+	snap list "$@" | cut -d "--" -f 1 \
+		|| { r_echo "Le paquet \"$@\" n'a pas pu être installé sur votre système"; return; } \
+		&& v_echo "Le paquet \"$@\" a été installé avec succès sur votre système"
 	echo "$SCRIPT_VOID"
 
 	return
