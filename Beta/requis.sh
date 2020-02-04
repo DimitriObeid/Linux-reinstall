@@ -2,12 +2,17 @@
 
 ################### DÉCLARATION DES VARIABLES ET AFFECTATION DE LEURS VALEURS ###################
 
+## COULEURS
+
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
 SH_C_STEP=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
 SH_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
 SH_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
 SH_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
 SH_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
+
+
+## TEXTE
 
 # Affichage de texte
 SH_HASH="#####"
@@ -114,11 +119,15 @@ install_essential()
     return
 }
 
-detect_bash()
+check_packs()
 {
-    which bash > /dev/null \
-        || echo "Bash n'est pas installé sur votre système" \
-        && echo ""
+    pack=$1
+
+    j_echo "Vérification de la présence du paquet $pack"
+
+    which "$pack" > /dev/null \
+        || echo "Le paquet $pack n'est pas installé sur votre système"; install_essential "$pack" \
+        && echo "Le paquet $pack est déjà installé sur votre système"
 }
 
 # Détection du gestionnaire de paquets
@@ -130,3 +139,4 @@ sys_update
 # Installation des paquets essentiels
 step_echo "INSTALLATION DES PAQUETS ESSENTIELS"
 install_essential wget
+install_essential bash

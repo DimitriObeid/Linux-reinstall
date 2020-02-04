@@ -221,12 +221,12 @@ script_init()
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$SCRIPT_C_RESET	sudo $0 $USER \$PWD"
+    	r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur"
 		echo "$SCRIPT_VOID"
 
 		r_echo "Ou connectez vous directement en tant que super-utilisateur"
 		r_echo "Et tapez cette commande :"
-		r_echo "$SCRIPT_C_RESET	$0 $USER \$PWD"
+		r_echo "$SCRIPT_C_RESET	$0 votre_nom_d'utilisateur"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 
@@ -235,7 +235,7 @@ script_init()
 		# Si aucun argument n'est entré
 		if test -z "${SCRIPT_USER_NAME}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
-			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur \$PWD"
+			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur"
 
 			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
 
