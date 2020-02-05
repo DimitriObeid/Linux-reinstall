@@ -54,6 +54,7 @@ SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier t
 
 # Création de fichiers
 SCRIPT_LOG="Linux-reinstall.log"
+SCRIPT_LOGDIR="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -91,19 +92,19 @@ SCRIPT_VERSION="2.0"
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
 function cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	>> $SCRIPT_HOMEDIR/$SCRIPT_LOG 2>&1 | tee -a "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP_INST_CAT;}
+	| tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP_INST_CAT;}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" \
-	2>&1 | tee -a "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP;}
+	2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" \
-	2>&1 | tee -a "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP;}
+	2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" \
-	2>&1 | tee -a "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP;}
+	2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -214,6 +215,19 @@ function handle_errors()
 # Détection de l'exécution du script en mode super-utilisateur (root)
 function script_init()
 {
+	if test ! -f "$SCRIPT_LOGDIR"; then
+		touch "$SCRIPT_LOGDIR" \
+			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans votre dossier personnel" \
+				>> "$SCRIPT_LOGDIR"
+
+		return
+	else
+		echo "" >> "$SCRIPT_LOGDIR" \
+			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans votre dossier personnel" \
+				>> "$SCRIPT_LOGDIR"
+
+		return
+	fi
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)."
@@ -314,19 +328,7 @@ function launch_script()
 				v_echo "C'est parti !!!"
 				echo "$SCRIPT_VOID"
 
-				j_echo "Création du fichier log \"$SCRIPT_LOG\" dans le dossier \"$SCRIPT_HOMEDIR\""
-
-				if test ! -f "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
-					touch "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
-						&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans votre dossier personnel"
-
-					return
-				else
-					v_echo "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans votre dossier personnel"
-
-					return
-				fi
-
+				return
 	            ;;
 	        "non")
 				echo "$SCRIPT_VOID"
