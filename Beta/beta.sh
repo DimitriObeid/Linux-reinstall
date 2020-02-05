@@ -53,8 +53,8 @@ SCRIPT_TMPPARENT="/tmp"									# Dossier parent du dossier temporaire
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
 
 # Création de fichiers
-SCRIPT_LOG="Linux-reinstall.log"
-SCRIPT_LOGDIR="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
+SCRIPT_LOG="Linux-reinstall.log"				# Nom du fichier de logs
+SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"	# Chemin du fichier de logs depuis la racine
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -92,16 +92,16 @@ SCRIPT_VERSION="2.0"
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
 function cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	| tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP_INST_CAT;}
+	| tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_INST_CAT;}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
+function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
+function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
+function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP;}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -212,19 +212,17 @@ function handle_errors()
 # Détection de l'exécution du script en mode super-utilisateur (root)
 function script_init()
 {
-	if test ! -f "$SCRIPT_LOGDIR"; then
-		touch "$SCRIPT_LOGDIR" \
-			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans votre dossier personnel" \
-				>> "$SCRIPT_LOGDIR"
-
-		return
+	# On vérifie que le fichier de logs existe déjà
+	if test ! -f "$SCRIPT_LOGPATH"; then
+		touch "$SCRIPT_LOGPATH" \
+			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans le dossier \"$SCRIPT_HOMEDIR\"" \
+				>> "$SCRIPT_LOGPATH"
 	else
-		echo "" >> "$SCRIPT_LOGDIR" \
-			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans votre dossier personnel" \
-				>> "$SCRIPT_LOGDIR"
-
-		return
+		echo "" >> "$SCRIPT_LOGPATH" \
+			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans le dossier \"$SCRIPT_HOMEDIR\"" \
+				>> "$SCRIPT_LOGPATH"
 	fi
+
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)."
@@ -323,7 +321,6 @@ function launch_script()
 
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
 				v_echo "C'est parti !!!"
-				echo "$SCRIPT_VOID"
 
 				return
 	            ;;
@@ -458,44 +455,31 @@ function pack_install()
 
 	function pack_full_install()
 	{
-		search_cmd="$*"			# Commande complète de recherche de paquets
-		install_cmd="$*"		# Commande complète d'installation de paquets
-
+		j_echo "Installation du paquet $package_name"
 		$SCRIPT_SLEEP_INST
 
-		echo "${search_cmd}" &> /dev/null \
-			 || { j_echo "Installation du paquet $package_name"; "${install_cmd}" \
-			 	|| {
-						r_echo "Impossible de télécharger le paquet $package_name. Existe-t'-il dans la base données du gestionnaire de paquets ?"
-						return;
-					} \
-				&& {
-						v_echo "Le paquet $package_name a été installé avec succès sur votre système";
-					}; \
-				} \
-			 && v_echo "Le paquet $package_name est déjà installé sur votre système"
-
-		# Appel de la commande "sleep" mettant en pause le script pendant 0,5 secondes, le temps que l'utilisateur voit si un paquet a bien été installé
-		$SCRIPT_SLEEP_INST
-
+		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+		v_echo "Le paquet \"$package_name\" a été correctement installé"
 		echo "$SCRIPT_VOID"
+
+		$SCRIPT_SLEEP_INST
 	}
 
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
 	case $SCRIPT_OS_FAMILY in
 		opensuse)
-			#	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
-
+			pack_manager_install zypper -y install
 			;;
 		archlinux)
 			pack_manager_install pacman --noconfirm -S
 			;;
 		fedora)
-			pack_full_install "$(dnf search "$package_name")" "$(dnf -y install "$package_name")"
+			pack_full_install dnf -y install
 			return
 			;;
 		debian)
-			pack_full_install "$(dpkg -s "$package_name")" "$(apt -y install "$package_name")"
+			pack_full_install apt -y install
 			;;
 		gentoo)
 			pack_manager_install emerge
