@@ -17,7 +17,7 @@
 
 # ARGUMENTS
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute
-SCRIPT_USER_NAME=$1		# Premier argument : Le nom du compte de l'utilisateur
+SCRIPT_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 
 
 ## CHRONOMÈTRE
@@ -45,7 +45,7 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 
 # DOSSIERS ET FICHIERS
 # Définition du dossier personnel de l'utilisateur
-SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"	# Dossier personnel de l'utilisateur
+SCRIPT_HOMEDIR="/home/${SCRIPT_USERNAME}"	# Dossier personnel de l'utilisateur
 
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"					# Nom du dossier temporaire
@@ -53,8 +53,8 @@ SCRIPT_TMPPARENT="/tmp"									# Dossier parent du dossier temporaire
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
 
 # Création de fichiers
-SCRIPT_LOG="Linux-reinstall.log"				# Nom du fichier de logs
-SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"	# Chemin du fichier de logs depuis la racine
+SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
+SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -87,6 +87,33 @@ SCRIPT_VERSION="2.0"
 
 
 ################### DÉFINITION DES FONCTIONS ###################
+
+## FICHIER DE LOGS
+# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
+function create_log_file()
+{
+	# On évite d'appeler les fonctions d'affichage propre "v_echo()" u "r_echo()" pour éviter d'écrire deux fois le même texte,
+	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
+	# Si le fichier de logs n'existe pas, le script le crée
+	if test ! -f "$SCRIPT_LOGPATH"; then
+		touch "$SCRIPT_LOGPATH" \
+			|| handle_errors "LE FICHIER DE LOGS N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER ACTUEL ($PWD)" \
+			&& v_echo "$SCRIPT_V_TAB Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans le dossier \"$PWD\" $SCRIPT_C_RESET" \
+				>> "$SCRIPT_LOGPATH"
+		echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+		return
+
+	# Sinon, si le fichier de logs existe déjà, le script écrase son contenu
+	else
+		true > "$SCRIPT_LOGPATH"
+		echo "$SCRIPT_V_TAB Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans le dossier \"$PWD\" $SCRIPT_C_RESET" \
+			>> "$SCRIPT_LOGPATH"
+		echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+		return
+	fi
+}
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
@@ -212,47 +239,39 @@ function handle_errors()
 # Détection de l'exécution du script en mode super-utilisateur (root)
 function script_init()
 {
-	# On vérifie que le fichier de logs existe déjà
-	if test ! -f "$SCRIPT_LOGPATH"; then
-		touch "$SCRIPT_LOGPATH" \
-			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans le dossier \"$SCRIPT_HOMEDIR\"" \
-				>> "$SCRIPT_LOGPATH"
-	else
-		echo "" >> "$SCRIPT_LOGPATH" \
-			&& v_echo "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans le dossier \"$SCRIPT_HOMEDIR\"" \
-				>> "$SCRIPT_LOGPATH"
-	fi
+	# On appelle la fonction de création du fichier de logs
+	create_log_file
 
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
-    	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)."
+    	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)"
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
 		echo "$SCRIPT_VOID"
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur"
+    	echo "	sudo $0 votre_nom_d'utilisateur"
 		echo "$SCRIPT_VOID"
 
 		r_echo "Ou connectez vous directement en tant que super-utilisateur"
 		r_echo "Et tapez cette commande :"
-		r_echo "$SCRIPT_C_RESET	$0 votre_nom_d'utilisateur"
+		echo "	$0 votre_nom_d'utilisateur"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 
 	# Sinon, si le script est lancé en mode super-utilisateur, on vérifie que la commande d'exécution du script soit accompagnée d'un argument
 	else
 		# Si aucun argument n'est entré
-		if test -z "${SCRIPT_USER_NAME}"; then
+		if test -z "${SCRIPT_USERNAME}"; then
 			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
-			r_echo "$SCRIPT_C_RESET	sudo $0 votre_nom_d'utilisateur"
+			echo "	sudo $0 votre_nom_d'utilisateur"
 
 			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
 
 		# Sinon, si l'argument attendu est entré
 		else
             # Si la veleur de l'argument ne correspond pas au nom de l'utilisateur
-			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USER_NAME}"; then
+			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USERNAME}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 
@@ -262,7 +281,7 @@ function script_init()
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
 			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
-			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USER_NAME}"; then
+			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USERNAME}"; then
 				v_echo "Vous avez correctement entré votre nom d'utilisateur"
 				v_echo "Lancement du script"
 
@@ -560,10 +579,10 @@ function set_sudo()
 				echo "$SCRIPT_VOID"
 
 				# Ajout de l'utilisateur au groupe "sudo"
-				j_echo "Ajout de l'utilisateur ${SCRIPT_USER_NAME} au groupe sudo"
-				usermod -aG root "${SCRIPT_USER_NAME}" \
-					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USER_NAME\" à la liste des sudoers"; return; } \
-					&& { v_echo "L'utilisateur ${SCRIPT_USER_NAME} a été ajouté au groupe sudo avec succès"; }
+				j_echo "Ajout de l'utilisateur ${SCRIPT_USERNAME} au groupe sudo"
+				usermod -aG root "${SCRIPT_USERNAME}" \
+					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USERNAME\" à la liste des sudoers"; return; } \
+					&& { v_echo "L'utilisateur ${SCRIPT_USERNAME} a été ajouté au groupe sudo avec succès"; }
 
 				return
 				;;
