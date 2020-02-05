@@ -34,14 +34,14 @@ v_echo() { v_string=$1; echo "$SH_C_VERT $v_string $SH_C_RESET"; }
 
 handle_errors()
 {
+    error_str=$1
+
     r_echo "##### UNE ERREUR FATALE S'EST PRODUITE #####"
 
-    error_string="$1"
-
     r_echo "Une erreur fatale s'est produite"
-    r_echo "$error_string"
+    r_echo "$error_str"
     r_echo "Abandon"
-    
+
     exit 1
 }
 
