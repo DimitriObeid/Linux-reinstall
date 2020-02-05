@@ -48,14 +48,12 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 SCRIPT_HOMEDIR="/home/${SCRIPT_USER_NAME}"	# Dossier personnel de l'utilisateur
 
 # Création du dossier temporaire et définition des chemins vers ce dossier temporaire
-SCRIPT_TMPDIR="Linux-reinstall.tmp.d"		# Nom du dossier temporaire
-SCRIPT_TMPPATH="/tmp/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"					# Nom du dossier temporaire
+SCRIPT_TMPPARENT="/tmp"									# Dossier parent du dossier temporaire
+SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
 
 # Création de fichiers
 SCRIPT_LOG="Linux-reinstall.log"
-
-# Redirections
-SCRIPT_OUT_ERR=">> $SCRIPT_HOMEDIR/$SCRIPT_LOG 2>&1"
 
 # RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -92,21 +90,24 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	"$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP_INST_CAT;}
+function cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
+	>> $SCRIPT_HOMEDIR/$SCRIPT_LOG 2>&1 | tee "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP_INST_CAT;}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" "$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP;}
+function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" \
+	2>&1 | tee "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" "$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP;}
+function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" \
+	2>&1 | tee "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" "$SCRIPT_OUT_ERR"; $SCRIPT_SLEEP;}
+function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" \
+	2>&1 | tee "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; $SCRIPT_SLEEP;}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
-draw_header_line()
+function draw_header_line()
 {
 	line_char=$1	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
@@ -140,7 +141,7 @@ draw_header_line()
 }
 
 # Affichage du texte des headers
-script_header()
+function script_header()
 {
 	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
@@ -174,7 +175,7 @@ script_header()
 }
 
 # Fonction de gestion d'erreurs fatales (impossibles à corriger)
-handle_errors()
+function handle_errors()
 {
 	error_result=$1		# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
@@ -211,7 +212,7 @@ handle_errors()
 
 ## DÉFINITION DES FONCTIONS D'EXÉCUTION
 # Détection de l'exécution du script en mode super-utilisateur (root)
-script_init()
+function script_init()
 {
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
@@ -265,7 +266,7 @@ script_init()
 }
 
 # Détection du gestionnaire de paquets de la distribution utilisée
-get_dist_package_manager()
+function get_dist_package_manager()
 {
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 
@@ -289,7 +290,7 @@ get_dist_package_manager()
 }
 
 # Demande à l'utilisateur s'il souhaite vraiment lancer le script, puis connecte l'utilisateur en mode super-utilisateur
-launch_script()
+function launch_script()
 {
 	script_header "LANCEMENT DU SCRIPT"
 
@@ -298,7 +299,7 @@ launch_script()
 	echo "$SCRIPT_VOID"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
-	read_launch_script()
+	function read_launch_script()
 	{
         # On demande à l'utilisateur d'entrer une réponse
 		read -r -p "Entrez votre réponse : " rep_launch
@@ -354,7 +355,7 @@ launch_script()
 
 ## CONNEXION À INTERNET ET MISES À JOUR
 # Vérification de la connexion à Internet
-check_internet_connection()
+function check_internet_connection()
 {
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
@@ -372,7 +373,7 @@ check_internet_connection()
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté
 # (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
 # SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
-dist_upgrade()
+function dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
@@ -405,7 +406,7 @@ dist_upgrade()
 
 ## CRÉATION DE DOSSIERS
 # Fonction de création rapide de dossiers
-makedir()
+function makedir()
 {
 	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
 	dirname=$2						# Nom du dossier à créer dans son dossier parent
@@ -414,7 +415,7 @@ makedir()
 	if test ! -d "$dirpath"; then
 		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
 		mkdir -v "$dirpath" \
-			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\" ($SCRIPT_TMPPATH)" \
+			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\"" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 
 		return
@@ -449,14 +450,14 @@ makedir()
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
-pack_install()
+function pack_install()
 {
 	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
 	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" suivant la commande
 	# d'installation de votre distribution.
 	package_name=$1
 
-	pack_full_install()
+	function pack_full_install()
 	{
 		search_cmd="$*"			# Commande complète de recherche de paquets
 		install_cmd="$*"		# Commande complète d'installation de paquets
@@ -506,7 +507,7 @@ pack_install()
 }
 
 # Pour installer des paquets via le gestionnaire de paquets Snap
-snap_install()
+function snap_install()
 {
 	snap_cut_cmd="$(cut -d - -f1)"
 	snap_cut="$* | $snap_cut"
@@ -526,7 +527,7 @@ snap_install()
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection et installation de Sudo
-set_sudo()
+function set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
@@ -550,7 +551,7 @@ set_sudo()
 	echo ">>>> Si vous avez déjà un fichier sudoers modifié, TOUS les changements effectués seront écrasés"
 	echo "$SCRIPT_VOID"
 
-	read_set_sudo()
+	function read_set_sudo()
 	{
 		read -r -p "Entrez votre réponse : " rep_sudo
 
@@ -604,7 +605,7 @@ set_sudo()
 }
 
 # Suppression des paquets obsolètes
-autoremove()
+function autoremove()
 {
 	script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 
@@ -612,7 +613,7 @@ autoremove()
 	echo "$SCRIPT_VOID"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
-	read_autoremove()
+	function read_autoremove()
 	{
 		read -r -p "Entrez votre réponse : " rep_autoremove
 
@@ -672,7 +673,7 @@ autoremove()
 }
 
 # Fin de l'installation
-is_installation_done()
+function is_installation_done()
 {
 	script_header "FIN DE L'INSTALLATION"
 
@@ -713,8 +714,8 @@ check_internet_connection
 dist_upgrade
 
 # Création du dossier temporaire où sont stockés les fichiers temporaires
-script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$SCRIPT_HOMEDIR\""
-makedir "$SCRIPT_HOMEDIR" "$SCRIPT_TMPDIR"
+script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$SCRIPT_TMPPARENT\""
+makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
 
 
 ## INSTALLATIONS PRIORITAIRES
