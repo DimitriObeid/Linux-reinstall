@@ -95,16 +95,13 @@ function cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $ca
 	| tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP_INST_CAT;}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" \
-	2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
+function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" \
-	2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
+function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" \
-	2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
+function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGDIR"; $SCRIPT_SLEEP;}
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
