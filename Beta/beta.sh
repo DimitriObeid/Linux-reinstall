@@ -295,8 +295,8 @@ function script_init()
 					|| handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
 					&& SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
 				
-				v_echo_str "Vous avez correctement entré votre nom d'utilisateur"
-				v_echo_str "Lancement du script"
+				v_echo_str "Vous avez correctement entré votre nom d'utilisateur" >> "$SCRIPT_LOGPATH"
+				v_echo_str "Lancement du script" >> "$SCRIPT_LOGPATH"
 
 				return
 			else
