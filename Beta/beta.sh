@@ -57,8 +57,8 @@ SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier t
 SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
-# Redirections
-SCRIPT_REDIRECT="$($? 2>&1 | tee -a "$SCRIPT_LOGPATH")"
+# Redirectionstouch
+SCRIPT_REDIRECT="$("$(history -1)" 2>&1 | tee -a "$SCRIPT_LOGPATH")"
 
 ## RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
