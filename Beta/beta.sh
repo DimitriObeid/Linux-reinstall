@@ -12,6 +12,7 @@
 
 # Ou débugguez le en utilisant Shell Check : https://www.shellcheck.net/
 
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
 ################### DÉCLARATION DES VARIABLES ET AFFECTATION DE LEURS VALEURS ###################
 
@@ -57,7 +58,7 @@ SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
 # Redirections
-SCRIPT_REDIRECT="$(2>&1 | tee -a "$SCRIPT_LOGPATH")"
+SCRIPT_REDIRECT="$($? 2>&1 | tee -a "$SCRIPT_LOGPATH")"
 
 ## RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -89,30 +90,40 @@ SCRIPT_VOID=""
 SCRIPT_VERSION="2.0"
 
 
-################### DÉFINITION DES FONCTIONS ###################
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+
+
+############################################# DÉFINITIONS DES FONCTIONS #############################################
+
+
+#### DÉFINITION DES FONCTIONS INDÉPENDANTES DE L'AVANCEMENT DU SCRIPT ####
+
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-function cats_echo_str() { cats_e_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	$SCRIPT_SLEEP_INST_CAT; }
+function cats_echo_str() { cats_e_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_e_string $SCRIPT_HASH $SCRIPT_C_RESET" \
+	"$SCRIPT_SLEEP_INST_CAT"; }
 # Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function cats_echo() { cats_string=$1; cats_echo_str $SCRIPT_REDIRECT; }
+function cats_echo() { cats_string=$1; cats_echo_str "$cats_string" "$SCRIPT_REDIRECT"; }
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function j_echo_str() { j_e_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+function j_echo_str() { j_e_string=$1; echo "$SCRIPT_J_TAB $j_e_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
 # Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function j_echo() {  j_string=$1; j_echo_str $SCRIPT_REDIRECT; }
+function j_echo() { j_string=$1; j_echo_str "$j_string" "$SCRIPT_REDIRECT"; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_e_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
 # Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function r_echo() {  r_string=$1; r_echo_str $SCRIPT_REDIRECT; }
+function r_echo() {  r_string=$1; r_echo_str "$r_string" "$SCRIPT_REDIRECT"; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
 # Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function v_echo() {  v_string=$1; v_echo_str $SCRIPT_REDIRECT; }
+function v_echo() {  v_string=$1; v_echo_str "$v_string" "$SCRIPT_REDIRECT"; }
+
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -208,15 +219,16 @@ function handle_errors()
 	echo "$SCRIPT_VOID"
 
 	$SCRIPT_SLEEP_HEADER
-	r_echo_str "Une erreur fatale s'est produite :" $SCRIPT_REDIRECT
-	r_echo_str "$error_result" $SCRIPT_REDIRECT
+	r_echo_str "Une erreur fatale s'est produite :" "$SCRIPT_REDIRECT"
+	r_echo_str "$error_result" "$SCRIPT_REDIRECT"
 	echo "$SCRIPT_VOID"
 
-	r_echo_str "Arrêt de l'installation" $SCRIPT_REDIRECT
+	r_echo_str "Arrêt de l'installation" "$SCRIPT_REDIRECT"
 	echo "$SCRIPT_VOID"
 
 	exit 1
 }
+
 
 ## FICHIER DE LOGS
 # Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
@@ -226,7 +238,7 @@ function create_log_file()
 	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
 	# Si le fichier de logs n'existe pas, le script le crée
 	if test ! -f "$SCRIPT_LOGPATH"; then
-		touch "$SCRIPT_LOGPATH" \
+		make_file "$SCRIPT_LOGPATH" \
 			|| handle_errors "LE FICHIER DE LOGS N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER ACTUEL ($PWD)" \
 			&& v_echo_str "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans le dossier \"$PWD\"" \
 				>> "$SCRIPT_LOGPATH"
@@ -244,6 +256,85 @@ function create_log_file()
 		return
 	fi
 }
+
+
+## CRÉATION DE FICHIERS ET DOSSIERS
+# Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
+function make_file()
+{
+	file_dirparent=$1	# Dossier parent du fichier à créer
+	filename=$2			# Nom du fichier à créer
+
+	touch "$file_dirparent" "$filename" "$SCRIPT_REDIRECT" \
+		|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
+		&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
+}
+
+# Fonction de création de dossiers ET d'attribution récursive des droits de lecture et d'écriture à l'utilisateur
+function makedir()
+{
+	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
+	dirname=$2						# Nom du dossier à créer dans son dossier parent
+	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
+
+	if test ! -d "$dirpath"; then
+		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
+		mkdir -v "$dirpath" \
+			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\"" \
+			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
+
+		# On change le du dossier créé par le script
+		# Comme il est exécuté en mode super-utilisateur, le dossier créé appartient totalement au super-utilisateur.
+		# Pour attribuer les droits de lecture, d'écriture et d'exécution (rwx) à l'utilisateur normal, on appelle
+		# la commande chown avec pour arguments :
+		#		- Le nom de l'utilisateur à qui donner les
+		chown -R "$SCRIPT_USERNAME" "$dirpath" "$SCRIPT_REDIRECT" \
+			|| {
+				r_echo "Impossible de changer les droits du dossier \"$dirpath\""
+				r_echo "Pour changer les droits du dossier \"$dirpath\" de manière récursive,"
+				r_echo "utilisez la commande :"
+				echo "	chown -R $SCRIPT_USERNAME $dirpath"
+
+				return
+			} \
+			&& v_echo "Les droits du dossier $dirpath ont été changés avec succès"
+		return
+
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent
+	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
+	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
+		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
+		j_echo "Suppression du contenu du dossier \"$dirpath\""
+		echo "$SCRIPT_VOID"
+
+		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
+		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
+		rm -r -f -v "${dirpath/:?}/"* "$SCRIPT_LOGPATH" "$SCRIPT_REDIRECT" \
+			|| {
+				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
+				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
+				return
+				} \
+			&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
+
+			return
+
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent
+	# ET que ce dossier est vide
+	elif test -d "$dirpath"; then
+		v_echo "Le dossier \"$dirpath\" existe déjà"
+
+		return
+	fi
+}
+
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+#### DÉFINITION DES FONCTIONS DÉPENDANTES DE L'AVANCEMENT DU SCRIPT ####
+
+
 
 ## DÉFINITION DES FONCTIONS D'EXÉCUTION
 # Détection de l'exécution du script en mode super-utilisateur (root)
@@ -293,7 +384,7 @@ function script_init()
 			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
 			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USERNAME}"; then
 				# On déplace le fichier de logs vers le dossier personnel de l'utilisateur
-				mv "$SCRIPT_LOG" $SCRIPT_HOMEDIR >> "$SCTRIPT_HOMEDIR/$SCRIPT_LOG" \
+				mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
 					|| handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
 					&& SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
 
@@ -434,58 +525,6 @@ function dist_upgrade()
 	return
 }
 
-## CRÉATION DE FICHIERS ET DOSSIERS
-# Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
-function make_file()
-{
-	fileparent=$1	# Dossier parent du fichier à créer
-	filename=$2		# Nom du dossier à créer
-}
-
-# Fonction de création de dossiers ET d'attribution récursive des droits de lecture et d'écriture à l'utilisateur
-function makedir()
-{
-	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
-	dirname=$2						# Nom du dossier à créer dans son dossier parent
-	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
-
-	if test ! -d "$dirpath"; then
-		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
-		mkdir -v "$dirpath" \
-			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\"" \
-			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
-		chown -R $dirpath "$SCRIPT_REDIRECT"
-			|| r_echo "Impossible de changer les droits du dossier $dirpath" \
-			&& v_echo "Les droits du dossier $dirpath ont été changés avec succès"
-		return
-
-	# Sinon, si le dossier à créer existe déjà dans son dossier parent
-	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
-	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
-		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
-		j_echo "Suppression du contenu du dossier \"$dirpath\""
-		echo "$SCRIPT_VOID"
-
-		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
-		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
-		rm -r -f -v "${dirpath/:?}/"* "$SCRIPT_LOGPATH" $SCRIPT_REDIRECT \
-			|| {
-				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
-				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
-				return
-				} \
-			&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
-
-			return
-
-	# Sinon, si le dossier à créer existe déjà dans son dossier parent
-	# ET que ce dossier est vide
-	elif test -d "$dirpath"; then
-		v_echo "Le dossier \"$dirpath\" existe déjà"
-
-		return
-	fi
-}
 
 ## DÉFINITION DES FONCTIONS D'INSTALLATION
 # Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
@@ -502,7 +541,7 @@ function pack_install()
 		$SCRIPT_SLEEP_INST
 
 		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		"$@" "$package_name" $SCRIPT_REDIRECT
+		"$@" "$package_name" "$SCRIPT_REDIRECT"
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
 		echo "$SCRIPT_VOID"
 
@@ -604,7 +643,7 @@ function set_sudo()
 
 				# Ajout de l'utilisateur au groupe "sudo"
 				j_echo "Ajout de l'utilisateur ${SCRIPT_USERNAME} au groupe sudo"
-				usermod -aG root "${SCRIPT_USERNAME}" $SCRIPT_REDIRECT \
+				usermod -aG root "${SCRIPT_USERNAME}" "$SCRIPT_REDIRECT" \
 					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USERNAME\" à la liste des sudoers"; return; } \
 					&& { v_echo "L'utilisateur ${SCRIPT_USERNAME} a été ajouté au groupe sudo avec succès"; }
 
@@ -710,7 +749,8 @@ function is_installation_done()
 	echo "$SCRIPT_VOID"
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
-    # On tue le processus
+
+    # On tue le processus de connexion en mode super-utilisateur, par précautions
 	sudo -k
 	echo "$SCRIPT_VOID"
 
