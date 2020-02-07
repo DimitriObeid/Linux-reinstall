@@ -118,17 +118,25 @@ function create_log_file()
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-function cats_echo() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	| tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_INST_CAT;}
+function cats_echo_str() { cats_e_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH $SCRIPT_C_RESET" \
+	$SCRIPT_SLEEP_INST_CAT; }
+# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs 
+function cats_echo() { cats_string=$1; cats_echo_str 2>&1 | tee -a "$SCRIPT_LOGPATH"; }
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP;}
+function j_echo_str() { j_e_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs 
+function j_echo() {  j_string=$1; j_echo_str 2>&1 | tee -a "$SCRIPT_LOGPATH"; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function r_echo() { r_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP;}
+function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs 
+function r_echo() {  r_string=$1; r_echo_str 2>&1 | tee -a "$SCRIPT_LOGPATH"; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function v_echo() { v_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP;}
+function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs 
+function v_echo() {  v_string=$1; v_echo_str 2>&1 | tee -a "$SCRIPT_LOGPATH"; }
 
 ## CRÉATION DES HEADERS
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
@@ -244,8 +252,8 @@ function script_init()
 
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
-    	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)"
-    	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
+    	r_echo_str "Ce script doit être exécuté en tant que super-utilisateur (root)"
+    	r_echo_str "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
 		echo "$SCRIPT_VOID"
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
@@ -253,8 +261,8 @@ function script_init()
     	echo "	sudo $0 votre_nom_d'utilisateur"
 		echo "$SCRIPT_VOID"
 
-		r_echo "Ou connectez vous directement en tant que super-utilisateur"
-		r_echo "Et tapez cette commande :"
+		r_echo_str "Ou connectez vous directement en tant que super-utilisateur"
+		r_echo_str "Et tapez cette commande :"
 		echo "	$0 votre_nom_d'utilisateur"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
@@ -263,7 +271,7 @@ function script_init()
 	else
 		# Si aucun argument n'est entré
 		if test -z "${SCRIPT_USERNAME}"; then
-			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
+			r_echo_str "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			echo "	sudo $0 votre_nom_d'utilisateur"
 
 			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
@@ -272,18 +280,23 @@ function script_init()
 		else
             # Si la veleur de l'argument ne correspond pas au nom de l'utilisateur
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USERNAME}"; then
-				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
+				r_echo_str "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 
-				r_echo "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
-				r_echo "veuillez copier ou déplacer le script dans un répertoire de votre dossier personnel et réexécuter le script."
+				r_echo_str "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
+				r_echo_str "veuillez copier ou déplacer le script dans un répertoire de votre dossier personnel et réexécuter le script."
 
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
 			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
 			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USERNAME}"; then
-				v_echo "Vous avez correctement entré votre nom d'utilisateur"
-				v_echo "Lancement du script"
+				# On déplace le fichier de logs vers le dossier personnel de l'utilisateur
+				mv "$SCRIPT_LOG" $SCRIPT_HOMEDIR >> "$SCTRIPT_HOMEDIR/$SCRIPT_LOG" \
+					|| handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
+					&& SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
+				
+				v_echo_str "Vous avez correctement entré votre nom d'utilisateur"
+				v_echo_str "Lancement du script"
 
 				return
 			else
@@ -444,7 +457,7 @@ function makedir()
 
 		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
 		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
-		rm -r -f -v "${dirpath/:?}/"* \
+		rm -r -f -v "${dirpath/:?}/"* "$SCRIPT_LOGPATH" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
@@ -580,7 +593,7 @@ function set_sudo()
 
 				# Ajout de l'utilisateur au groupe "sudo"
 				j_echo "Ajout de l'utilisateur ${SCRIPT_USERNAME} au groupe sudo"
-				usermod -aG root "${SCRIPT_USERNAME}" \
+				usermod -aG root "${SCRIPT_USERNAME}" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USERNAME\" à la liste des sudoers"; return; } \
 					&& { v_echo "L'utilisateur ${SCRIPT_USERNAME} a été ajouté au groupe sudo avec succès"; }
 
