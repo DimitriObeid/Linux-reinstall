@@ -10,7 +10,11 @@
 # Ou encore
 # sudo bash -x reinstall.sh
 
-# Ou débugguez le en utilisant Shell Check : https://www.shellcheck.net/
+# Ou débugguez le en utilisant l'excellent utilitaire Shell Check :
+#	En ligne -> https://www.shellcheck.net/
+#	En ligne de commandes -> sudo ${commande d'installation de paquets} shellcheck
+
+
 
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
@@ -24,8 +28,8 @@ SCRIPT_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 ## CHRONOMÈTRE
 
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
-# Pour changer le timer, changer la valeur de "sleep".
-# Pour désactiver cette fonctionnalité, mettre la valeur de "sleep" à 0
+# Pour changer une durée de chronométrage, changez la valeur de la commande "sleep" voulue.
+# Pour désactiver cette fonctionnalité, mettez la valeur de la commande "sleep" à 0
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
 SCRIPT_SLEEP=sleep\ .5			# Temps d'affichage d'un texte de sous-étape
 SCRIPT_SLEEP_HEADER=sleep\ 1.5	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
@@ -55,9 +59,10 @@ SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier t
 
 # Création de fichiers
 SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
+SCRIPT_LOGPARENT=$PWD					# Dossier parent du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
-# Redirectionstouch
+# Redirections
 SCRIPT_REDIRECT="$("$(history -1)" 2>&1 | tee -a "$SCRIPT_LOGPATH")"
 
 ## RESSOURCES
@@ -230,44 +235,41 @@ function handle_errors()
 }
 
 
-## FICHIER DE LOGS
-# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
-function create_log_file()
-{
-	# On évite d'appeler les fonctions d'affichage propre "v_echo()" u "r_echo()" pour éviter d'écrire deux fois le même texte,
-	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
-	# Si le fichier de logs n'existe pas, le script le crée
-	if test ! -f "$SCRIPT_LOGPATH"; then
-		make_file "$SCRIPT_LOGPATH" \
-			|| handle_errors "LE FICHIER DE LOGS N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER ACTUEL ($PWD)" \
-			&& v_echo_str "Le fichier de logs \"$SCRIPT_LOG\" a été créé avec succès dans le dossier \"$PWD\"" \
-				>> "$SCRIPT_LOGPATH"
-		echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
-
-		return
-
-	# Sinon, si le fichier de logs existe déjà, le script écrase son contenu
-	else
-		true > "$SCRIPT_LOGPATH"
-		v_echo_str "Le fichier de logs \"$SCRIPT_LOG\" existe déjà dans le dossier \"$PWD\"" \
-			>> "$SCRIPT_LOGPATH"
-		echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
-
-		return
-	fi
-}
-
-
 ## CRÉATION DE FICHIERS ET DOSSIERS
 # Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
-function make_file()
+function makefile()
 {
 	file_dirparent=$1	# Dossier parent du fichier à créer
 	filename=$2			# Nom du fichier à créer
+	filepath="$file_parentdir/$filename"
 
-	touch "$file_dirparent" "$filename" "$SCRIPT_REDIRECT" \
-		|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
-		&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
+	# Si le fichier à créer n'existe pas
+	if test ! -f "$filepath"; then
+		touch "$file_dirparent/$filename" "$SCRIPT_REDIRECT" \
+			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
+			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
+		
+		chown "$SCRIPT_USERNAME" "$filepath" "$SCRIPT_REDIRECT" \
+			|| {
+				r_echo "Impossible de changer les droits du fichier \"$filepath\""
+				r_echo "Pour changer les droits du fichier \"$filepath\","
+				r_echo "utilisez la commande :"
+				echo "	chown $SCRIPT_USERNAME $filepath"
+
+				return
+			} \
+			&& v_echo "Les droits du fichier $filepath ont été changés avec succès"
+		
+		return
+
+	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
+	elif test -f "$filepath" || test -s "$filepath"; then
+		true > "$filepath" \
+			|| r_echo "Le contenu du fichier \"$filepath\" n'a pas été écrasé" \
+			&& v_echo "Le contenu du fichier \"$filepath\" a été écrasé avec succès"
+		
+		return
+	fi
 }
 
 # Fonction de création de dossiers ET d'attribution récursive des droits de lecture et d'écriture à l'utilisateur
@@ -287,7 +289,9 @@ function makedir()
 		# Comme il est exécuté en mode super-utilisateur, le dossier créé appartient totalement au super-utilisateur.
 		# Pour attribuer les droits de lecture, d'écriture et d'exécution (rwx) à l'utilisateur normal, on appelle
 		# la commande chown avec pour arguments :
-		#		- Le nom de l'utilisateur à qui donner les
+		#		- Le nom de l'utilisateur à qui donner les droits
+		#		- Le chemin du dossier cible
+		#		- Ici, la variable contenant la redirection
 		chown -R "$SCRIPT_USERNAME" "$dirpath" "$SCRIPT_REDIRECT" \
 			|| {
 				r_echo "Impossible de changer les droits du dossier \"$dirpath\""
@@ -309,7 +313,7 @@ function makedir()
 
 		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
 		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
-		rm -r -f -v "${dirpath/:?}/"* "$SCRIPT_LOGPATH" "$SCRIPT_REDIRECT" \
+		rm -r -f -v "${dirpath/:?}/"* "$SCRIPT_REDIRECT" \
 			|| {
 				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
@@ -326,6 +330,24 @@ function makedir()
 
 		return
 	fi
+}
+
+
+## FICHIER DE LOGS
+# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
+function create_log_file()
+{
+	# On évite d'appeler les fonctions d'affichage propre "v_echo()" ou "r_echo()" pour éviter d'écrire deux fois le même texte,
+	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
+
+	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
+	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG" \
+	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+	v_echo "Fichier de logs créé avec succès"
+	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+	return
 }
 
 
@@ -377,7 +399,7 @@ function script_init()
 				echo "$SCRIPT_VOID"
 
 				r_echo_str "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
-				r_echo_str "veuillez copier ou déplacer le script dans un répertoire de votre dossier personnel et réexécuter le script."
+				r_echo_str "veuillez y retourner, et réexécuter le script."
 
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
