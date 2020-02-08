@@ -62,8 +62,6 @@ SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
 SCRIPT_LOGPARENT=$PWD					# Dossier parent du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
-# Redirections
-SCRIPT_REDIRECT="$("$(history -1)" 2>&1 | tee -a "$SCRIPT_LOGPATH")"
 
 ## RESSOURCES
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
@@ -86,7 +84,8 @@ SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en
 SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 chevrons
 
 # Saut de ligne
-SCRIPT_VOID=""
+VOID_TEST=""
+SCRIPT_VOID=$(echo "$VOID_TEST" >> "$SCRIPT_LOGPATH")
 
 
 ## VERSION
@@ -109,25 +108,21 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-function cats_echo_str() { cats_e_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_e_string $SCRIPT_HASH $SCRIPT_C_RESET" \
-	"$SCRIPT_SLEEP_INST_CAT"; }
-# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function cats_echo() { cats_string=$1; cats_echo_str "$cats_string" "$SCRIPT_REDIRECT"; }
+function cats_str() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
+	$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_INST_CAT; }
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function j_echo_str() { j_e_string=$1; echo "$SCRIPT_J_TAB $j_e_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
-# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function j_echo() { j_string=$1; j_echo_str "$j_string" "$SCRIPT_REDIRECT"; }
+function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_e_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_e_string $SCRIPT_C_RESET"; }
 # Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function r_echo() {  r_string=$1; r_echo_str "$r_string" "$SCRIPT_REDIRECT"; }
+function r_echo() {  r_string=$1; r_echo_str "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C_RESET"; $SCRIPT_SLEEP; }
+function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C_RESET"; }
 # Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function v_echo() {  v_string=$1; v_echo_str "$v_string" "$SCRIPT_REDIRECT"; }
+function v_echo() {  v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 
 ## CRÉATION DES HEADERS
@@ -144,11 +139,9 @@ function draw_header_line()
 
 	# Affichage du caractère souhaité sur toute la ligne. Pour cela, on commence à la lire à partir de la première colonne (1),
 	# puis, on parcourt toute la colonne jusqu'à la fin de la ligne. À chaque fin de boucle, un caractère est affiché, coloré
-	# selon l'encodage de la couleur stocké dans la variable
-
-	# délimité par la valeur retournée par
-	# "tput cols" (affichage du nombre de colonnes séparant la bordure gauche de la bordure droite de la zone
-	# de texte du terminal), dont la variable "$SCRIPT_COLS" stocke la commande d'exécution.
+	# selon l'encodage de la couleur stocké dans la variable délimité par la valeur retournée par la commande "tput cols"
+	# (affichage du nombre de colonnes séparant la bordure gauche de la bordure droite de la zone de texte du terminal),
+	# dont la variable "$SCRIPT_COLS" stocke la commande d'exécution.
 	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
 		echo -n "$line_char"
 	done
@@ -224,11 +217,11 @@ function handle_errors()
 	echo "$SCRIPT_VOID"
 
 	$SCRIPT_SLEEP_HEADER
-	r_echo_str "Une erreur fatale s'est produite :" "$SCRIPT_REDIRECT"
-	r_echo_str "$error_result" "$SCRIPT_REDIRECT"
+	r_echo_str "Une erreur fatale s'est produite :" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	r_echo_str "$error_result" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
 
-	r_echo_str "Arrêt de l'installation" "$SCRIPT_REDIRECT"
+	r_echo_str "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
 
 	exit 1
@@ -241,15 +234,15 @@ function makefile()
 {
 	file_dirparent=$1	# Dossier parent du fichier à créer
 	filename=$2			# Nom du fichier à créer
-	filepath="$file_parentdir/$filename"
+	filepath="$file_dirparent/$filename"
 
 	# Si le fichier à créer n'existe pas
 	if test ! -f "$filepath"; then
-		touch "$file_dirparent/$filename" "$SCRIPT_REDIRECT" \
+		touch "$file_dirparent/$filename" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
 			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
-		
-		chown "$SCRIPT_USERNAME" "$filepath" "$SCRIPT_REDIRECT" \
+
+		chown "$SCRIPT_USERNAME" "$filepath" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de changer les droits du fichier \"$filepath\""
 				r_echo "Pour changer les droits du fichier \"$filepath\","
@@ -259,7 +252,7 @@ function makefile()
 				return
 			} \
 			&& v_echo "Les droits du fichier $filepath ont été changés avec succès"
-		
+
 		return
 
 	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
@@ -267,7 +260,7 @@ function makefile()
 		true > "$filepath" \
 			|| r_echo "Le contenu du fichier \"$filepath\" n'a pas été écrasé" \
 			&& v_echo "Le contenu du fichier \"$filepath\" a été écrasé avec succès"
-		
+
 		return
 	fi
 }
@@ -292,7 +285,7 @@ function makedir()
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 		#		- Ici, la variable contenant la redirection
-		chown -R "$SCRIPT_USERNAME" "$dirpath" "$SCRIPT_REDIRECT" \
+		chown -R "$SCRIPT_USERNAME" "$dirpath" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de changer les droits du dossier \"$dirpath\""
 				r_echo "Pour changer les droits du dossier \"$dirpath\" de manière récursive,"
@@ -313,7 +306,7 @@ function makedir()
 
 		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
 		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
-		rm -r -f -v "${dirpath/:?}/"* "$SCRIPT_REDIRECT" \
+		rm -r -f -v "${dirpath/:?}/"* 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
@@ -344,7 +337,7 @@ function create_log_file()
 	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG" \
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
-	v_echo "Fichier de logs créé avec succès"
+	v_echo_str "Fichier de logs créé avec succès" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
 	return
@@ -524,19 +517,19 @@ function dist_upgrade()
 	# puis on appelle sa commande de mise à jour des paquets installés
 	case "$SCRIPT_OS_FAMILY" in
 		opensuse)
-			zypper -y update
+			zypper -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 		archlinux)
-			pacman --noconfirm -Syu
+			pacman --noconfirm -Syu 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 		fedora)
-			dnf -y update
+			dnf -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 		debian)
-			apt -y update; apt -y upgrade
+			apt -y update; apt -y upgrade 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 		gentoo)
-			emerge -u world
+			emerge -u world 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 	esac
 
@@ -563,7 +556,7 @@ function pack_install()
 		$SCRIPT_SLEEP_INST
 
 		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		"$@" "$package_name" "$SCRIPT_REDIRECT"
+		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 		v_echo "Le paquet \"$package_name\" a été correctement installé"
 		echo "$SCRIPT_VOID"
 
@@ -665,7 +658,7 @@ function set_sudo()
 
 				# Ajout de l'utilisateur au groupe "sudo"
 				j_echo "Ajout de l'utilisateur ${SCRIPT_USERNAME} au groupe sudo"
-				usermod -aG root "${SCRIPT_USERNAME}" "$SCRIPT_REDIRECT" \
+				usermod -aG root "${SCRIPT_USERNAME}" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 					|| { r_echo "Impossible d'ajouter l'utilisateur \"$SCRIPT_USERNAME\" à la liste des sudoers"; return; } \
 					&& { v_echo "L'utilisateur ${SCRIPT_USERNAME} a été ajouté au groupe sudo avec succès"; }
 
