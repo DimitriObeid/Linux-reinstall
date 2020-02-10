@@ -29,7 +29,7 @@ SCRIPT_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
 # Pour changer une durée de chronométrage, changez la valeur de la commande "sleep" voulue.
-# Pour désactiver cette fonctionnalité, mettez la valeur de la commande "sleep" à 0
+# Pour désactiver cette fonctionnalité, mettez la valeur de la commande "sleep" à 0.
 # NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
 SCRIPT_SLEEP=sleep\ .5			# Temps d'affichage d'un texte de sous-étape
 SCRIPT_SLEEP_HEADER=sleep\ 1.5	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
@@ -40,19 +40,19 @@ SCRIPT_SLEEP_INST_CAT=sleep\ 1	# Temps d'affichage d'un changement de catégorie
 ## COULEURS
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
-SCRIPT_C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers.
-SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes.
-SCRIPT_C_PACK_CATS=$(tput setaf 6)	# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets.
-SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal.
-SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape.
-SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape.
+SCRIPT_C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers
+SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
+SCRIPT_C_PACK_CATS=$(tput setaf 6)	# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets
+SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
+SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape
+SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
 
 
 ## DOSSIERS ET FICHIERS
 # Définition du dossier personnel de l'utilisateur
 SCRIPT_HOMEDIR="/home/${SCRIPT_USERNAME}"	# Dossier personnel de l'utilisateur
 
-# Création du dossier temporaire et définition des chemins vers ce dossier temporaire
+# Création du dossier temporaire et définition du chemin vers ce dossier temporaire
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"					# Nom du dossier temporaire
 SCRIPT_TMPPARENT="/tmp"									# Dossier parent du dossier temporaire
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
@@ -74,18 +74,17 @@ SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
 # Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
 # (une ligne de chaque caractère).
 SCRIPT_HEADER_LINE_CHAR="-"
-SCRIPT_COLS=$(tput cols)	# Affichage de colonnes sur le terminal
+SCRIPT_COLS=$(tput cols)	# Affichage du nombre de colonnes sur le terminal
 SCRIPT_HASH="#####"			# Nombre de dièses (hash) précédant et suivant une chaîne de caractères
 SCRIPT_TAB=">>>>"			# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
 
-# Affichage de chevrons précédant l'encodage de la couleur d'une chaîne de caractères
+# Affichage de chevrons suivant l'encodage de la couleur d'une chaîne de caractères
 SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons
-SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 chevrons
-SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 chevrons
+SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
+SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
 
 # Saut de ligne
-VOID_TEST=""
-SCRIPT_VOID=$(echo "$VOID_TEST" >> "$SCRIPT_LOGPATH")
+SCRIPT_VOID=$(echo "" 2>&1 | tee -a "$SCRIPT_LOGPATH")
 
 
 ## VERSION
@@ -108,20 +107,27 @@ SCRIPT_VERSION="2.0"
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
 # Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-function cats_str() { cats_string=$1; echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
-	$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_INST_CAT; }
+function cats_echo()
+{
+	cats_string=$1;
+
+	echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
+		$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH";
+	
+	$SCRIPT_SLEEP_INST_CAT
+}
 
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_e_string $SCRIPT_C_RESET"; }
-# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
+# Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
 function r_echo() {  r_string=$1; r_echo_str "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C_RESET"; }
-# Puis de la fonction redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
+# Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
 function v_echo() {  v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 
@@ -242,7 +248,7 @@ function makefile()
 			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
 			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
 
-		chown "$SCRIPT_USERNAME" "$filepath" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+		chown -v "$SCRIPT_USERNAME" "$filepath" >> "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de changer les droits du fichier \"$filepath\""
 				r_echo "Pour changer les droits du fichier \"$filepath\","
@@ -258,8 +264,8 @@ function makefile()
 	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
 	elif test -f "$filepath" || test -s "$filepath"; then
 		true > "$filepath" \
-			|| r_echo "Le contenu du fichier \"$filepath\" n'a pas été écrasé" \
-			&& v_echo "Le contenu du fichier \"$filepath\" a été écrasé avec succès"
+			|| r_echo_str "Le contenu du fichier \"$filepath\" n'a pas été écrasé" >> "$SCRIPT_LOGPATH" \
+			&& v_echo_str "Le contenu du fichier \"$filepath\" a été écrasé avec succès" >> "$SCRIPT_LOGPATH"
 
 		return
 	fi
@@ -274,9 +280,10 @@ function makedir()
 
 	if test ! -d "$dirpath"; then
 		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
-		mkdir -v "$dirpath" \
-			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER \"$dirparent\"" \
+		mkdir -v "$dirpath" >> "$SCRIPT_LOGPATH" \
+			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT \"$dirparent\"" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
+		echo "$SCRIPT_VOID"
 
 		# On change le du dossier créé par le script
 		# Comme il est exécuté en mode super-utilisateur, le dossier créé appartient totalement au super-utilisateur.
@@ -285,7 +292,7 @@ function makedir()
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 		#		- Ici, la variable contenant la redirection
-		chown -R "$SCRIPT_USERNAME" "$dirpath" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+		chown -R -v "$SCRIPT_USERNAME" "$dirpath" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de changer les droits du dossier \"$dirpath\""
 				r_echo "Pour changer les droits du dossier \"$dirpath\" de manière récursive,"
@@ -304,7 +311,7 @@ function makedir()
 		j_echo "Suppression du contenu du dossier \"$dirpath\""
 		echo "$SCRIPT_VOID"
 
-		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR CE QUE VOUS FAITES
+		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES
 		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
 		rm -r -f -v "${dirpath/:?}/"* 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
@@ -334,10 +341,10 @@ function create_log_file()
 	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
 
 	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
-	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG" \
+	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG"
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
-	v_echo_str "Fichier de logs créé avec succès" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	v_echo_str "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
 	return
@@ -397,9 +404,9 @@ function script_init()
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
 			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
-			elif test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" == "${SCRIPT_USERNAME}"; then
+			else
 				# On déplace le fichier de logs vers le dossier personnel de l'utilisateur
-				mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
+				mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
 					|| handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
 					&& SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
 
@@ -407,8 +414,6 @@ function script_init()
 				v_echo_str "Lancement du script" >> "$SCRIPT_LOGPATH"
 
 				return
-			else
-				handle_errors "UNE ERREUR INCONNUE A EU LIEU LORS DE L'EXÉCUTION DU SCRIPT"
 			fi
 		fi
 	fi
@@ -495,7 +500,7 @@ function check_internet_connection()
 {
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
-	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS (ping 1.1.1.1))
+	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
 	if ping -q -c 1 -W 1 opendns.com > /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 
@@ -546,8 +551,7 @@ function dist_upgrade()
 function pack_install()
 {
 	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
-	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" suivant la commande
-	# d'installation de votre distribution.
+	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
 	package_name=$1
 
 	function pack_full_install()
@@ -564,6 +568,8 @@ function pack_install()
 	}
 
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
+	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
 	case $SCRIPT_OS_FAMILY in
 		opensuse)
 			pack_manager_install zypper -y install
@@ -589,7 +595,7 @@ function pack_install()
 # Pour installer des paquets via le gestionnaire de paquets Snap
 function snap_install()
 {
-	snap_cut_cmd="$(cut -d - -f1)"
+	snap_cut_cmd="$(cut -d - f -1)"
 	snap_cut="$* | $snap_cut"
 
 	# Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
@@ -615,8 +621,8 @@ function set_sudo()
 
 	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
 	command -v sudo > /dev/null 2>&1 \
-		|| { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo ;} \
-		&& { v_echo "La commande \"sudo\" est déjà installée sur votre système"; sleep 0.5; }
+		|| { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo; } \
+		&& { v_echo "La commande \"sudo\" est déjà installée sur votre système"; }
 	echo "$SCRIPT_VOID"
 
 	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré"
