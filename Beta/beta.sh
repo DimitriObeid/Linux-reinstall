@@ -109,10 +109,10 @@ SCRIPT_VERSION="2.0"
 # entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
 function cats_echo()
 {
-	cats_string=$1;
+	cats_string=$1
 
 	echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
-		$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH";
+		$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 
 	$SCRIPT_SLEEP_INST_CAT
 }
@@ -123,12 +123,12 @@ function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_e_string $SCRIPT_C_RESET"; }
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function r_echo() {  r_string=$1; r_echo_str "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function r_echo() { r_string=$1; r_echo_str "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C_RESET"; }
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function v_echo() {  v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function v_echo() { v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 
 ## CRÉATION DES HEADERS
