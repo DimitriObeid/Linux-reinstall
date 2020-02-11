@@ -113,7 +113,7 @@ function cats_echo()
 
 	echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
 		$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH";
-	
+
 	$SCRIPT_SLEEP_INST_CAT
 }
 
@@ -393,7 +393,7 @@ function script_init()
 
 		# Sinon, si l'argument attendu est entré
 		else
-            # Si la veleur de l'argument ne correspond pas au nom de l'utilisateur
+            # Si la valeur de l'argument ne correspond pas au nom de l'utilisateur
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USERNAME}"; then
 				r_echo_str "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
