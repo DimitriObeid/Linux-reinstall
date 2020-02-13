@@ -84,7 +84,7 @@ SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en
 SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
 
 # Saut de ligne
-SCRIPT_VOID=$(echo "" 2>&1 | tee -a "$SCRIPT_LOGPATH")
+SCRIPT_VOID=""
 
 
 ## VERSION
@@ -135,8 +135,8 @@ function v_echo() { v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_L
 # Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
 function draw_header_line()
 {
-	line_char=$1	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
-	line_color=$2	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
+	line_color=$1	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
+	line_char=$2	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 
 	# Définition de la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	if test "$line_color" != ""; then
@@ -164,29 +164,35 @@ function draw_header_line()
 	return
 }
 
-# Affichage du texte des headers
-function script_header()
+function header_base()
 {
-	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
-
 	# Définition de la couleur de la ligne du caractère souhaité.
 	# Il s'agit du même code définissant la première condition de la fonction "draw_header_line",
 	# mais il a été réécrit ici pour définir l'affichage de la véritable couleur sur chaque caractère lors de l'appel de la
 	# fonction "script_header()", car les conditions d'une fonction ne peuvent pas être utilisées depuis une autre fonction
-	if test "$header_color" = ""; then
+	if test "$header_base_line_color" == ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
-		header_color=$SCRIPT_C_HEADER
+		header_base_line_color=$1
 	fi
 
+	return
+
+	# Ligne
+	header_base_char=$2				# Caractère composant chaque colonne d'une ligne d'un header
+
+	# Chaîne de caractères
+	header_base_string_color=$3		# Définition de la couleur de la chaîne de caractères
+	header_base_string=$4			# Chaîne de caractères affichée dans chaque header
+	
 	echo "$SCRIPT_VOID"
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
-	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$header_color"
-	# Affichage une autre couleur pour le texte, remplacez l'appel de variable "$header_color" ci-dessous par la couleur que vous souhaitez
-	echo "$header_color" "##>" "$header_string"
-	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$header_color"
+	draw_header_line "$header_base_line_color" "$header_base_char"
+	# Affichage une autre couleur pour le texte
+	echo "$header_base_string_color" "##>" "$header_base_string"
+	draw_header_line "$header_base_line_color" "$header_base_char"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
 	echo "$SCRIPT_VOID"
@@ -198,33 +204,25 @@ function script_header()
 	return
 }
 
+# Affichage du texte des headers
+function script_header()
+{
+	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
+
+	header_base "$SCRIPT_C_HEADER" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_HEADER" "$header_string"
+
+	return
+}
+
 # Fonction de gestion d'erreurs fatales (impossibles à corriger)
 function handle_errors()
 {
-	error_result=$1		# Chaîne de caractères à passer en argument lors de l'appel de la fonction
+	error_string=$1		# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
-	# Même chose que dans la première condition de la fonction "script_header"
-	if test "$error_color" = ""; then
-		error_color=$SCRIPT_C_ROUGE
-	fi
+	header_base "$SCRIPT_C_ROUGE" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_ROUGE" "ERREUR FATALE : $error_string"
 
-	echo "$SCRIPT_VOID" "$SCRIPT_VOID"
-
-	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
-	# $SCRIPT_SLEEP_HEADER
-	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
-	# Affichage d'une autre couleur pour le texte, remplacez l'appel de variable "$error_color" ci-dessous par la couleur que vous souhaitez
-	echo "$error_color" "##> ERREUR FATALE : $error_result"
-	draw_header_line "$SCRIPT_HEADER_LINE_CHAR" "$error_color"
-	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
-	# affiche toujours un saut de ligne à la fin)
-	echo "$SCRIPT_VOID"
-
-	echo "$SCRIPT_VOID"
-
-	$SCRIPT_SLEEP_HEADER
 	r_echo_str "Une erreur fatale s'est produite :" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-	r_echo_str "$error_result" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	r_echo_str "$error_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
 
 	r_echo_str "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
@@ -346,6 +344,9 @@ function create_log_file()
 
 	v_echo_str "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
+	uname -a >> "$SCRIPT_LOGPATH"	# Récupération du nom du système d'exploitation, de la version du noyau
 
 	return
 }
@@ -592,20 +593,21 @@ function pack_install()
 	return
 }
 
-# Pour installer des paquets via le gestionnaire de paquets Snap
+# Installation de paquets via le gestionnaire de paquets Snap
 function snap_install()
 {
-	snap_cut_cmd="$(cut -d - f -1)"
-	snap_cut="$* | $snap_cut"
+	snap list "$*" | cut -d - f -1
+	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
+		j_echo "Installation du paquet \"$*\""
 
-	# Utilisation d'un tableau dynamique d'arguments pour ajouter des options de téléchargement
-	j_echo "Installation du paquet \"$*\""
+		r_echo "Le paquet \"$("$*" | cut -d - f -1)\" n'a pas pu être installé sur votre système"
+	    snap install "$*"
 
-    snap install "$*"
+		return
+	else
+		v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
+	fi
 
-	snap list "$*" | "$snap_cut_cmd" \
-		|| { r_echo "Le paquet \"$snap_cut\" n'a pas pu être installé sur votre système"; return; } \
-		&& v_echo "Le paquet \"$snap_cut\" a été installé avec succès sur votre système"
 	echo "$SCRIPT_VOID"
 
 	return
@@ -617,7 +619,7 @@ function set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
-    j_echo "$SCRIPT_J_TAB Détection de sudo $SCRIPT_C_RESET"
+    j_echo "Détection de sudo $SCRIPT_C_RESET"
 
 	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
 	command -v sudo > /dev/null 2>&1 \
@@ -634,7 +636,7 @@ function set_sudo()
 	echo "$SCRIPT_VOID"
 
 	echo ">>>> REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
-	echo ">>>> Si vous avez déjà un fichier sudoers modifié, TOUS les changements effectués seront écrasés"
+	echo ">>>> Si vous avez déjà un fichier sudoers modifié, une sauvegarde du fichier actuel sera effectuée dans le même dossier"
 	echo "$SCRIPT_VOID"
 
 	function read_set_sudo()
@@ -654,6 +656,10 @@ function set_sudo()
 					|| { r_echo "Impossible de télécharger le fichier \"sudoers\""; return; } \
 					&& v_echo "Fichier \"sudoers\" téléchargé avec succès"
 				echo "$SCRIPT_VOID"
+
+				# Sauvegarde du fichier "/etc/sudoers" existant en "sudoers.old"
+				j_echo "Création d'une sauvegarde de votre fichier sudoers existant nommée \"sudoers.old\""
+				cat "/etc/sudoers" > "/etc/sudoers.old"
 
 				# Déplacement du fichier vers le dossier "/etc/"
 				j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
