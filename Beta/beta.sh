@@ -48,6 +48,11 @@ SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des me
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
 
 
+# DATE
+# Variable permettant l'écriture de la date et de l'heure actuelle dans le nom d'un fichier
+SCRIPT_DATE=$(date +"%Y-%m-%d %H-%M-%S")
+
+
 ## DOSSIERS ET FICHIERS
 # Définition du dossier personnel de l'utilisateur
 SCRIPT_HOMEDIR="/home/${SCRIPT_USERNAME}"	# Dossier personnel de l'utilisateur
@@ -515,7 +520,7 @@ function check_internet_connection()
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté
 # (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
 # SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
-function dist_upgrade()
+function dist_upgsudoers_bak_daterade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
@@ -619,6 +624,8 @@ function set_sudo()
 {
 	script_header "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
+	sudoers_old="/etc/sudoers $SCRIPT_DATE.old"
+
     j_echo "Détection de sudo $SCRIPT_C_RESET"
 
 	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
@@ -658,8 +665,11 @@ function set_sudo()
 				echo "$SCRIPT_VOID"
 
 				# Sauvegarde du fichier "/etc/sudoers" existant en "sudoers.old"
-				j_echo "Création d'une sauvegarde de votre fichier sudoers existant nommée \"sudoers.old\""
-				cat "/etc/sudoers" > "/etc/sudoers.old"
+				j_echo "Création d'une sauvegarde de votre fichier sudoers existant nommée \"sudoers $SCRIPT_DATE.old\""
+				cat "/etc/sudoers" > "$sudoers_old" \
+					|| { r_echo "Impossible de créer une sauvegarde du fichier sudoers"; return; } \
+					&& v_echo "Le fichier de sauvegarde \"$sudoers_old\" a été créé avec succès"
+				echo "$SCRIPT_VOID"
 
 				# Déplacement du fichier vers le dossier "/etc/"
 				j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""

@@ -20,7 +20,7 @@ Lisez le fichier **"Mode d'emploi.odt"** pour :
 
 La lecture de la documentation du script que vous souhaitez installer est vivement conseillée si vous avez besoin d'ajouter ou de supprimer des programmes. Vous saurez ainsi quelle partie du script changer pour l'adapter à vos besoins.
 
-## 2) Gestionnaires de paquets supportés :
+## 2) Gestionnaires de paquets supportés par distributions :
 - **APT** (Debian, Ubuntu, Mint, Kali)  
 - **DNF** (RHEL, Fedora, CentOS)  
 - **Emerge** (Gentoo)  
@@ -30,7 +30,7 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 ## 3) Fichiers à télécharger :
 
 - Les fichiers qui vous intéresseront le plus pour vos cours de BTS SIO ou pour une utilisation personnelle ou plus avancée se trouvent dans le dossier **Stable** (*__Documentation Stable.odt__* _(si vous souhaitez modifier le script)_, plus *__sio.sh__* ou *__personnel.sh__*).  
-- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Beta"** (si vous voulez donner un petit coup de main).  
+- Les fichiers qui vous intéresseront le plus si vous êtes développeur et que vous souhaitez participer à l'élaboration du projet se trouvent dans le sous-dossier **"Beta"** (si vous souhaitez donner un petit coup de main).  
 
 ## 4) Arborescence et description des fichiers du projet
 
@@ -48,10 +48,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5
     - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
 
 * *__4.3) GUI :__*
-    - **.gitignore :** Fichier servant à ne pas inclure, dans les commits Git, les fichiers listés dedans (fichiers binaires, temporaires, etc...).  
-    - **fenetreGUI.cpp :** Fichier source C++ contenant la définition des méthodes de la classe **"fenetreGUI"**.  
-    - **fenetreGUI.h :** Fichier d'en-tête contenant la classe gérant l'affichage de la fenêtre principale.  
-    - **main.cpp :** Fichier source C++ contenant la fonction principale du programme **(main)**, fonction de début et de fin de **TOUT** programme écrit en C ou en C++.  
+    - 
 
 * *__4.4) Parser :__*
     - **main.cpp :** Fichier source C++ contenant la fonction principale du programme de parsing du script shell.  
