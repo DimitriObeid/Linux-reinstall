@@ -1,0 +1,2 @@
+# Installation du module wget pour télécharger des fichiers
+sudo pip install python3-wget

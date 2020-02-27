@@ -8,7 +8,7 @@ alias rm='rm -i --preserve-root'
 alias l='ls -CF'
 alias la='ls -A'
 alias ll='ls -alF'
-alias lla='ls -l -a'
+alias lla='ls -la'
 alias lll='ls -larth'
 
 # 

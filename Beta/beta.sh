@@ -520,7 +520,7 @@ function check_internet_connection()
 # Mise à jour des paquets actuels selon le gestionnaire de paquets supporté
 # (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
 # SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
-function dist_upgsudoers_bak_daterade()
+function dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
@@ -601,6 +601,7 @@ function pack_install()
 # Installation de paquets via le gestionnaire de paquets Snap
 function snap_install()
 {
+	snap_array=("$1" "$2")
 	snap list "$*" | cut -d - f -1
 	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
 		j_echo "Installation du paquet \"$*\""

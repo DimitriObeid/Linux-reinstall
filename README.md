@@ -51,10 +51,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5
     - 
 
 * *__4.4) Parser :__*
-    - **main.cpp :** Fichier source C++ contenant la fonction principale du programme de parsing du script shell.  
-    - **Makefile :** Fichier Makefile permettant de compiler tous les fichiers d'un projet avec des paramètres prédéfinis, le tout en une seule commande.  
-    - **parser.cpp :** Fichier source C++ contenant les définitions des méthodes de la classe **"Parser"**.  
-    - **parser.h :** Fichier d'en-tête (header) contenant la classe **"Parser"**, ses attributs et déclarations de méthodes et l'inclusion des en-têtes des librairies standard C++ (iostream, string, fstream, etc...).  
+    - **Parser.py** : Le fichier de parsing de fichiers XML contenant les paquets à installer
 
 * *__4.5) Ressources :__*
     - **paquets.xml :** Fichier de structuration de données contenant les noms des paquets.  

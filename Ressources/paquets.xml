@@ -21,7 +21,7 @@
 
 <!-- Balise racine du corps du document XML -->
 <installation>
-    <distribution>
+    <distribution> <!-- Installation de paquets via le gestionnaire de paquets de la distribution -->
         <categorie cat="Commandes de téléchargement">
             <paquet>
                 <nom>curl</nom>
@@ -404,7 +404,7 @@
                 <script>&sio;</script>
             </paquet>
         </categorie>
-    </distribution>
+    </distribution> <!-- Fin  -->
 
     <PPA>
         <categorie cat="">
