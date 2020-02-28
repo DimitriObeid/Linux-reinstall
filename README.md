@@ -34,30 +34,30 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 
 ## 4) Arborescence et description des fichiers du projet
 
-Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5 sous-dossiers :  
+Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5 sous-dossiers contenant d'autres fichiers :  
 
-* *__4.1) Dossier actuel :__*
-    - **.gitignore :** Fichier servant à ne pas inclure, dans les commits Git, les fichiers listés dedans (fichiers binaires, etc...).  
+* *__4.1) Dossier actuel :__*  
+    - **.gitignore :** Fichier servant à ne pas inclure les fichiers listés dedans (fichiers binaires, etc...) dans chaque commit Git.  
     - **Bug tracking.md :** Liste tous les bugs connus jusqu'à leur correction.  
     - **Changelogs.md :** Contient la liste des changements ayant eu lieu entre deux versions.  
     - **Mode d'emploi.odt :** Mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
     - **README.md :** Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
-* *__4.2) Beta :__*
+* *__4.2) Beta :__*  
     - **beta.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
     - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
 
-* *__4.3) GUI :__*
-    - 
+* *__4.3) GUI :__*  
+    - **window.py :** Fichier source Python contenant le début de code de l'interface graphique.  
 
-* *__4.4) Parser :__*
-    - **Parser.py** : Le fichier de parsing de fichiers XML contenant les paquets à installer
+* *__4.4) Parser :__*  
+    - **Parser.py** : Le fichier de parsing de fichiers XML contenant les paquets à installer.  
 
-* *__4.5) Ressources :__*
+* *__4.5) Ressources :__*  
     - **paquets.xml :** Fichier de structuration de données contenant les noms des paquets.  
     - **sudoers :** Fichier de configuration se trouvant dans le dossier **"/etc/"**, consignant la gestion des droits du super-utilisateur accordés aux utilisateurs de l'ordinateur.  
 
-* *__4.6) Stable :__*
+* *__4.6) Stable :__*  
     - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.  
     - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
     - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.  
