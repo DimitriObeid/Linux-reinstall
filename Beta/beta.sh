@@ -110,18 +110,6 @@ SCRIPT_VERSION="2.0"
 
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
-# entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-function cats_echo()
-{
-	cats_string=$1
-
-	echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
-		$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-
-	$SCRIPT_SLEEP_INST_CAT
-}
-
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
@@ -136,8 +124,8 @@ function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C
 function v_echo() { v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 
-## CRÉATION DES HEADERS
-# Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
+## DÉFINITION DES FONCTIONS DE CRÉATION DES HEADERS
+# Fonction de création et d'affichage des lignes des headers
 function draw_header_line()
 {
 	line_color=$1	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
@@ -169,6 +157,7 @@ function draw_header_line()
 	return
 }
 
+# Fonction de création de base d'un header (Couleur et caractère de ligne, couleur et chaîne de caractères)
 function header_base()
 {
 	# Définition de la couleur de la ligne du caractère souhaité.
@@ -180,8 +169,6 @@ function header_base()
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
 		header_base_line_color=$1
 	fi
-
-	return
 
 	# Ligne
 	header_base_char=$2				# Caractère composant chaque colonne d'une ligne d'un header
@@ -209,12 +196,22 @@ function header_base()
 	return
 }
 
-# Affichage du texte des headers
+# Fonction d'affichage des headers lors d'un changement d'étape
 function script_header()
 {
 	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
 	header_base "$SCRIPT_C_HEADER" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_HEADER" "$header_string"
+
+	return
+}
+
+# Fonction d'affichage de headers lors du passage à une nouvelle catégorie de paquets lors de l'installation de ces derniers
+function header_install()
+{
+	install_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
+
+	header_base "$SCRIPT_C_JAUNE" "$SCRIPT_HEADER_LINE" "$SCRIPT_C_VERT" "$install_string"
 
 	return
 }
@@ -233,11 +230,86 @@ function handle_errors()
 	r_echo_str "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
 
+	# En cas d'erreurs de lancement du script (mauvais argument ou aucun argument)
+	# Si le fichier de logs se trouve toujours dans le dossier actuel (si le script a été exécuté depuis un autre dossier)
+	if test "$SCRIPT_LOGPATH" != "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
+		mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
+	fi
+
 	exit 1
 }
 
 
-## CRÉATION DE FICHIERS ET DOSSIERS
+## DÉFINITION DES FONCTIONS D'INSTALLATION
+# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
+function pack_install()
+{
+	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
+	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
+	package_name=$1
+
+	function pack_full_install()
+	{
+		j_echo "Installation du paquet $package_name"
+		$SCRIPT_SLEEP_INST
+
+		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+		v_echo "Le paquet \"$package_name\" a été correctement installé"
+		echo "$SCRIPT_VOID"
+
+		$SCRIPT_SLEEP_INST
+	}
+
+	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
+	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
+	case $SCRIPT_OS_FAMILY in
+		opensuse)
+			pack_manager_install zypper -y install
+			;;
+		archlinux)
+			pack_manager_install pacman --noconfirm -S
+			;;
+		fedora)
+			pack_full_install dnf -y install
+			return
+			;;
+		debian)
+			pack_full_install apt -y install
+			;;
+		gentoo)
+			pack_manager_install emerge
+			;;
+	esac
+
+	return
+}
+
+# Installation de paquets via le gestionnaire de paquets Snap
+function snap_install()
+{
+#	snap_array=("$1" "$2")
+	snap list = "$("$*" | cut -d - f -1)"
+	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
+		j_echo "Installation du paquet \"$*\""
+
+	    snap install "$*" \
+			|| r_echo "Le paquet \"$("$*" | cut -d - f -1)\" n'a pas pu être installé sur votre système" \
+			&& v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
+		echo "$SCRIPT_VOID"
+		return
+	else
+		v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
+	fi
+
+	echo "$SCRIPT_VOID"
+
+	return
+}
+
+
+## DÉFINITION DES FONCTIONS DE CRÉATION DE FICHIERS ET DE DOSSIERS
 # Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
 function makefile()
 {
@@ -336,7 +408,14 @@ function makedir()
 }
 
 
-## FICHIER DE LOGS
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+#### DÉFINITION DES FONCTIONS DÉPENDANTES DE L'AVANCEMENT DU SCRIPT ####
+
+
+
+## DÉFINITION DES FONCTIONS D'INITIALISATION
 # Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
 function create_log_file()
 {
@@ -344,8 +423,8 @@ function create_log_file()
 	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
 
 	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
-	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG"
-	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG" > /dev/null
+	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH" 	# Au moment de la création du fichier de logs, la variable "$SCRIPT_LOGPATH" correspond au dossier actuel de l'utilisateur
 
 	v_echo_str "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
@@ -356,15 +435,6 @@ function create_log_file()
 	return
 }
 
-
-
-# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
-
-#### DÉFINITION DES FONCTIONS DÉPENDANTES DE L'AVANCEMENT DU SCRIPT ####
-
-
-
-## DÉFINITION DES FONCTIONS D'EXÉCUTION
 # Détection de l'exécution du script en mode super-utilisateur (root)
 function script_init()
 {
@@ -500,7 +570,8 @@ function launch_script()
 	read_launch_script
 }
 
-## CONNEXION À INTERNET ET MISES À JOUR
+
+## DÉFINITION DES FONCTIONS DE CONNEXION À INTERNET ET DE MISES À JOUR
 # Vérification de la connexion à Internet
 function check_internet_connection()
 {
@@ -551,73 +622,6 @@ function dist_upgrade()
 	return
 }
 
-
-## DÉFINITION DES FONCTIONS D'INSTALLATION
-# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
-function pack_install()
-{
-	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
-	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
-	package_name=$1
-
-	function pack_full_install()
-	{
-		j_echo "Installation du paquet $package_name"
-		$SCRIPT_SLEEP_INST
-
-		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-		v_echo "Le paquet \"$package_name\" a été correctement installé"
-		echo "$SCRIPT_VOID"
-
-		$SCRIPT_SLEEP_INST
-	}
-
-	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
-	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
-	case $SCRIPT_OS_FAMILY in
-		opensuse)
-			pack_manager_install zypper -y install
-			;;
-		archlinux)
-			pack_manager_install pacman --noconfirm -S
-			;;
-		fedora)
-			pack_full_install dnf -y install
-			return
-			;;
-		debian)
-			pack_full_install apt -y install
-			;;
-		gentoo)
-			pack_manager_install emerge
-			;;
-	esac
-
-	return
-}
-
-# Installation de paquets via le gestionnaire de paquets Snap
-function snap_install()
-{
-	snap_array=("$1" "$2")
-	snap list "$*" | cut -d - f -1
-	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
-		j_echo "Installation du paquet \"$*\""
-
-		r_echo "Le paquet \"$("$*" | cut -d - f -1)\" n'a pas pu être installé sur votre système"
-	    snap install "$*"
-
-		return
-	else
-		v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
-	fi
-
-	echo "$SCRIPT_VOID"
-
-	return
-}
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection et installation de Sudo
@@ -707,6 +711,8 @@ function set_sudo()
 	return
 }
 
+
+# DÉFINITION DES FONCTIONS DE FIN D'INSTALLATION
 # Suppression des paquets obsolètes
 function autoremove()
 {
