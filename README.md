@@ -38,16 +38,18 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5
 
 * *__4.1) Dossier actuel :__*  
     - **.gitignore :** Fichier servant à ne pas inclure les fichiers listés dedans (fichiers binaires, etc...) dans chaque commit Git.  
-    - **Bug tracking.md :** Liste tous les bugs connus jusqu'à leur correction.  
-    - **Changelogs.md :** Contient la liste des changements ayant eu lieu entre deux versions.  
-    - **Mode d'emploi.odt :** Mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
-    - **README.md :** Le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
+    - **Bug tracking.md :** Ce fichier liste tous les bugs connus jusqu'à leur correction.  
+    - **Changelogs.md :** Ce fichier contient la liste des changements ayant eu lieu entre deux versions.  
+    - **Mode d'emploi.odt :** Ce fichier contient le mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
+    - **README.md :** C'est le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
 * *__4.2) Beta :__*  
     - **beta.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
     - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
 
 * *__4.3) GUI :__*  
+    - **Code couleur schema.txt :** Fichier contenant les informations sur le code couleur utilisé dans le schéma Draw.io.  
+    - **Interface graphique.drawio :** Fichier contenant le schéma de fonctionnement de l'interface graphique. Ce fichier ne peut être ouvert qu'avec le logiciel Draw.io (via la version bureau ou la version en ligne).  
     - **window.py :** Fichier source Python contenant le début de code de l'interface graphique.  
 
 * *__4.4) Parser :__*  
