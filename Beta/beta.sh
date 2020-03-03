@@ -213,7 +213,7 @@ function header_install()
 {
 	install_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
-	header_base "$SCRIPT_C_JAUNE" "$SCRIPT_HEADER_LINE" "$SCRIPT_C_VERT" "$install_string"
+	header_base "$SCRIPT_C_JAUNE" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_VERT" "$install_string"
 
 	return
 }
@@ -234,6 +234,11 @@ function handle_errors()
 
 	# En cas d'erreurs de lancement du script (mauvais argument ou aucun argument)
 	mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
+
+	# Si le fichier de logs se trouve toujours dans le dossier actuel (si le script a été exécuté depuis un autre dossier)
+	if test "$SCRIPT_LOGPATH" != "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
+		mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
+	fi
 
 	exit 1
 }
@@ -359,7 +364,7 @@ function makedir()
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
 		echo "$SCRIPT_VOID"
 
-		# On change le du dossier créé par le script
+		# On change les droits du dossier créé par le script
 		# Comme il est exécuté en mode super-utilisateur, le dossier créé appartient totalement au super-utilisateur.
 		# Pour attribuer les droits de lecture, d'écriture et d'exécution (rwx) à l'utilisateur normal, on appelle
 		# la commande chown avec pour arguments :
