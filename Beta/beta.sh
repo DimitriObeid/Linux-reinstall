@@ -40,7 +40,7 @@ SCRIPT_SLEEP_INST_CAT=sleep\ 1	# Temps d'affichage d'un changement de catégorie
 ## COULEURS
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
-SCRIPT_C_HEADER=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers
+SCRIPT_C_CYAN=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers
 SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
 SCRIPT_C_PACK_CATS=$(tput setaf 6)	# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets
 SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
@@ -69,6 +69,8 @@ SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine,
 
 
 ## RESSOURCES
+
+# Lien de mon dépôt Github
 SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
 
 
@@ -110,34 +112,22 @@ SCRIPT_VERSION="2.0"
 
 
 ## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
-# Affichage d'un message de changement de catégories de paquets propre à la partie d'installation des paquets (encodé en bleu cyan,
-# entouré de dièses et appelant la variable de chronomètre pour chaque passage à une autre catégorie de paquets)
-function cats_echo()
-{
-	cats_string=$1
-
-	echo "$SCRIPT_C_PACK_CATS$SCRIPT_HASH $cats_string $SCRIPT_HASH \
-		$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-
-	$SCRIPT_SLEEP_INST_CAT
-}
-
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function r_echo_str() { r_e_string=$1; echo "$SCRIPT_R_TAB $r_e_string $SCRIPT_C_RESET"; }
+function r_echo_nolog() { r_n_string=$1; echo "$SCRIPT_R_TAB $r_n_string $SCRIPT_C_RESET"; }
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function r_echo() { r_string=$1; r_echo_str "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function r_echo() { r_string=$1; r_echo_nolog "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function v_echo_str() { v_e_string=$1; echo "$SCRIPT_V_TAB $v_e_string $SCRIPT_C_RESET"; }
+function v_echo_nolog() { v_n_string=$1; echo "$SCRIPT_V_TAB $v_n_string $SCRIPT_C_RESET"; }
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function v_echo() { v_string=$1; v_echo_str "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function v_echo() { v_string=$1; v_echo_nolog "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 
-## CRÉATION DES HEADERS
-# Afficher les lignes des headers pour la bienvenue et le passage à une autre étape du script
+## DÉFINITION DES FONCTIONS DE CRÉATION DES HEADERS
+# Fonction de création et d'affichage des lignes des headers
 function draw_header_line()
 {
 	line_color=$1	# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
@@ -169,6 +159,7 @@ function draw_header_line()
 	return
 }
 
+# Fonction de création de base d'un header (Couleur et caractère de ligne, couleur et chaîne de caractères)
 function header_base()
 {
 	# Définition de la couleur de la ligne du caractère souhaité.
@@ -181,10 +172,8 @@ function header_base()
 		header_base_line_color=$1
 	fi
 
-	return
-
 	# Ligne
-	header_base_char=$2				# Caractère composant chaque colonne d'une ligne d'un header
+	header_base_line_char=$2				# Caractère composant chaque colonne d'une ligne d'un header
 
 	# Chaîne de caractères
 	header_base_string_color=$3		# Définition de la couleur de la chaîne de caractères
@@ -194,10 +183,10 @@ function header_base()
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
-	draw_header_line "$header_base_line_color" "$header_base_char"
+	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Affichage une autre couleur pour le texte
-	echo "$header_base_string_color" "##>" "$header_base_string"
-	draw_header_line "$header_base_line_color" "$header_base_char"
+	echo "$header_base_string_color" "##>" "$header_base_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
 	echo "$SCRIPT_VOID"
@@ -209,12 +198,22 @@ function header_base()
 	return
 }
 
-# Affichage du texte des headers
+# Fonction d'affichage des headers lors d'un changement d'étape
 function script_header()
 {
 	header_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
-	header_base "$SCRIPT_C_HEADER" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_HEADER" "$header_string"
+	header_base "$SCRIPT_C_CYAN" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_CYAN" "$header_string"
+
+	return
+}
+
+# Fonction d'affichage de headers lors du passage à une nouvelle catégorie de paquets lors de l'installation de ces derniers
+function header_install()
+{
+	install_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
+
+	header_base "$SCRIPT_C_JAUNE" "$SCRIPT_HEADER_LINE" "$SCRIPT_C_VERT" "$install_string"
 
 	return
 }
@@ -226,18 +225,90 @@ function handle_errors()
 
 	header_base "$SCRIPT_C_ROUGE" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_ROUGE" "ERREUR FATALE : $error_string"
 
-	r_echo_str "Une erreur fatale s'est produite :" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-	r_echo_str "$error_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	r_echo_nolog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	r_echo_nolog "$error_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
 
-	r_echo_str "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	r_echo_nolog "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
+
+	# En cas d'erreurs de lancement du script (mauvais argument ou aucun argument)
+	mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
 
 	exit 1
 }
 
 
-## CRÉATION DE FICHIERS ET DOSSIERS
+## DÉFINITION DES FONCTIONS D'INSTALLATION
+# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
+function pack_install()
+{
+	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
+	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
+	package_name=$1
+
+	function pack_full_install()
+	{
+		j_echo "Installation du paquet $package_name"
+		$SCRIPT_SLEEP_INST
+
+		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
+		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+		v_echo "Le paquet \"$package_name\" a été correctement installé"
+		echo "$SCRIPT_VOID"
+
+		$SCRIPT_SLEEP_INST
+	}
+
+	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
+	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
+	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
+	case $SCRIPT_OS_FAMILY in
+		opensuse)
+			pack_manager_install zypper -y install
+			;;
+		archlinux)
+			pack_manager_install pacman --noconfirm -S
+			;;
+		fedora)
+			pack_full_install dnf -y install
+			return
+			;;
+		debian)
+			pack_full_install apt -y install
+			;;
+		gentoo)
+			pack_manager_install emerge
+			;;
+	esac
+
+	return
+}
+
+# Installation de paquets via le gestionnaire de paquets Snap
+function snap_install()
+{
+#	snap_array=("$1" "$2")
+	snap list = "$("$*" | cut -d - f -1)"
+	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
+		j_echo "Installation du paquet \"$*\""
+
+	    snap install "$*" \
+			|| r_echo "Le paquet \"$("$*" | cut -d - f -1)\" n'a pas pu être installé sur votre système" \
+			&& v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
+		echo "$SCRIPT_VOID"
+		return
+	else
+		v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
+	fi
+
+	echo "$SCRIPT_VOID"
+
+	return
+}
+
+
+## DÉFINITION DES FONCTIONS DE CRÉATION DE FICHIERS ET DE DOSSIERS
 # Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
 function makefile()
 {
@@ -267,8 +338,8 @@ function makefile()
 	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
 	elif test -f "$filepath" || test -s "$filepath"; then
 		true > "$filepath" \
-			|| r_echo_str "Le contenu du fichier \"$filepath\" n'a pas été écrasé" >> "$SCRIPT_LOGPATH" \
-			&& v_echo_str "Le contenu du fichier \"$filepath\" a été écrasé avec succès" >> "$SCRIPT_LOGPATH"
+			|| r_echo_nolog "Le contenu du fichier \"$filepath\" n'a pas été écrasé" >> "$SCRIPT_LOGPATH" \
+			&& v_echo_nolog "Le contenu du fichier \"$filepath\" a été écrasé avec succès" >> "$SCRIPT_LOGPATH"
 
 		return
 	fi
@@ -336,27 +407,6 @@ function makedir()
 }
 
 
-## FICHIER DE LOGS
-# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
-function create_log_file()
-{
-	# On évite d'appeler les fonctions d'affichage propre "v_echo()" ou "r_echo()" pour éviter d'écrire deux fois le même texte,
-	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
-
-	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
-	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG"
-	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
-
-	v_echo_str "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
-
-	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
-	uname -a >> "$SCRIPT_LOGPATH"	# Récupération du nom du système d'exploitation, de la version du noyau
-
-	return
-}
-
-
 
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
@@ -364,7 +414,31 @@ function create_log_file()
 
 
 
-## DÉFINITION DES FONCTIONS D'EXÉCUTION
+## DÉFINITION DES FONCTIONS D'INITIALISATION
+# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard STDOUT ou sortie d'erreurs STDERR)
+function create_log_file()
+{
+	# On évite d'appeler les fonctions d'affichage propre "v_echo()" ou "r_echo()" pour éviter d'écrire deux fois le même texte,
+	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
+
+	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
+	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG" > /dev/null
+	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH" 	# Au moment de la création du fichier de logs, la variable "$SCRIPT_LOGPATH" correspond au dossier actuel de l'utilisateur
+
+	v_echo_nolog "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
+	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
+	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"				# Récupération du nom du noyau
+	echo "Version du Kernel : $(uname -r)" >> "$SCRIPT_LOGPATH"		# Récupération du numéro de version du noyau
+	# Récupération des informations sur le système d'exploitation de l'utilisateur
+	printf "Informations sur le système d'exploitation :\n\n$(cat "/etc/os-release")\n\n" >> "$SCRIPT_LOGPATH"
+	v_echo_nolog "Fin des informations sur le système d'exploitation" >> "$SCRIPT_LOGPATH"
+	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
+	return
+}
+
 # Détection de l'exécution du script en mode super-utilisateur (root)
 function script_init()
 {
@@ -373,8 +447,8 @@ function script_init()
 
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
-    	r_echo_str "Ce script doit être exécuté en tant que super-utilisateur (root)"
-    	r_echo_str "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
+    	r_echo_nolog "Ce script doit être exécuté en tant que super-utilisateur (root)"
+    	r_echo_nolog "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
 		echo "$SCRIPT_VOID"
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
@@ -382,8 +456,8 @@ function script_init()
     	echo "	sudo $0 votre_nom_d'utilisateur"
 		echo "$SCRIPT_VOID"
 
-		r_echo_str "Ou connectez vous directement en tant que super-utilisateur"
-		r_echo_str "Et tapez cette commande :"
+		r_echo_nolog "Ou connectez vous directement en tant que super-utilisateur"
+		r_echo_nolog "Et tapez cette commande :"
 		echo "	$0 votre_nom_d'utilisateur"
 
 		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
@@ -392,7 +466,7 @@ function script_init()
 	else
 		# Si aucun argument n'est entré
 		if test -z "${SCRIPT_USERNAME}"; then
-			r_echo_str "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
+			r_echo_nolog "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			echo "	sudo $0 votre_nom_d'utilisateur"
 
 			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
@@ -401,11 +475,11 @@ function script_init()
 		else
             # Si la valeur de l'argument ne correspond pas au nom de l'utilisateur
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USERNAME}"; then
-				r_echo_str "Veuillez entrer correctement votre nom d'utilisateur"
+				r_echo_nolog "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 
-				r_echo_str "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
-				r_echo_str "veuillez y retourner, et réexécuter le script."
+				r_echo_nolog "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
+				r_echo_nolog "veuillez y retourner, et réexécuter le script."
 
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
@@ -416,8 +490,8 @@ function script_init()
 					|| handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
 					&& SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
 
-				v_echo_str "Vous avez correctement entré votre nom d'utilisateur" >> "$SCRIPT_LOGPATH"
-				v_echo_str "Lancement du script" >> "$SCRIPT_LOGPATH"
+				v_echo_nolog "Vous avez correctement entré votre nom d'utilisateur" >> "$SCRIPT_LOGPATH"
+				v_echo_nolog "Lancement du script" >> "$SCRIPT_LOGPATH"
 
 				return
 			fi
@@ -500,7 +574,8 @@ function launch_script()
 	read_launch_script
 }
 
-## CONNEXION À INTERNET ET MISES À JOUR
+
+## DÉFINITION DES FONCTIONS DE CONNEXION À INTERNET ET DE MISES À JOUR
 # Vérification de la connexion à Internet
 function check_internet_connection()
 {
@@ -551,73 +626,6 @@ function dist_upgrade()
 	return
 }
 
-
-## DÉFINITION DES FONCTIONS D'INSTALLATION
-# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
-function pack_install()
-{
-	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
-	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
-	package_name=$1
-
-	function pack_full_install()
-	{
-		j_echo "Installation du paquet $package_name"
-		$SCRIPT_SLEEP_INST
-
-		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-		v_echo "Le paquet \"$package_name\" a été correctement installé"
-		echo "$SCRIPT_VOID"
-
-		$SCRIPT_SLEEP_INST
-	}
-
-	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
-	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
-	case $SCRIPT_OS_FAMILY in
-		opensuse)
-			pack_manager_install zypper -y install
-			;;
-		archlinux)
-			pack_manager_install pacman --noconfirm -S
-			;;
-		fedora)
-			pack_full_install dnf -y install
-			return
-			;;
-		debian)
-			pack_full_install apt -y install
-			;;
-		gentoo)
-			pack_manager_install emerge
-			;;
-	esac
-
-	return
-}
-
-# Installation de paquets via le gestionnaire de paquets Snap
-function snap_install()
-{
-	snap_array=("$1" "$2")
-	snap list "$*" | cut -d - f -1
-	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
-		j_echo "Installation du paquet \"$*\""
-
-		r_echo "Le paquet \"$("$*" | cut -d - f -1)\" n'a pas pu être installé sur votre système"
-	    snap install "$*"
-
-		return
-	else
-		v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
-	fi
-
-	echo "$SCRIPT_VOID"
-
-	return
-}
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
 # Détection et installation de Sudo
@@ -707,6 +715,8 @@ function set_sudo()
 	return
 }
 
+
+# DÉFINITION DES FONCTIONS DE FIN D'INSTALLATION
 # Suppression des paquets obsolètes
 function autoremove()
 {
@@ -860,14 +870,14 @@ echo "$SCRIPT_VOID"
 sleep 3
 
 # Commandes
-cats_echo "INSTALLATION DES COMMANDES PRATIQUES"
+header_install "INSTALLATION DES COMMANDES PRATIQUES"
 pack_install htop
 pack_install neofetch
 pack_install tree
 echo "$SCRIPT_VOID"
 
 # Développement
-cats_echo "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
+header_install "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
 snap_install atom --classic		# Éditeur de code Atom
 snap_install code --classic		# Éditeur de code Visual Studio Code
 pack_install emacs
@@ -880,18 +890,18 @@ pack_install valgrind
 echo "$SCRIPT_VOID"
 
 # Logiciels de nettoyage de disque
-cats_echo "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
+header_install "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
 pack_install k4dirstat
 echo "$SCRIPT_VOID"
 
 # Internet
-cats_echo "INSTALLATION DES CLIENTS INTERNET"
+header_install "INSTALLATION DES CLIENTS INTERNET"
 snap_install discord --stable
 pack_install thunderbird
 echo "$SCRIPT_VOID"
 
 # LAMP
-cats_echo "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
+header_install "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
 pack_install apache2			# Apache
 pack_install php				# PHP
 pack_install libapache2-mod-php
@@ -907,21 +917,21 @@ pack_install php-zip
 echo "$SCRIPT_VOID"
 
 # Librairies
-cats_echo "INSTALLATION DES LIBRAIRIES"
+header_install "INSTALLATION DES LIBRAIRIES"
 pack_install python3.7
 echo "$SCRIPT_VOID"
 
 # Réseau
-cats_echo "INSTALLATION DES LOGICIELS RÉSEAU"
+header_install "INSTALLATION DES LOGICIELS RÉSEAU"
 pack_install wireshark
 echo "$SCRIPT_VOID"
 
 # Vidéo
-cats_echo "INSTALLATION DES LOGICIELS VIDÉO"
+header_install "INSTALLATION DES LOGICIELS VIDÉO"
 pack_install vlc
 echo "$SCRIPT_VOID"
 
-cats_echo "INSTALLATION DE WINE"
+header_install "INSTALLATION DE WINE"
 pack_install wine-stable
 echo "$SCRIPT_VOID"
 
