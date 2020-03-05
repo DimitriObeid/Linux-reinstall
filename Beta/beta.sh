@@ -34,7 +34,6 @@ SCRIPT_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 SCRIPT_SLEEP=sleep\ .5			# Temps d'affichage d'un texte de sous-étape
 SCRIPT_SLEEP_HEADER=sleep\ 1.5	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
 SCRIPT_SLEEP_INST=sleep\ .5		# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
-SCRIPT_SLEEP_INST_CAT=sleep\ 1	# Temps d'affichage d'un changement de catégories de paquets lors de l'étape d'installation
 
 
 ## COULEURS
@@ -42,7 +41,6 @@ SCRIPT_SLEEP_INST_CAT=sleep\ 1	# Temps d'affichage d'un changement de catégorie
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
 SCRIPT_C_CYAN=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers
 SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
-SCRIPT_C_PACK_CATS=$(tput setaf 6)	# Bleu cyan		--> Couleur d'affichage des messages de passage à la prochaine catégorie de paquets
 SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
 SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape
 SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
@@ -82,7 +80,6 @@ SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
 # (une ligne de chaque caractère).
 SCRIPT_HEADER_LINE_CHAR="-"
 SCRIPT_COLS=$(tput cols)	# Affichage du nombre de colonnes sur le terminal
-SCRIPT_HASH="#####"			# Nombre de dièses (hash) précédant et suivant une chaîne de caractères
 SCRIPT_TAB=">>>>"			# Nombre de chevrons avant les chaînes de caractères jaunes, vertes et rouges
 
 # Affichage de chevrons suivant l'encodage de la couleur d'une chaîne de caractères
@@ -185,7 +182,7 @@ function header_base()
 	# $SCRIPT_SLEEP_HEADER
 	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Affichage une autre couleur pour le texte
-	echo "$header_base_string_color" "##>" "$header_base_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	echo "$header_base_string_color""##>" "$header_base_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
@@ -293,20 +290,17 @@ function pack_install()
 # Installation de paquets via le gestionnaire de paquets Snap
 function snap_install()
 {
-#	snap_array=("$1" "$2")
-	snap list = "$("$*" | cut -d - f -1)"
-	if test "$(command -v "$*" | cut -d - f -1)" >&2 ; then
-		j_echo "Installation du paquet \"$*\""
+    snap_name=$@
 
-	    snap install "$*" \
-			|| r_echo "Le paquet \"$("$*" | cut -d - f -1)\" n'a pas pu être installé sur votre système" \
-			&& v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
-		echo "$SCRIPT_VOID"
-		return
-	else
-		v_echo "Le paquet \"$("$*" | cut -d - f -1)\" a été installé avec succès sur votre système"
-	fi
+	j_echo "Installation du paquet $snap_name"
+    snap install "$snap_name" \
+		|| {
+				r_echo "L'installation du paquet \"$snap_name\" a échoué"
+				echo "$SCRIPT_VOID"
 
+				return
+		 	} \
+		&& "Installation du paquet \"$snap_name\" effectuée avec succès"
 	echo "$SCRIPT_VOID"
 
 	return
@@ -465,7 +459,7 @@ function script_init()
 		r_echo_nolog "Et tapez cette commande :"
 		echo "	$0 votre_nom_d'utilisateur"
 
-		handle_errors "ERREUR : SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+		handle_errors "SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 
 	# Sinon, si le script est lancé en mode super-utilisateur, on vérifie que la commande d'exécution du script soit accompagnée d'un argument
 	else
@@ -793,7 +787,7 @@ function autoremove()
 # Fin de l'installation
 function is_installation_done()
 {
-	script_header "FIN DE L'INSTALLATION"
+	script_header "INSTALLATION TERMINÉE"
 
 	v_echo "Suppression du dossier temporaire $SCRIPT_TMPPATH"
 	rm -r -f "$SCRIPT_TMPPATH" \
@@ -879,7 +873,6 @@ header_install "INSTALLATION DES COMMANDES PRATIQUES"
 pack_install htop
 pack_install neofetch
 pack_install tree
-echo "$SCRIPT_VOID"
 
 # Développement
 header_install "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
@@ -892,18 +885,15 @@ pack_install git
 pack_install make
 pack_install umlet
 pack_install valgrind
-echo "$SCRIPT_VOID"
 
 # Logiciels de nettoyage de disque
 header_install "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
 pack_install k4dirstat
-echo "$SCRIPT_VOID"
 
 # Internet
 header_install "INSTALLATION DES CLIENTS INTERNET"
 snap_install discord --stable
 pack_install thunderbird
-echo "$SCRIPT_VOID"
 
 # LAMP
 header_install "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
@@ -919,26 +909,21 @@ pack_install php-json
 pack_install php-mbstring
 pack_install php-xml
 pack_install php-zip
-echo "$SCRIPT_VOID"
 
 # Librairies
 header_install "INSTALLATION DES LIBRAIRIES"
 pack_install python3.7
-echo "$SCRIPT_VOID"
 
 # Réseau
 header_install "INSTALLATION DES LOGICIELS RÉSEAU"
 pack_install wireshark
-echo "$SCRIPT_VOID"
 
 # Vidéo
 header_install "INSTALLATION DES LOGICIELS VIDÉO"
 pack_install vlc
-echo "$SCRIPT_VOID"
 
 header_install "INSTALLATION DE WINE"
 pack_install wine-stable
-echo "$SCRIPT_VOID"
 
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 
