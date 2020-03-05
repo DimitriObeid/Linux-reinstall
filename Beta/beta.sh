@@ -237,6 +237,9 @@ function handle_errors()
 		mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
 	fi
 
+	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel : \"$SCRIPT_LOG\""
+	echo "$SCRIPT_VOID"
+
 	exit 1
 }
 
@@ -363,7 +366,7 @@ function makedir()
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 		#		- Ici, la variable contenant la redirection
-		chown -R -v "$SCRIPT_USERNAME" "$dirpath" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+		chown -R -v "$SCRIPT_USERNAME" "$dirpath" >> "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de changer les droits du dossier \"$dirpath\""
 				r_echo "Pour changer les droits du dossier \"$dirpath\" de manière récursive,"
@@ -449,8 +452,8 @@ function script_init()
 
 	# Si le script n'est pas lancé en mode super-utilisateur
 	if test "$EUID" -ne 0; then
-    	r_echo_nolog "Ce script doit être exécuté en tant que super-utilisateur (root)"
-    	r_echo_nolog "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
+    	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)"
+    	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
 		echo "$SCRIPT_VOID"
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
@@ -458,8 +461,8 @@ function script_init()
     	echo "	sudo $0 votre_nom_d'utilisateur"
 		echo "$SCRIPT_VOID"
 
-		r_echo_nolog "Ou connectez vous directement en tant que super-utilisateur"
-		r_echo_nolog "Et tapez cette commande :"
+		r_echo "Ou connectez vous directement en tant que super-utilisateur"
+		r_echo "Et tapez cette commande :"
 		echo "	$0 votre_nom_d'utilisateur"
 
 		handle_errors "SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
@@ -468,7 +471,7 @@ function script_init()
 	else
 		# Si aucun argument n'est entré
 		if test -z "${SCRIPT_USERNAME}"; then
-			r_echo_nolog "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
+			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
 			echo "	sudo $0 votre_nom_d'utilisateur"
 
 			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
@@ -477,11 +480,11 @@ function script_init()
 		else
             # Si la valeur de l'argument ne correspond pas au nom de l'utilisateur
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USERNAME}"; then
-				r_echo_nolog "Veuillez entrer correctement votre nom d'utilisateur"
+				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
 				echo "$SCRIPT_VOID"
 
-				r_echo_nolog "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
-				r_echo_nolog "veuillez y retourner, et réexécuter le script."
+				r_echo "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
+				r_echo "veuillez y retourner, et réexécuter le script."
 
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
