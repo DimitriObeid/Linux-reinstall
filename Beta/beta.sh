@@ -290,17 +290,15 @@ function pack_install()
 # Installation de paquets via le gestionnaire de paquets Snap
 function snap_install()
 {
-    snap_name=$@
-
-	j_echo "Installation du paquet $snap_name"
-    snap install "$snap_name" \
+	j_echo "Installation du paquet $*"
+    snap install "$@" \
 		|| {
-				r_echo "L'installation du paquet \"$snap_name\" a échoué"
+				r_echo "L'installation du paquet \"$*\" a échoué"
 				echo "$SCRIPT_VOID"
 
 				return
 		 	} \
-		&& "Installation du paquet \"$snap_name\" effectuée avec succès"
+		&& v_echo "Installation du paquet \"$*\" effectuée avec succès"
 	echo "$SCRIPT_VOID"
 
 	return
@@ -431,7 +429,12 @@ function create_log_file()
 	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"				# Récupération du nom du noyau
 	echo "Version du Kernel : $(uname -r)" >> "$SCRIPT_LOGPATH"		# Récupération du numéro de version du noyau
 	# Récupération des informations sur le système d'exploitation de l'utilisateur
-	printf "Informations sur le système d'exploitation :\n\n$(cat "/etc/os-release")\n\n" >> "$SCRIPT_LOGPATH"
+	echo "Informations sur le système d'exploitation :" >> "$SCRIPT_LOGPATH"
+	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+	
+	cat "/etc/os-release" >> "$SCRIPT_LOGPATH"
+	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+
 	v_echo_nolog "Fin des informations sur le système d'exploitation" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
@@ -790,7 +793,7 @@ function is_installation_done()
 	script_header "INSTALLATION TERMINÉE"
 
 	v_echo "Suppression du dossier temporaire $SCRIPT_TMPPATH"
-	rm -r -f "$SCRIPT_TMPPATH" \
+	rm -r -f -v "$SCRIPT_TMPPATH" >> "$SCRIPT_LOGPATH" \
 		|| r_echo "Suppression du dossier temporaire impossible. Essayez de le supprimer à la main" \
 		&& v_echo "Le dossier temporaire \"$SCRIPT_TMPPATH\" a été supprimé avec succès"
 	echo "$SCRIPT_VOID"
