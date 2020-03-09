@@ -12,7 +12,8 @@
 
 # Ou débugguez le en utilisant l'excellent utilitaire Shell Check :
 #	En ligne -> https://www.shellcheck.net/
-#	En ligne de commandes -> sudo ${commande d'installation de paquets} shellcheck
+#	En ligne de commandes -> shellcheck beta.sh
+#		--> Commande d'installation : sudo $commande_d'installation_de_paquets shellcheck
 
 
 
@@ -64,12 +65,6 @@ SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier t
 SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
 SCRIPT_LOGPARENT=$PWD					# Dossier parent du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
-
-
-## RESSOURCES
-
-# Lien de mon dépôt Github
-SCRIPT_REPO="https://github.com/DimitriObeid/Linux-reinstall"
 
 
 ## TEXTE
@@ -653,7 +648,7 @@ function set_sudo()
 
 	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré"
 	j_echo "depuis le dossier des fichiers ressources de mon dépôt Git : "
-	echo ">>>> $SCRIPT_REPO/tree/master/Ressources"
+	echo ">>>> https://github.com/DimitriObeid/Linux-reinstall/tree/master/Ressources"
 	echo "$SCRIPT_VOID"
 
 	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
@@ -846,7 +841,7 @@ pack_install curl
 pack_install snapd
 pack_install wget
 
-command -v curl snapd wget > /dev/null 2>&1 \
+command -v curl snapd wget >> "$SCRIPT_LOGPATH" \
 	|| handle_errors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" \
 	&& v_echo "Les commandes importantes d'installation ont été installées avec succès"
 

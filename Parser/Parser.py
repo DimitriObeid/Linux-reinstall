@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 
 import sys    # Importation du module "sys" pour intéragir avec 
-import os     # Importation du module "os" pour intéragir avec les appels systèmes
+import os     # Importation du module "os" pour utiliser les appels systèmes
 
-file_base = "/tmp/paquets_base.xml"
-file_suggest = "/tmp/paquets_suggestion.xml"
-file_custom = "/tmp/paquets_perso.xml"
+file_base_sio = "/tmp/xml/paquets_base_sio.xml"
+file_base_cus = "/tmp/xml/paquets_base_cus.xml"
+file_suggest = "/tmp/xml/paquets_suggestion.xml"
+file_custom = "/tmp/xml/paquets_perso.xml"
 
 # On crée une liste pour y stocker des valeurs, ici les chemins des fichiers XML
-list_files = [file_base, file_suggest, file_custom]
+list_files = [file_base_sio, file_base_cus, file_suggest, file_custom]
 # On récupère les chaînes de caractères des noms de fichiers de la liste créée ci-dessus
 lf_str = ''.join(list_files)
 
