@@ -180,10 +180,10 @@ function header_base()
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
-	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	draw_header_line "$header_base_line_color" "$header_base_line_char" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Affichage une autre couleur pour le texte
-	echo "$header_base_string_color""##>" "$header_base_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	echo "$header_base_string_color""##>" "$header_base_string" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	draw_header_line "$header_base_line_color" "$header_base_line_char" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
 	echo "$SCRIPT_VOID"
@@ -644,7 +644,10 @@ function set_sudo()
 
 	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
 	command -v sudo > /dev/null 2>&1 \
-		|| { j_echo "La commande \"sudo\" n'est pas installé sur votre système"; pack_install sudo; } \
+		|| {
+				j_echo "La commande \"sudo\" n'est pas installé sur votre système"
+				pack_install sudo
+			} \
 		&& { v_echo "La commande \"sudo\" est déjà installée sur votre système"; }
 	echo "$SCRIPT_VOID"
 
@@ -817,7 +820,7 @@ function is_installation_done()
 script_init
 
 # Affichage du header de bienvenue
-script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX VERSION $SCRIPT_VERSION !!!!!"
+script_header "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $SCRIPT_VERSION !!!!!"
 v_echo "Début de l'installation"
 
 # Détection du gestionnaire de paquets de la distribution utilisée
