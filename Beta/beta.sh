@@ -19,6 +19,8 @@
 
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
+
+
 ################### DÉCLARATION DES VARIABLES ET AFFECTATION DE LEURS VALEURS ###################
 
 ## ARGUMENTS
@@ -63,7 +65,6 @@ SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier t
 
 # Création de fichiers
 SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
-SCRIPT_LOGPARENT=$PWD					# Dossier parent du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
 
@@ -417,7 +418,7 @@ function create_log_file()
 	# vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
 
 	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
-	makefile "$SCRIPT_LOGPARENT" "$SCRIPT_LOG" > /dev/null
+	makefile "$PWD" "$SCRIPT_LOG" > /dev/null
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH" 	# Au moment de la création du fichier de logs, la variable "$SCRIPT_LOGPATH" correspond au dossier actuel de l'utilisateur
 
 	v_echo_nolog "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
