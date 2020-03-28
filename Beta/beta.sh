@@ -305,42 +305,6 @@ function snap_install()
 
 
 ## DÉFINITION DES FONCTIONS DE CRÉATION DE FICHIERS ET DE DOSSIERS
-# Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
-function makefile()
-{
-	file_dirparent=$1	# Dossier parent du fichier à créer
-	filename=$2			# Nom du fichier à créer
-	filepath="$file_dirparent/$filename"
-
-	# Si le fichier à créer n'existe pas
-	if test ! -f "$filepath"; then
-		touch "$file_dirparent/$filename" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
-			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
-			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
-
-		chown -v "$SCRIPT_USERNAME" "$filepath" >> "$SCRIPT_LOGPATH" \
-			|| {
-				r_echo "Impossible de changer les droits du fichier \"$filepath\""
-				r_echo "Pour changer les droits du fichier \"$filepath\","
-				r_echo "utilisez la commande :"
-				echo "	chown $SCRIPT_USERNAME $filepath"
-
-				return
-			} \
-			&& v_echo "Les droits du fichier $filepath ont été changés avec succès"
-
-		return
-
-	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
-	elif test -f "$filepath" || test -s "$filepath"; then
-		true > "$filepath" \
-			|| r_echo_nolog "Le contenu du fichier \"$filepath\" n'a pas été écrasé" >> "$SCRIPT_LOGPATH" \
-			&& v_echo_nolog "Le contenu du fichier \"$filepath\" a été écrasé avec succès" >> "$SCRIPT_LOGPATH"
-
-		return
-	fi
-}
-
 # Fonction de création de dossiers ET d'attribution récursive des droits de lecture et d'écriture à l'utilisateur
 function makedir()
 {
@@ -397,6 +361,42 @@ function makedir()
 	# ET que ce dossier est vide
 	elif test -d "$dirpath"; then
 		v_echo "Le dossier \"$dirpath\" existe déjà"
+
+		return
+	fi
+}
+
+# Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
+function makefile()
+{
+	file_dirparent=$1	# Dossier parent du fichier à créer
+	filename=$2			# Nom du fichier à créer
+	filepath="$file_dirparent/$filename"
+
+	# Si le fichier à créer n'existe pas
+	if test ! -f "$filepath"; then
+		touch "$file_dirparent/$filename" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
+			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
+
+		chown -v "$SCRIPT_USERNAME" "$filepath" >> "$SCRIPT_LOGPATH" \
+			|| {
+				r_echo "Impossible de changer les droits du fichier \"$filepath\""
+				r_echo "Pour changer les droits du fichier \"$filepath\","
+				r_echo "utilisez la commande :"
+				echo "	chown $SCRIPT_USERNAME $filepath"
+
+				return
+			} \
+			&& v_echo "Les droits du fichier $filepath ont été changés avec succès"
+
+		return
+
+	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
+	elif test -f "$filepath" || test -s "$filepath"; then
+		true > "$filepath" \
+			|| r_echo_nolog "Le contenu du fichier \"$filepath\" n'a pas été écrasé" >> "$SCRIPT_LOGPATH" \
+			&& v_echo_nolog "Le contenu du fichier \"$filepath\" a été écrasé avec succès" >> "$SCRIPT_LOGPATH"
 
 		return
 	fi
