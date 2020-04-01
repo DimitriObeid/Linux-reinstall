@@ -56,11 +56,12 @@ DIR_TMP_PATH="$DIR_TMP_PARENT/$DIR_TMP_NAME"	# Chemin complet du dossier tempora
 
 # Définition des sous-dossiers du dossier temporaire
 DIR_INSTALL_NAME="Install"		# Dossier contenant les fichiers temporaires enregistrant les commandes de recherche et d'installation de paquets selon le gestionnaire de paquets utilisé.
-DIR_LOG_NAME="Logs"				# Dossier contenant le fichier de logs.
-DIR_PACKAGES_NAME="Packages"	# Dossier contenant les fichiers enregistrant les paquets non-trouvés ou dont l'installation a échoué.
-
 DIR_INSTALL_PATH="$DIR_TMP_PATH/$DIR_INSTALL_NAME"		# Chemin du dossier contenant le fichier de script.
+
+DIR_LOG_NAME="Logs"				# Dossier contenant le fichier de logs.
 DIR_LOG_PATH="$DIR_TMP_PATH/$DIR_LOG_NAME"				# Chemin du dossier contenant le fichier de logs.
+
+DIR_PACKAGES_NAME="Packages"	# Dossier contenant les fichiers enregistrant les paquets non-trouvés ou dont l'installation a échoué.
 DIR_PACKAGES_PATH="$DIR_TMP_PATH/$DIR_PACKAGES_NAME"	# Chemin du dossier contenant les fichiers listant les paquets absents de la base de données du gestionnaire de paquets ou impossibles à installer.
 
 # Définition du dossier d'installation de logiciels indisponibles via les gestionnaires de paquets.
@@ -320,10 +321,13 @@ function HandleErrors()
             
             FILE_LOG_PATH="$DIR_HOMEDIR/$FILE_LOG_NAME"
         fi
+        EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé dans le dossier $(DechoE "$DIR_LOG_PATH")."
+        Newline
+	else
+        EchoError "Vous pouvez m'envoyer le fichier de logs si vous avez besoin d'aide pour débugguer le script et / ou déchiffrer les erreurs renvoyées."
+        EchoError "Il se situe dans le dossier $(DechoE "$DIR_LOG_PATH")"
+        Newline
 	fi
-
-	EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé à l'adresse suivante : $(DechoE "$FILE_LOG_PATH")."
-	Newline
 
 	exit 1
 }
@@ -1436,12 +1440,15 @@ function SetSudo()
     Newline
     
 	# On vérifie si la commande "sudo" est installée sur le système de l'utilisateur.
-	command -v sudo > /dev/null 2>&1
+	command -v sudo 2>&1 | tee -a "$FILE_LOG_PATH"
 	
 	if test "$?" -eq 0; then
+        Newline
+        
         EchoSuccess "La commande $(DechoS "sudo") est déjà installée sur votre système."
 		Newline
 	else
+		Newline
 		EchoNewstep "La commande $(DechoN "sudo") n'est pas installé sur votre système."
 		Newline
 		
@@ -1465,12 +1472,11 @@ function SetSudo()
 	{
 		read -rp "Entrez votre réponse : " rep_set_sudo
 		echo "$rep_set_sudo" >> "$FILE_LOG_PATH"
-
+		Newline
+		
 		# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
 		case ${rep_set_sudo,,} in
 			"oui" | "yes")
-				Newline
-
 				# Sauvegarde du fichier "/etc/sudoers" existant en "/etc/sudoers $date_et_heure.old"
 				EchoNewstep "Création d'une sauvegarde de votre fichier $(DechoN "sudoers") existant nommée $(DechoN "sudoers $DATE_TIME.old")."
 				Newline
@@ -1540,15 +1546,11 @@ function SetSudo()
 				fi
 				;;
 			"non" | "no")
-				Newline
-
 				EchoSuccess "Le fichier $(DechoS "/etc/sudoers") ne sera pas modifié."
 
 				return
 				;;
 			*)
-				Newline
-
 				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")."
 				ReadSetSudo
 				;;
@@ -1574,11 +1576,10 @@ function Autoremove()
 	{
 		read -rp "Entrez votre réponse : " rep_autoremove
 		echo "$rep_autoremove" >> "$FILE_LOG_PATH"
+		Newline
 
 		case ${rep_autoremove,,} in
 			"oui" | "yes")
-				Newline
-
 				EchoNewstep "Suppression des paquets."
 				Newline
 
@@ -1601,16 +1602,12 @@ function Autoremove()
 				return
 				;;
 			"non" | "no")
-				Newline
-
 				EchoSuccess "Les paquets obsolètes ne seront pas supprimés."
 				EchoSuccess "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets."
 
 				return
 				;;
 			*)
-				Newline
-
 				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")."
 				ReadAutoremove
 				;;
@@ -1631,6 +1628,7 @@ function IsInstallationDone()
 
 	read -rp "Entrez votre réponse : " rep_erase_tmp
 	echo "$rep_erase_tmp" >> "$FILE_LOG_PATH"
+    Newline
 
 	case ${rep_erase_tmp,,} in
 		"oui")
@@ -1797,7 +1795,7 @@ Newline
 
 sleep 1
 
-# Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur.
+# Création du dossier contenant les fichiers de logiciels téléchargés via la commande "wget" dans le dossier personnel de l'utilisateur.
 EchoNewstep "Création du dossier d'installation des logiciels."
 Newline
 
