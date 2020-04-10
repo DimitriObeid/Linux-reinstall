@@ -34,7 +34,7 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 
 ## 4) Arborescence et description des fichiers du projet
 
-Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5 sous-dossiers contenant d'autres fichiers :  
+Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6 sous-dossiers contenant d'autres fichiers :  
 
 * *__4.1) Dossier actuel :__*  
     - **.gitignore :** Fichier servant à ne pas inclure les fichiers listés dedans (fichiers binaires, etc...) dans chaque commit Git.  
@@ -47,9 +47,14 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 5
     - **beta.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
     - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
 
+*__4.3) Graphiques :__*
+    - *Note* : Ces fichiers ne peuvent être ouverts qu'avec le logiciel Draw.io (via la version bureau ou la version en ligne), pour le moment. Une version imagée arrivera bientôt.  
+    - **Interface graphique.drawio :** Fichier contenant le schéma de fonctionnement de l'interface graphique.  
+    - **Script de réinstallation.drawio :** Fichier contenant l'algorigramme de l'exécution du script de réinstallation.  
+
 * *__4.3) GUI :__*  
     - **Code couleur schema.txt :** Fichier contenant les informations sur le code couleur utilisé dans le schéma Draw.io.  
-    - **Interface graphique.drawio :** Fichier contenant le schéma de fonctionnement de l'interface graphique. Ce fichier ne peut être ouvert qu'avec le logiciel Draw.io (via la version bureau ou la version en ligne).  
+.  
     - **window.py :** Fichier source Python contenant le début de code de l'interface graphique.  
 
 * *__4.4) Parser :__*  
