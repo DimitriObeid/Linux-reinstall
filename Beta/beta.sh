@@ -465,7 +465,7 @@ function script_init()
 	else
 		# Si aucun argument n'est entré
 		if test -z "${SCRIPT_USERNAME}"; then
-			r_echo "Veuillez lancer le script en plaçant votre nom devant la commande d'exécution du script,"
+			r_echo "Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script :"
 			echo "	sudo $0 votre_nom_d'utilisateur"
 
 			handle_errors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
@@ -809,10 +809,17 @@ function is_installation_done()
 	return
 }
 
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+
 ################### DÉBUT DE L'EXÉCUTION DU SCRIPT ###################
 
+
+
 ## APPEL DES FONCTIONS DE CONSTRUCTION
-# Détection du mode super-administrateur (root)
+# Détection du mode super-administrateur (root) et de la présence de l'argument contenant le nom d'utilisateur
 script_init
 
 # Affichage du header de bienvenue
@@ -846,7 +853,7 @@ command -v curl snapd wget >> "$SCRIPT_LOGPATH" \
 	|| handle_errors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" \
 	&& v_echo "Les commandes importantes d'installation ont été installées avec succès"
 
-# Installation de sudo et configuration
+# Installation de sudo (pour les distributions livrées sans la commande) et configuration du fichier "sudoers" ("/etc/sudoers")
 set_sudo
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
