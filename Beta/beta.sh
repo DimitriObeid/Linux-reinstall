@@ -423,7 +423,7 @@ function create_log_file()
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
 	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
-	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"				# Récupération du nom du noyau
+	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"							# Récupération du nom du noyau
 	echo "Version du Kernel : $(uname -r)" >> "$SCRIPT_LOGPATH"		# Récupération du numéro de version du noyau
 	# Récupération des informations sur le système d'exploitation de l'utilisateur
 	echo "Informations sur le système d'exploitation :" >> "$SCRIPT_LOGPATH"
@@ -528,7 +528,7 @@ function launch_script()
 	script_header "LANCEMENT DU SCRIPT"
 
 	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi (Mode d'emploi.odt) avant de lancer l'installation."
-    j_echo "Êtes-vous sûr de savoir ce que vous faites ? (oui/non)"
+    j_echo "Êtes-vous sûr de bien vouloir lancer l'installation ? (oui/non)"
 	echo "$SCRIPT_VOID"
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
@@ -802,7 +802,7 @@ function is_installation_done()
 
 	j_echo "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script, vous pouvez m'envoyer le fichier de logs situé dans le dossier \"$SCRIPT_LOGPATH\""
 
-    # On tue le processus de connexion en mode super-utilisateur, par précautions
+    # On tue le processus de connexion en mode super-utilisateur, par précaution
 	sudo -k
 	echo "$SCRIPT_VOID"
 
