@@ -51,6 +51,10 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6
     - *__Note__* : Ces fichiers ne peuvent être ouverts qu'avec le logiciel Draw.io (via la version bureau ou la version en ligne) pour le moment. Une version imagée de chaque fichier arrivera bientôt (les fichiers .drawio resteront pour que vous puissiez apporter des modifiactions si vous modifiez une ou plusieurs fonctions du script).  
     - **Interface graphique.drawio :** Fichier contenant le schéma de fonctionnement de l'interface graphique.  
     - **Script de réinstallation.drawio :** Fichier contenant l'algorigramme de l'exécution du script de réinstallation.  
+        * *__4.3.1) Fonctions__*
+            - **makedir.drawio :** Fichier contenant le schéma de fonctionnement de la fonction makedir du script de réinstallation.  
+            - **makefile.drawio :** Fichier contenant le schéma de fonctionnement de la fonction makefile du script de réinstallation.   
+            - **pack_install.drawio :** Fichier contenant le schema de fonctionnement de la fonction pack_install du script de fonctionnement.  
 
 * *__4.4) GUI :__*  
     - **Code couleur schema.txt :** Fichier contenant les informations sur le code couleur utilisé dans le schéma Draw.io.  
