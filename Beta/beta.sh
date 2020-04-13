@@ -391,13 +391,15 @@ function makefile()
 		return
 
 	# Sinon, si le fichier à créer existe déjà ou qu'il n'est pas vide
-	elif test -f "$filepath" || test -s "$filepath"; then
+	elif test -s "$filepath"; then
 		true > "$filepath" \
 			|| r_echo_nolog "Le contenu du fichier \"$filepath\" n'a pas été écrasé" >> "$SCRIPT_LOGPATH" \
 			&& v_echo_nolog "Le contenu du fichier \"$filepath\" a été écrasé avec succès" >> "$SCRIPT_LOGPATH"
 
 		return
 	fi
+
+	return
 }
 
 
