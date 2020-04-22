@@ -64,7 +64,7 @@ SCRIPT_TMPPARENT="/tmp"									# Dossier parent du dossier temporaire
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
 
 # Création de fichiers
-SCRIPT_LOG="Linux-reinstall.log"		# Nom du fichier de logs
+SCRIPT_LOG="Linux-reinstall.log"						# Nom du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
 
@@ -75,7 +75,7 @@ SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine,
 # (une ligne de chaque caractère).
 SCRIPT_HEADER_LINE_CHAR="-"
 SCRIPT_COLS=$(tput cols)	# Affichage du nombre de colonnes sur le terminal
-SCRIPT_TAB=">>>>"			# Nombre de chevrons à afficher avant les chaînes de caractères jaunes, vertes et rouges
+SCRIPT_TAB=">>>>"				# Nombre de chevrons à afficher avant les chaînes de caractères jaunes, vertes et rouges
 
 # Affichage de chevrons suivant l'encodage de la couleur d'une chaîne de caractères
 SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons

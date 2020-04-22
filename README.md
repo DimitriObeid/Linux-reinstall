@@ -5,7 +5,7 @@
 
 ## 1) Description du projet
 
-Vous en avez plus qu'assez de repasser encore et encore par toutes les étapes de réinstallation de vos logiciels à la main ? Ou bien souhaitez-vous vous simplifier la vie lors de l'installation des programmes que vous souhaitez la première fois que vous installez une distribution Linux ?
+Vous en avez plus qu'assez de repasser encore et encore par toutes les étapes de réinstallation de vos logiciels à la main ? Ou bien souhaitez-vous vous simplifier la vie lors de l'installation des programmes que vous souhaitez installer la première fois que vous installez une distribution Linux ?
 
 Ne vous embêtez plus. Désormais, vous n'avez qu'à télécharger un des deux scripts du dossier **"Stable"** (recommandé) et à l'exécuter après chaque (ré)installation d'une distribution Linux sur votre ordinateur. Il vous téléchargera tous les programmes dont vous avez besoin et les installera à votre place.
 
@@ -37,7 +37,7 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6 sous-dossiers contenant d'autres fichiers :  
 
 * *__4.1) Dossier actuel :__*  
-    - **.gitignore :** Fichier servant à ne pas inclure les fichiers listés dedans (fichiers binaires, etc...) dans chaque commit Git.  
+    - **.gitignore :** Ce fichier sert à éviter d'inclure les fichiers listés dedans (fichiers binaires, etc...) dans chaque commit Git.  
     - **Bug tracking.md :** Ce fichier liste tous les bugs connus jusqu'à leur correction.  
     - **Changelogs.md :** Ce fichier contient la liste des changements ayant eu lieu entre deux versions.  
     - **Mode d'emploi.odt :** Ce fichier contient le mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
