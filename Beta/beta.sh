@@ -246,7 +246,7 @@ function pack_install()
 	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
 	package_name=$1
 
-	function pack_full_install()
+	function pack_manager_install()
 	{
 		j_echo "Installation du paquet $package_name"
 		$SCRIPT_SLEEP_INST
