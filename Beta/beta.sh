@@ -357,6 +357,7 @@ function makedir()
 				return
 			} \
 			&& v_echo "Les droits du dossier $dirpath ont été changés avec succès"
+
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
@@ -421,8 +422,6 @@ function makefile()
 
 		return
 	fi
-
-	return
 }
 
 

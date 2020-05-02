@@ -44,7 +44,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6
     - **README.md :** C'est le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
 * *__4.2) Beta :__*  
-    - **beta.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
+    - **beta.sh :** Le fichier exécutable de la version Bêta du script de réinstallation SIO.  
     - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
 
 * *__4.3) Graphiques :__*
@@ -52,9 +52,13 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6
     - **Interface graphique.drawio :** Fichier contenant le schéma de fonctionnement de l'interface graphique.  
     - **Script de réinstallation.drawio :** Fichier contenant l'algorigramme de l'exécution du script de réinstallation.  
         * *__4.3.1) Fonctions__*
-            - **makedir.drawio :** Fichier contenant le schéma de fonctionnement de la fonction makedir du script de réinstallation.  
+            - **makedir.drawio :** Fichier contenant le schéma de fonctionnement de la fonction **makedir()** du script de réinstallation.  
             - **makefile.drawio :** Fichier contenant le schéma de fonctionnement de la fonction makefile du script de réinstallation.   
-            - **pack_install.drawio :** Fichier contenant le schema de fonctionnement de la fonction pack_install du script de fonctionnement.  
+            - **script_header.drawio :** Fichier contenant le schéma de fonctionnement de la fonction
+            - **pack_install.drawio :** Fichier contenant le schéma de fonctionnement de la fonction pack_install du script de fonctionnement.  
+
+        * *__4.3.2) UI__*
+            - **Interface graphique.drawio :** Fichier contenant le schéma du fonctionnement de l'interface graphique
 
 * *__4.4) GUI :__*  
     - **Code couleur schema.txt :** Fichier contenant les informations sur le code couleur utilisé dans le schéma Draw.io.  
