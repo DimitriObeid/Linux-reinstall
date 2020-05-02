@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Script de réinstallation minimal pour les cours de BTS SIO en version Bêta
 # Version Bêta 2.0
@@ -51,7 +51,7 @@ SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des mes
 
 # DATE
 # Variable permettant l'écriture de la date et de l'heure actuelle dans le nom d'un fichier
-SCRIPT_DATE=$(date +"%Y-%m-%d %H-%M-%S")
+SCRIPT_DATE=$(date +"%Y-%m-%d %Hh-%Mm-%Ss")
 
 
 ## DOSSIERS ET FICHIERS
@@ -102,17 +102,19 @@ SCRIPT_VERSION="2.0"
 #### DÉFINITION DES FONCTIONS INDÉPENDANTES DE L'AVANCEMENT DU SCRIPT ####
 
 
-## DÉFINITION DES FONCTIONS DE DÉCORATION DU SCRIPT
+## DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function r_echo_nolog() { r_n_string=$1; echo "$SCRIPT_R_TAB $r_n_string $SCRIPT_C_RESET"; }
+
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
 function r_echo() { r_string=$1; r_echo_nolog "$r_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function v_echo_nolog() { v_n_string=$1; echo "$SCRIPT_V_TAB $v_n_string $SCRIPT_C_RESET"; }
+
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
 function v_echo() { v_string=$1; v_echo_nolog "$v_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
@@ -164,20 +166,20 @@ function header_base()
 	fi
 
 	# Ligne
-	header_base_line_char=$2				# Caractère composant chaque colonne d'une ligne d'un header
+	header_base_line_char=$2		# Caractère composant chaque colonne d'une ligne d'un header
 
 	# Chaîne de caractères
 	header_base_string_color=$3		# Définition de la couleur de la chaîne de caractères
 	header_base_string=$4			# Chaîne de caractères affichée dans chaque header
-	
+
 	echo "$SCRIPT_VOID"
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
-	draw_header_line "$header_base_line_color" "$header_base_line_char" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Affichage une autre couleur pour le texte
 	echo "$header_base_string_color""##>" "$header_base_string" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-	draw_header_line "$header_base_line_color" "$header_base_line_char" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
 	echo "$SCRIPT_VOID"
@@ -223,12 +225,9 @@ function handle_errors()
 	r_echo_nolog "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID"
 
-	# En cas d'erreurs de lancement du script (mauvais argument ou aucun argument)
-	mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
-
 	# Si le fichier de logs se trouve toujours dans le dossier actuel (si le script a été exécuté depuis un autre dossier)
-	if test "$SCRIPT_LOGPATH" != "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
-		mv "$SCRIPT_LOG" "$SCRIPT_HOMEDIR"
+	if test ! -f "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
+		mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_LOGPATH"
 	fi
 
 	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel. Il porte le nom de \"$SCRIPT_LOG\""
@@ -248,15 +247,39 @@ function pack_install()
 
 	function pack_manager_install()
 	{
+		list_package=$1
+		install_command=$2
+
 		j_echo "Installation du paquet $package_name"
 		$SCRIPT_SLEEP_INST
 
-		# $@ --> Tableau dynamique d'arguments permettant d'appeller la commande d'installation complète du gestionnaire de paquets et ses options
-		"$@" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-		v_echo "Le paquet \"$package_name\" a été correctement installé"
-		echo "$SCRIPT_VOID"
+		"$list_package | grep -w $package_name | cut -d / -f-1" \
+			|| {
+				# Si le paquet n'est pas déjà installé
+
+				j_echo "Installation du paquet $package_name"
+				"$install_command" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+
+				# On s'assure que le paquet a bien été installé
+				"$list_package | grep -w $package_name | cut -d / -f-1" \
+					|| handle_errors "LE PAQUET \"$package_name\" N'A PAS PU ÊTRE INSTALLÉ" \
+					&& v_echo "Le paquet \"$package_name\" a été correctement installé"
+				return
+			} \
+			&& {
+				# Sinon, si le paquet est déjà installé
+
+				v_echo "Le paquet \"$package_name\" est déjà installé"
+				echo "$SCRIPT_VOID"
+
+				$SCRIPT_SLEEP_INST
+
+				return
+			}
 
 		$SCRIPT_SLEEP_INST
+
+		return
 	}
 
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
@@ -264,17 +287,17 @@ function pack_install()
 	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
 	case $SCRIPT_OS_FAMILY in
 		opensuse)
-			pack_manager_install zypper -y install
+			pack_manager_install "${zypper -y install}"
 			;;
 		archlinux)
-			pack_manager_install pacman --noconfirm -S
+			pack_manager_install "$(pacman --noconfirm -S)"
 			;;
 		fedora)
-			pack_full_install dnf -y install
-			return
+			pack_manager_install "$(dnf -y install)"
 			;;
 		debian)
-			pack_full_install apt -y install
+			pack_manager_install "$(eval apt list --installed)" "$(eval apt -y install)"
+		#	pack_manager_install ${"$(apt list --installed)"} ${"$(apt -y install)"}
 			;;
 		gentoo)
 			pack_manager_install emerge
@@ -343,20 +366,20 @@ function makedir()
 		j_echo "Suppression du contenu du dossier \"$dirpath\""
 		echo "$SCRIPT_VOID"
 
-		# ATTENTION À NE PAS MODIFIER LA LIGNE " rm -r -f "${dirpath/*}" ", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES
-		# Pour plus d'informations --> https://github.com/koalaman/shellcheck/wiki/SC2115
+		# ATTENTION À NE PAS MODIFIER LA COMMANDE " rm -r -f -v "${dirpath/:?}/"* ", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
+		# Pour plus d'informations sur cette commande --> https://github.com/koalaman/shellcheck/wiki/SC2115
 		rm -r -f -v "${dirpath/:?}/"* 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| {
 				r_echo "Impossible de supprimer le contenu du dossier \"$dirpath";
 				r_echo "Le contenu de tout fichier du dossier \"$dirpath\" portant le même nom qu'un des fichiers téléchargés sera écrasé"
+
 				return
 				} \
 			&& { v_echo "Suppression du contenu du dossier \"$dirpath\" effectuée avec succès"; }
 
 			return
 
-	# Sinon, si le dossier à créer existe déjà dans son dossier parent
-	# ET que ce dossier est vide
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier est vide
 	elif test -d "$dirpath"; then
 		v_echo "Le dossier \"$dirpath\" existe déjà"
 
@@ -372,7 +395,7 @@ function makefile()
 	filepath="$file_dirparent/$filename"
 
 	# Si le fichier à créer n'existe pas
-	if test ! -f "$filepath"; then
+	if test ! -s "$filepath"; then
 		touch "$file_dirparent/$filename" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
 			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
@@ -430,7 +453,7 @@ function create_log_file()
 	# Récupération des informations sur le système d'exploitation de l'utilisateur
 	echo "Informations sur le système d'exploitation :" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
-	
+
 	cat "/etc/os-release" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
@@ -486,10 +509,12 @@ function script_init()
 
 			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
 			else
-				# On déplace le fichier de logs vers le dossier personnel de l'utilisateur
-				mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
-					|| handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
-					&& SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
+				# On déplace le fichier de logs vers le dossier personnel de l'utilisateur tout en vérifiant s'il ne s'y trouve pas déjà
+				if test ! -f "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
+                    mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
+                        || handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
+                        && SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
+                fi
 
 				v_echo_nolog "Vous avez correctement entré votre nom d'utilisateur" >> "$SCRIPT_LOGPATH"
 				v_echo_nolog "Lancement du script" >> "$SCRIPT_LOGPATH"
@@ -820,7 +845,7 @@ function is_installation_done()
 
 
 
-## APPEL DES FONCTIONS DE CONSTRUCTION
+## APPEL DES FONCTIONS D'INITIALISATION ET DE PRÉ-INSTALLATION
 # Détection du mode super-administrateur (root) et de la présence de l'argument contenant le nom d'utilisateur
 script_init
 
@@ -845,7 +870,7 @@ script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIE
 makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
 
 
-## INSTALLATIONS PRIORITAIRES
+## INSTALLATIONS PRIORITAIRES ET CONFIGURATIONS DE PRÉ-INSTALLATION
 script_header "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 pack_install curl
 pack_install snapd
@@ -857,6 +882,7 @@ command -v curl snapd wget >> "$SCRIPT_LOGPATH" \
 
 # Installation de sudo (pour les distributions livrées sans la commande) et configuration du fichier "sudoers" ("/etc/sudoers")
 set_sudo
+
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION
 # Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
@@ -890,8 +916,8 @@ pack_install tree
 
 # Développement
 header_install "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
-snap_install atom --classic		# Éditeur de code Atom
-snap_install code --classic		# Éditeur de code Visual Studio Code
+snap_install atom --classic --stable		# Éditeur de code Atom
+snap_install code --classic	--stable    	# Éditeur de code Visual Studio Code
 pack_install emacs
 pack_install g++
 pack_install gcc
@@ -911,8 +937,8 @@ pack_install thunderbird
 
 # LAMP
 header_install "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
-pack_install apache2			# Apache
-pack_install php				# PHP
+pack_install apache2
+pack_install php
 pack_install libapache2-mod-php
 pack_install mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server"
 pack_install php-mysql
@@ -942,7 +968,9 @@ pack_install wine-stable
 v_echo "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS ! FIN DE L'INSTALLATION"
 
 
+## FIN D'INSTALLATION
 # Suppression des paquets obsolètes
 autoremove
+
 # Fin de l'installation
 is_installation_done
