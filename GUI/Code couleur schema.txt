@@ -1,4 +1,0 @@
-Flèches :
-    - QCMs (oui et non, ainsi que la fin d'exécution du script) : 0000FF (bleu) ET FF8000 (orange)
-    - Gestion d'erreurs fatales (pas d'erreurs ET présences d'erreurs) : 00FF00 (vert) ET FF0000 (rouge)
-    - Événements (clics sur un bouton) (hors QCM de confirmation) : 007FFF (bleu cyan)
