@@ -43,8 +43,8 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6
     - **Mode d'emploi.odt :** Ce fichier contient le mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
     - **README.md :** C'est le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
-* *__4.2) Stable :__*  
-    - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.  
+* *__4.2) Scripts :__*  
+    - **Documentation.odt :** La documentation officielle des deux scripts de réinstallation en version stable.  
     - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
     - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.  
 
