@@ -59,13 +59,13 @@ SCRIPT_DATE=$(date +"%Y-%m-%d %Hh-%Mm-%Ss")
 SCRIPT_HOMEDIR="/home/${SCRIPT_USERNAME}"	# Dossier personnel de l'utilisateur
 
 # Création du dossier temporaire et définition du chemin vers ce dossier temporaire
-SCRIPT_TMPDIR="Linux-reinstall.tmp.d"					# Nom du dossier temporaire
-SCRIPT_TMPPARENT="/tmp"									# Dossier parent du dossier temporaire
-SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"		# Chemin complet du dossier temporaire
+SCRIPT_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
+SCRIPT_TMPPARENT="/tmp"								# Dossier parent du dossier temporaire
+SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
 # Création de fichiers
-SCRIPT_LOG="Linux-reinstall.log"						# Nom du fichier de logs
-SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"		# Chemin du fichier de logs depuis la racine, dans le dossier actuel
+SCRIPT_LOG="Linux-reinstall $SCRIPT_DATE.log"		# Nom du fichier de logs
+SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"					# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
 
 ## TEXTE
@@ -127,24 +127,28 @@ function draw_header_line()
 	line_char=$2	# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 
 	# Définition de la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
+	# Si la chaîne de caractère de la variable $line_color (qui contient l'encodage de la couleur du texte) est vide,
+	# alors on écrit l'encodage de la couleur dans le terminal, qui affiche la couleur, et non son encodage en texte.
+	# L'encodage de la couleur peut être écrit via la commande "tput cols $encodage_de_la_couleur"
 	if test "$line_color" != ""; then
 		echo -n -e "$line_color"
 	fi
 
-	# Affichage du caractère souhaité sur toute la ligne. Pour cela, on commence à la lire à partir de la première colonne (1),
-	# puis, on parcourt toute la colonne jusqu'à la fin de la ligne. À chaque fin de boucle, un caractère est affiché, coloré
-	# selon l'encodage de la couleur stocké dans la variable délimité par la valeur retournée par la commande "tput cols"
-	# (affichage du nombre de colonnes séparant la bordure gauche de la bordure droite de la zone de texte du terminal),
-	# dont la variable "$SCRIPT_COLS" stocke la commande d'exécution.
+	# Affichage du caractère souhaité sur toute la ligne. Pour cela, en utilisant une boucle "for", on commence à la lire à partir
+	# de la première colonne (1), puis, on parcourt toute la ligne jusqu'à la fin de la zone de texte du terminal. À chaque appel
+	# de la commande "echo", un caractère est affiché et coloré selon l'encodage défini et écrit ci-dessus.
 	for i in $(eval echo "{1..$SCRIPT_COLS}"); do
 		echo -n "$line_char"
 	done
 
-	# Définition (ici, réintialisation) la couleur des caractères suivant le dernier caractère de la ligne du header.
-	# En pratique, La couleur des caractères suivants est déjà encodée quand ils sont appelés. Cette réinitialisation
-	# de la couleur du texte n'est qu'une mini sécurité permettant d'éviter d'avoir la couleur du prompt encodée avec
-	# la couleur des headers si l'exécution du script est interrompue de force avec un "CTRL + C" ou un "CTRL + Z", par
-	# exemple.
+	# Définition (ici, réintialisation) de la couleur des caractères suivant le dernier caractère de la ligne du header
+	# en utilisant le même bout de code que la première condition, pour écrire l'encodage de la couleur de base du terminal
+	# (il est recommandé d'appeller la commande "tput cols sgr0" pour réinitialiser la couleur selon les options du profil
+	# du terminal). Comme tout encodage de couleur, le texte brut ne sera pas affiché sur le terminal.
+	# En pratique, La couleur des caractères suivants est déjà encodée quand ils sont appelés via une des fonctions d'affichage.
+	# Cette réinitialisation de la couleur du texte n'est qu'une mini-sécurité permettant d'éviter d'avoir la couleur de l'invite de
+	# commandes encodée avec la couleur des headers si l'exécution du script est interrompue de force avec la combinaison "CTRL + C"
+	# ou mise en pause avec la combinaison "CTRL + Z", par exemple.
 	if test "$line_color" != ""; then
         echo -n -e "$SCRIPT_C_RESET"
 	fi
@@ -155,14 +159,16 @@ function draw_header_line()
 # Fonction de création de base d'un header (Couleur et caractère de ligne, couleur et chaîne de caractères)
 function header_base()
 {
+	# Couleur de ligne
+	header_base_line_color=$1
+
 	# Définition de la couleur de la ligne du caractère souhaité.
-	# Il s'agit du même code définissant la première condition de la fonction "draw_header_line",
-	# mais il a été réécrit ici pour définir l'affichage de la véritable couleur sur chaque caractère lors de l'appel de la
-	# fonction "script_header()", car les conditions d'une fonction ne peuvent pas être utilisées depuis une autre fonction
+	# Ce code produit le même résultat que la première condition de la fonction "draw_header_line", mais il a été
+	# réécrit ici car aucune partie d'une fonction ne peut être utilisée individuellement depuis une autre fonction
 	if test "$header_base_line_color" == ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
-		header_base_line_color=$1
+		echo -n -e "$header_base_line_color"
 	fi
 
 	# Ligne
@@ -230,7 +236,7 @@ function handle_errors()
 		mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_LOGPATH"
 	fi
 
-	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel. Il porte le nom de \"$SCRIPT_LOG\""
+	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel. Il porte le nom de $SCRIPT_C_JAUNE\"$SCRIPT_LOG\"$SCRIPT_C_RESET"
 	echo "$SCRIPT_VOID"
 
 	exit 1
@@ -243,41 +249,60 @@ function pack_install()
 {
 	# Si vous souhaitez mettre tous les paquets en tant que multiples arguments (tableau d'arguments), remplacez le "$1"
 	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
-	package_name=$1
+	package_name=$1		# Argument de la fonction "pack_install" contenant le nom du paquet à installer
+	is_installed=0		# Variable servant à enregistrer la présence d'un paquet
 
-	function pack_manager_install()
+	# Adaptation de la commande de vérification de présence de paquets selon le gestionnaire de paquets
+	function pack_manager_list()
 	{
-		list_package=$1
-		install_command=$2
+		list_command=$*
 
-		j_echo "Installation du paquet $package_name"
-		$SCRIPT_SLEEP_INST
-
-		"$list_package | grep -w $package_name | cut -d / -f-1" \
-			|| {
-				# Si le paquet n'est pas déjà installé
-
-				j_echo "Installation du paquet $package_name"
-				"$install_command" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-
-				# On s'assure que le paquet a bien été installé
-				"$list_package | grep -w $package_name | cut -d / -f-1" \
-					|| handle_errors "LE PAQUET \"$package_name\" N'A PAS PU ÊTRE INSTALLÉ" \
-					&& v_echo "Le paquet \"$package_name\" a été correctement installé"
-				return
-			} \
+		# Cette ligne sert à m'assurer que le code fonctionne
+		j_echo "Vérification de la présence du paquet $package_name" # >> "$SCRIPT_LOGPATH"
+		$list_command "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+			|| is_installed=0 \
 			&& {
-				# Sinon, si le paquet est déjà installé
-
+				is_installed=1
 				v_echo "Le paquet \"$package_name\" est déjà installé"
-				echo "$SCRIPT_VOID"
+				$SCRIPT_VOID
 
-				$SCRIPT_SLEEP_INST
-
-				return
+				$SCRIPT_VOID
 			}
 
-		$SCRIPT_SLEEP_INST
+		return
+	}
+
+	# Adaptation de la commande d'installation selon le gestionnaire de paquets
+	function pack_manager_install()
+	{
+		install_command=$*
+
+		if test "$is_installed" = 0; then
+			j_echo "Installation du paquet $package_name"
+			$SCRIPT_SLEEP_INST
+
+			# On appelle la commande d'installation du gestionnaire de paquets,
+			# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
+			"$install_command" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH" && is_installed=1
+			$SCRIPT_SLEEP_INST
+			$SCRIPT_VOID
+
+			# On vérifie que le paquet à installer a été correctement installé
+			j_echo "Vérification de l'installation du paquet \"$package_name\"" # >> "$SCRIPT_LOGPATH"
+			if test "$is_installed" = 1; then
+				v_echo "Le paquet \"$package_name\" a été installé avec succès"
+				is_installed=0
+				$SCRIPT_VOID
+
+				$SCRIPT_VOID
+
+			else
+				r_echo "L'installation du paquet \"$package_name\" a échoué" \
+				$SCRIPT_VOID
+
+				$SCRIPT_VOID
+			fi
+		fi
 
 		return
 	}
@@ -287,7 +312,7 @@ function pack_install()
 	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
 	case $SCRIPT_OS_FAMILY in
 		opensuse)
-			pack_manager_install "${zypper -y install}"
+			pack_manager_install "$(zypper -y install)"
 			;;
 		archlinux)
 			pack_manager_install "$(pacman --noconfirm -S)"
@@ -296,8 +321,8 @@ function pack_install()
 			pack_manager_install "$(dnf -y install)"
 			;;
 		debian)
-			pack_manager_install "$(eval apt list --installed)" "$(eval apt -y install)"
-		#	pack_manager_install ${"$(apt list --installed)"} ${"$(apt -y install)"}
+			pack_manager_list "$(apt list --installed)"
+			pack_manager_install "$(apt -y install)"
 			;;
 		gentoo)
 			pack_manager_install emerge
@@ -447,12 +472,14 @@ function create_log_file()
 	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
 	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
-	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"							# Récupération du nom du noyau
+	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"				# Récupération du nom du noyau
 	echo "Version du Kernel : $(uname -r)" >> "$SCRIPT_LOGPATH"		# Récupération du numéro de version du noyau
-	# Récupération des informations sur le système d'exploitation de l'utilisateur
+
+	# Récupération des informations sur le système d'exploitation de l'utilisateur ...
 	echo "Informations sur le système d'exploitation :" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 
+	# ... contenues dans le fichier "/etc/os-release"
 	cat "/etc/os-release" >> "$SCRIPT_LOGPATH"
 	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
 

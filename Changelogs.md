@@ -82,7 +82,7 @@
 # Version actuelle : 1.4.2 (jeudi 16 janvier 2020, 14h43)
 * Changelogs :
     - **handle_errors() :** Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).  
-    - **Note :** Pratiquement un mois et demi s'est écoulé depuis la mise à jour du script stable vers la version 1.4.1, car je me suis beaucoup concentré sur la nouvelle version majeure à venir, malgrès le fait que le bug a été corrigé pratiquement quelques jours après la sortie de la dernière version.
+    - **Note :** Pratiquement un mois et demi s'est écoulé depuis la mise à jour du script stable vers la version 1.4.1, car je me suis beaucoup concentré sur la nouvelle version majeure à venir, malgré le fait que le bug a été corrigé pratiquement quelques jours après la sortie de la dernière version.
 
 # Prochaine version : 2.0
 

@@ -40,39 +40,35 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6
     - **.gitignore :** Ce fichier sert à éviter d'inclure les fichiers listés dedans (fichiers binaires, etc...) dans chaque commit Git.  
     - **Bug tracking.md :** Ce fichier liste tous les bugs connus jusqu'à leur correction.  
     - **Changelogs.md :** Ce fichier contient la liste des changements ayant eu lieu entre deux versions.  
-    - **Mode d'emploi.odt :** Ce fichier contient le mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
     - **README.md :** C'est le fichier que vous lisez actuellement sur Github (ou dans tout autre lecteur de fichiers Markdown).  
 
-* *__4.2) Beta :__*  
-    - **beta.sh :** Le fichier exécutable de la version Bêta du script de réinstallation SIO.  
-    - **Documentation Beta.odt :** La documentation officielle de la version Bêta.  
-
-* *__4.3) Graphiques :__*
-    - *__Note__* : Ces fichiers ne peuvent être ouverts qu'avec le logiciel Draw.io (via la version bureau ou la version en ligne) pour le moment. Une version imagée de chaque fichier arrivera bientôt (les fichiers .drawio resteront pour que vous puissiez apporter des modifiactions si vous modifiez une ou plusieurs fonctions du script).  
+* *__4.2) Graphiques :__*
+    - *__Note__* : Les fichiers portant l'extension **.drawio** ne peuvent être ouverts qu'avec le logiciel Draw.io (via la version bureau ou la version en ligne) pour le moment. Une version imagée de chaque fichier arrivera bientôt (les fichiers .drawio resteront pour que vous puissiez apporter des modifiactions si vous modifiez une ou plusieurs fonctions du script).  
     - **Interface graphique.drawio :** Fichier contenant le schéma de fonctionnement de l'interface graphique.  
     - **Script de réinstallation.drawio :** Fichier contenant l'algorigramme de l'exécution du script de réinstallation.  
-        * *__4.3.1) Fonctions__*
+        * *__4.2.1) Fonctions__*
             - **makedir.drawio :** Fichier contenant le schéma de fonctionnement de la fonction **makedir()** du script de réinstallation.  
             - **makefile.drawio :** Fichier contenant le schéma de fonctionnement de la fonction makefile du script de réinstallation.   
             - **script_header.drawio :** Fichier contenant le schéma de fonctionnement de la fonction
             - **pack_install.drawio :** Fichier contenant le schéma de fonctionnement de la fonction pack_install du script de fonctionnement.  
 
-        * *__4.3.2) UI__*
+        * *__4.2.2) UI__*
             - **Interface graphique.drawio :** Fichier contenant le schéma du fonctionnement de l'interface graphique
 
-* *__4.4) GUI :__*  
+* *__4.3) GUI :__*  
     - **Code couleur schema.txt :** Fichier contenant les informations sur le code couleur utilisé dans le schéma Draw.io.  
     - **window.py :** Fichier source Python contenant le début de code de l'interface graphique.  
 
-* *__4.5) Parser :__*  
-    - **Parser.py** : Le fichier de parsing de fichiers XML contenant les paquets à installer.  
+* *__4.4) Parser :__*  
+    - **Parser.py :** Le fichier de parsing de fichiers XML contenant les paquets à installer.  
 
-* *__4.6) Ressources :__*  
+* *__4.5) Ressources :__*  
     - **paquets.xml :** Fichier de structuration de données contenant les noms des paquets.  
     - **sudoers :** Fichier de configuration se trouvant dans le dossier **"/etc/"**, consignant la gestion des droits du super-utilisateur accordés aux utilisateurs de l'ordinateur.  
 
-* *__4.7) Stable :__*  
-    - **Documentation Stable.odt :** La documentation officielle des deux scripts de réinstallation en version stable.  
+* *__4.6) Scripts :__*  
+    - **Documentation.odt :** La documentation officielle des deux scripts de réinstallation en version stable.  
+    - **Mode d'emploi.odt :** Ce fichier contient le mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
     - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
     - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.  
 
