@@ -30,7 +30,7 @@
 * Changelogs :
     - Mise en fonctionnement de la fonction d'installation des paquets venant des dépôts officiels.
     - Ajout de la fonction **snap_install()** pour télécharger des paquets depuis les dépôts de Snap.
-    - Suppression de Zypper de la fonction **autoremove()**. Se référer à la documentation pour supprimer les paquets obsolètes sur OpenSUSE.
+    - Suppression du gestionnaire de paquets **Zypper** de la fonction **autoremove()**. Se référer à la documentation pour supprimer les paquets obsolètes sur OpenSUSE.
     - Légères modifications appliquées sur les commentaires.
 
 
@@ -45,13 +45,12 @@
 # Ancienne version : 1.2 (lundi 2 décembre 2019)
 
 * Changelogs :
-    - **get_dist_package_manager()** et **pack_install() :** Remplacement des commandes *__which__* par *__command -v__*, commande mieux recommandée que *__which__* pour vérifier qu'un paquet est déjà installé.
+    - **get_dist_package_manager()** et **pack_install() :** Remplacement de chaque commande *__which__* par la commande *__command -v__*, qui est une commande intégrée à Bash, toujours pour vérifier qu'une commande existe.
     - Correction d'un bug affichant l'étape d'autoremove sans interaction possible.
     - Toujours dans l'étape d'autoremove : La fonction **read_autoremove()** se répète désormais en cas de réponse inattendue.
     - Léger changement de la chaîne de caractères à afficher en cas de réponse inattendue dans les fonctions **read_launch_script()** et **read_autoremove()**. Passage de *__"Veuillez rentrer une valeur valide (oui/non)"__* à *__"Veuillez répondre EXACTEMENT par "oui" ou par "non" "__*
     - **detect_root() :** Changement de la demande d'autorisation de lancement de l'installation. Passage de *__"Assurez-vous d'avoir lu le script et sa documentation avant de l'exécuter."__*
-    à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter
-    à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.
+    à *__"Assurez-vous d'avoir lu au moins le mode d'emploi avant de lancer l'installation."__*, le mode d'emploi étant de plus en plus complet pour les personnes qui ne souhaitent pas s'embêter à lire la description des fonctions et variables pour savoir ce qu'elles exécutent.  
 
 
 # Ancienne version : 1.3 (mardi 3 décembre 2019, ~14h)
@@ -71,7 +70,7 @@
     - Remise en place de la fonction **handle_errors()**, une fonction de sortie d'erreurs abandonnée à la sortie de la version Bêta 0.2, à l'époque où je ne savais pas très bien comment manipuler les arguments en Shell. Plus besoin de préciser la couleur du texte de sortie d'erreurs et d'appeler deux chaînes de caractères avant et après le message d'erreur.
     - Modification des noms des variables déclarées dans chaque fonction pour éviter la confusion avec les noms de d'autres variables situées dans d'autres fonctions.
     - Précision plus importante sur l'argument **$0** de la fonction **detect_root()** en commentaire.
-    - Pas d'oubli de rajouter les changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour lesquelles cette version est sortie près de deux heures après la version 1.3.
+    - Aucun oubli de rajout des changements stables du ficher **beta.sh** dans les fichiers shell **sio.sh** et **personnel.sh**. Avec le développement rapide et facile des ajouts de cette version, c'est une des raisons pour lesquelles cette version est sortie près de deux heures après la version 1.3.
 
 
 # Ancienne version : 1.4.1 (mardi 3 décembre 2019, ~22h)
@@ -90,7 +89,7 @@
 
     - Ajouts globaux :
         - Ajout de fonctions de décoration et d'optimisation de texte.
-        - Ajout de la détection de la commande sudo pour les distributions Linux n'ayant pas Sudo installé de base.
+        - Ajout de la détection de la commande **sudo** pour les distributions Linux n'ayant pas Sudo installé de base.
 
     - **<u>1) Ajouts (A), Changements (__C__) et Suppressions (S) de fonctions, paquets et variables</u> :**
         - **<u>1.1) Fonctions</u> :**
@@ -114,7 +113,6 @@
             La partie de demande de permission est modifiée. Désormais, le script ne doit pas s'exécuter en mode super-utilisateur pour que le script obtienne les valeurs des variables d'environnement quand le mode super-utilisateur est désactivé pour les utiliser au moment opportun.  
             Le nom de cette fonction **"detect_root"** a été changé par **"script_init()"** le vendredi 24 janvier 2020, vers 14h32, suite à la détection des arguments, qui fait que cette fonction ne gère plus seulement le lancement du script en mode super-utilisateur, mais aussi le nombre d'arguments passés, ainsi que leur valeur.  
             - C:\ **get_dist_package_manager() :** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.  
-
             - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
 
         - **<u>1.2) Paquets</u> :**
@@ -128,7 +126,7 @@
             - A:\ **wireshark :** Paquet installant Wireshark.  
 
         - **<u>1.3) Variables</u> :**
-           - A:\ **$COLS :** Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line() :** (suppression de la variable **$line_cols** au profit de cette nouvelle variable).  
+            - A:\ **$COLS :** Cette variable est destinée à afficher des colonnes quand on en a besoin ailleurs que dans la fonction **draw_header_line() :** (suppression de la variable **$line_cols** au profit de cette nouvelle variable).  
             - A:\ **$SCRIPT_VERSION :** Cette variable contient le numéro de la version actuelle du script. Elle est utilisée dans le header de bienvenue du script, dont la fin a été légèrement refondue (ajout de **VERSION $SCRIPT_VERSION**).  
             - A:\ **"$SLEEP_HEADER"** dans la fonction **"handle_errors()"**.  
 
@@ -143,6 +141,9 @@
             - A:\ **$SCRIPT_TMPDIR :** Nom du dossier temporaire créé par le script.  
             - A:\ **$SCRIPT_TMPPATH :** Chemin complet du dossier temporaire (chemin du dossier parent + Le nom du dossier temporaire).  
 
+            - C:\ **SCRIPT_OS_FAMILY :** Renommée en **$SCRIPT_PACK_MANAGER**.
+
+            - S:\ **$SCRIPT_VOID :** Remplacée par une nouvelle fonction nommée **"newline()"**.  
 
     - **<u>2) Corrections</u> :**
         - **handle_errors() :** Correction du bug d'affichage des headers d'erreur ne s'affichant pas en rouge, mais selon la couleur de texte par défaut du terminal (variable utilisée : **$C_RED** au lieu de **$C_ROUGE**).  

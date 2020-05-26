@@ -97,7 +97,8 @@
                     • Cette commande permet d’afficher des informations concernant votre système d’exploitation, sur votre terminal,
                     à côté du logo de votre distribution, parfois dessiné en art ASCII.
 
-                    • Selon son fichier de configuration, la commande retourne (exemple sur ma distribution Kubuntu 18.04) :
+                    • Selon son fichier de configuration (localisé dans le dossier ~/.config/neofetch/config.conf),
+                    la commande retourne (exemple sur ma distribution Kubuntu 18.04) :
                         • La version de votre système d’exploitation
                         • Le nom de l’hôte du système d’exploitation (votre ordinateur)
                         • La version de votre kernel (noyau Linux)
@@ -110,8 +111,8 @@
                         • Les thèmes de votre environnement de bureau
                         • Les thèmes d’icônes utilisés
                         • Le terminal actuellement utilisé
-                        • Les caractéristiques principales de votre processeur
-                        • Les caractéristiques principales de votre carte graphique
+                        • Les caractéristiques principales de votre processeur central (CPU)
+                        • Les caractéristiques principales de votre processeur graphique (GPU)
                         • La mémoire vive actuellement utilisée comparée à la mémoire vive totale
                 </description>
                 <script>&sio;</script>
