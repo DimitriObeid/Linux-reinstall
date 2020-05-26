@@ -13,7 +13,7 @@
 # Ou débugguez le en utilisant l'excellent utilitaire Shell Check :
 #	En ligne -> https://www.shellcheck.net/
 #	En ligne de commandes -> shellcheck beta.sh
-#		--> Commande d'installation : sudo $commande_d'installation_de_paquets shellcheck
+#		--> Commande d'installation de l'utilitaire : sudo $gestionnaire de paquets $option_d'installation shellcheck
 
 
 
@@ -82,9 +82,6 @@ SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"				# Encodage de la couleur en jaune e
 SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
 SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
 
-# Saut de ligne
-SCRIPT_VOID=""
-
 
 ## VERSION
 # Version actuelle du script
@@ -103,6 +100,12 @@ SCRIPT_VERSION="2.0"
 
 
 ## DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
+# Fonction de saut de ligne pour la zone de texte du terminal et pour le fichier de logs
+function newline() { echo "" | tee -a "$SCRIPT_LOGPATH"; }
+
+# Fonction de saut de ligne uniquement pour le fichier de logs (utiliser la fonction précédente en redirigeant sa sortie vers le fichier de logs provoque un saut de deux lignes au lieu d'une)
+function newlogline() { echo "" >> "$SCRIPT_LOGPATH"; }
+
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
@@ -178,7 +181,7 @@ function header_base()
 	header_base_string_color=$3		# Définition de la couleur de la chaîne de caractères
 	header_base_string=$4			# Chaîne de caractères affichée dans chaque header
 
-	echo "$SCRIPT_VOID"
+	newline
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
 	# $SCRIPT_SLEEP_HEADER
@@ -188,9 +191,9 @@ function header_base()
 	draw_header_line "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Double saut de ligne, car l'option '-n' de la commande "echo" empêche un saut de ligne (un affichage via la commande "echo" (sans l'option '-n')
 	# affiche toujours un saut de ligne à la fin)
-	echo "$SCRIPT_VOID"
+	newline
 
-	echo "$SCRIPT_VOID"
+	newline
 
 	$SCRIPT_SLEEP_HEADER
 
@@ -226,10 +229,10 @@ function handle_errors()
 
 	r_echo_nolog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	r_echo_nolog "$error_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID"
+	newline
 
 	r_echo_nolog "Arrêt de l'installation" 2>&1 | tee -a "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID"
+	newline
 
 	# Si le fichier de logs se trouve toujours dans le dossier actuel (si le script a été exécuté depuis un autre dossier)
 	if test ! -f "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
@@ -237,7 +240,7 @@ function handle_errors()
 	fi
 
 	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel. Il porte le nom de $SCRIPT_C_JAUNE\"$SCRIPT_LOG\"$SCRIPT_C_RESET"
-	echo "$SCRIPT_VOID"
+	newline
 
 	exit 1
 }
@@ -255,7 +258,7 @@ function pack_install()
 	# Adaptation de la commande de vérification de présence de paquets selon le gestionnaire de paquets
 	function pack_manager_list()
 	{
-		list_command=$*
+		list_command="$*"
 
 		# Cette ligne sert à m'assurer que le code fonctionne
 		j_echo "Vérification de la présence du paquet $package_name" # >> "$SCRIPT_LOGPATH"
@@ -264,9 +267,9 @@ function pack_install()
 			&& {
 				is_installed=1
 				v_echo "Le paquet \"$package_name\" est déjà installé"
-				$SCRIPT_VOID
+				newline
 
-				$SCRIPT_VOID
+				newline
 			}
 
 		return
@@ -283,24 +286,30 @@ function pack_install()
 
 			# On appelle la commande d'installation du gestionnaire de paquets,
 			# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
-			"$install_command" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH" && is_installed=1
+			"$install_command" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+				|| {
+						r_echo "Le paquet \"$package_name\" est introuvable dans les dépôts de votre gestionnaire de paquets"
+
+						return
+					} \
+				&& is_installed=1
 			$SCRIPT_SLEEP_INST
-			$SCRIPT_VOID
+			newline
 
 			# On vérifie que le paquet à installer a été correctement installé
 			j_echo "Vérification de l'installation du paquet \"$package_name\"" # >> "$SCRIPT_LOGPATH"
 			if test "$is_installed" = 1; then
 				v_echo "Le paquet \"$package_name\" a été installé avec succès"
 				is_installed=0
-				$SCRIPT_VOID
+				newline
 
-				$SCRIPT_VOID
+				newline
 
 			else
-				r_echo "L'installation du paquet \"$package_name\" a échoué" \
-				$SCRIPT_VOID
+				r_echo "L'installation du paquet \"$package_name\" a échoué"
+				newline
 
-				$SCRIPT_VOID
+				newline
 			fi
 		fi
 
@@ -310,21 +319,21 @@ function pack_install()
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
 	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
 	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
-	case $SCRIPT_OS_FAMILY in
-		opensuse)
+	case $SCRIPT_PACK_MANAGER in
+		zypper)
 			pack_manager_install "$(zypper -y install)"
 			;;
-		archlinux)
+		pacman)
 			pack_manager_install "$(pacman --noconfirm -S)"
 			;;
-		fedora)
+		dnf)
 			pack_manager_install "$(dnf -y install)"
 			;;
-		debian)
+		apt)
 			pack_manager_list "$(apt list --installed)"
 			pack_manager_install "$(apt -y install)"
 			;;
-		gentoo)
+		emerge)
 			pack_manager_install emerge
 			;;
 	esac
@@ -339,12 +348,12 @@ function snap_install()
     snap install "$@" \
 		|| {
 				r_echo "L'installation du paquet \"$*\" a échoué"
-				echo "$SCRIPT_VOID"
+				newline
 
 				return
 		 	} \
 		&& v_echo "Installation du paquet \"$*\" effectuée avec succès"
-	echo "$SCRIPT_VOID"
+	newline
 
 	return
 }
@@ -363,7 +372,7 @@ function makedir()
 		mkdir -v "$dirpath" >> "$SCRIPT_LOGPATH" \
 			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT \"$dirparent\"" \
 			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
-		echo "$SCRIPT_VOID"
+		newline
 
 		# On change les droits du dossier créé par le script
 		# Comme il est exécuté en mode super-utilisateur, le dossier créé appartient totalement au super-utilisateur.
@@ -390,7 +399,7 @@ function makedir()
 	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
 		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
 		j_echo "Suppression du contenu du dossier \"$dirpath\""
-		echo "$SCRIPT_VOID"
+		newline
 
 		# ATTENTION À NE PAS MODIFIER LA COMMANDE " rm -r -f -v "${dirpath/:?}/"* ", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
 		# Pour plus d'informations sur cette commande --> https://github.com/koalaman/shellcheck/wiki/SC2115
@@ -466,25 +475,23 @@ function create_log_file()
 
 	# Si le fichier de logs n'existe pas, le script le crée via la fonction "makefile"
 	makefile "$PWD" "$SCRIPT_LOG" > /dev/null
-	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH" 	# Au moment de la création du fichier de logs, la variable "$SCRIPT_LOGPATH" correspond au dossier actuel de l'utilisateur
+	newlogline
 
+	# Au moment de la création du fichier de logs, la variable "$SCRIPT_LOGPATH" correspond au dossier actuel de l'utilisateur
 	v_echo_nolog "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+	newlogline
 
 	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
 	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"				# Récupération du nom du noyau
 	echo "Version du Kernel : $(uname -r)" >> "$SCRIPT_LOGPATH"		# Récupération du numéro de version du noyau
 
-	# Récupération des informations sur le système d'exploitation de l'utilisateur ...
+	# Récupération des informations sur le système d'exploitation de l'utilisateur contenues dans le fichier "/etc/os-release"
 	echo "Informations sur le système d'exploitation :" >> "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
-
-	# ... contenues dans le fichier "/etc/os-release"
 	cat "/etc/os-release" >> "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID" "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+	newlogline
 
-	v_echo_nolog "Fin des informations sur le système d'exploitation" >> "$SCRIPT_LOGPATH"
-	echo "$SCRIPT_VOID" >> "$SCRIPT_LOGPATH"
+	v_echo_nolog "Fin de la récupération d'informations sur le système d'exploitation" >> "$SCRIPT_LOGPATH"
+	newline >> "$SCRIPT_LOGPATH"
 
 	return
 }
@@ -499,12 +506,12 @@ function script_init()
 	if test "$EUID" -ne 0; then
     	r_echo "Ce script doit être exécuté en tant que super-utilisateur (root)"
     	r_echo "Exécutez ce script en plaçant$C_RESET sudo$C_ROUGE devant votre commande :"
-		echo "$SCRIPT_VOID"
+		newline
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
     	echo "	sudo $0 votre_nom_d'utilisateur"
-		echo "$SCRIPT_VOID"
+		newline
 
 		r_echo "Ou connectez vous directement en tant que super-utilisateur"
 		r_echo "Et tapez cette commande :"
@@ -526,24 +533,59 @@ function script_init()
             # Si la valeur de l'argument ne correspond pas au nom de l'utilisateur
 			if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" != "${SCRIPT_USERNAME}"; then
 				r_echo "Veuillez entrer correctement votre nom d'utilisateur"
-				echo "$SCRIPT_VOID"
+				newline
 
 				r_echo "Si vous avez exécuté le script en dehors de votre dossier personnel ou d'un de ses sous-dossiers,"
-				r_echo "veuillez y retourner, et réexécuter le script."
+				r_echo "retournez-y pour réexécuter le script sans problèmes."
 
 				handle_errors "LA CHAÎNE DE CARACTÈRES PASSÉE EN PREMIER ARGUMENT NE CORRESPOND PAS À VOTRE NOM D'UTILISATEUR"
 
 			# Sinon, si la valeur de l'argument correspond au nom de l'utilisateur
 			else
+				# On demande à l'utilisateur de bien confirmer son nom, au cas où son compte utilisateur cohabite avec d'autres comptes
+				j_echo "Nom d'utilisateur entré :$SCRIPT_C_RESET $SCRIPT_USERNAME"
+				j_echo "Est-ce correct ? (oui/non)"
+				newline
+
+				# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
+				# Les deux virgules suivant directement le "rep_script_init" entre les accolades signifient que les mêmes réponses avec des
+				# majuscules sont permises, peu importe où elles se situent dans la chaîne de caractères (pas de sensibilité à la casse).
+				function read_script_init()
+				{
+					read -r -p "Entrez votre réponse : " rep_script_init
+					echo "$rep_script_init" >> "$SCRIPT_LOGPATH"
+					newline
+
+					case ${rep_script_init,,} in
+						"oui")
+							v_echo "Lancement du script"
+
+							return
+							;;
+						"non")
+							r_echo "Abandon"
+							newline
+
+							exit 1
+							;;
+						*)
+							r_echo "Réponses attendues : \"oui\" ou \"non\" (pas de sensibilité à la casse)"
+							r_echo "Abandon"
+							newline
+
+							exit 1
+							;;
+					esac
+				}
+
+				read_script_init
+
 				# On déplace le fichier de logs vers le dossier personnel de l'utilisateur tout en vérifiant s'il ne s'y trouve pas déjà
 				if test ! -f "$SCRIPT_HOMEDIR/$SCRIPT_LOG"; then
                     mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_HOMEDIR/$SCRIPT_LOG" \
                         || handle_errors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $SCRIPT_HOMEDIR" \
                         && SCRIPT_LOGPATH="$SCRIPT_HOMEDIR/$SCRIPT_LOG"
                 fi
-
-				v_echo_nolog "Vous avez correctement entré votre nom d'utilisateur" >> "$SCRIPT_LOGPATH"
-				v_echo_nolog "Lancement du script" >> "$SCRIPT_LOGPATH"
 
 				return
 			fi
@@ -557,21 +599,21 @@ function get_dist_package_manager()
 	script_header "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
 
 	# On cherche la commande du gestionnaire de paquets de la distribution de l'utilisateur dans les chemins de la variable d'environnement "$PATH" en l'exécutant.
-	# On redirige chaque sortie ("stdout (sortie standard) si la commande est trouvée" et "stderr(sortie d'erreurs) si la commande n'est pas trouvée")
+	# On redirige chaque sortie ("STDOUT (sortie standard) si la commande est trouvée" et "STDERR (sortie d'erreurs) si la commande n'est pas trouvée")
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-    command -v zypper &> /dev/null && SCRIPT_OS_FAMILY="opensuse"
-    command -v pacman &> /dev/null && SCRIPT_OS_FAMILY="archlinux"
-    command -v dnf &> /dev/null && SCRIPT_OS_FAMILY="fedora"
-    command -v apt &> /dev/null && SCRIPT_OS_FAMILY="debian"
-    command -v emerge &> /dev/null && SCRIPT_OS_FAMILY="gentoo"
+    command -v zypper &> /dev/null && SCRIPT_PACK_MANAGER="zypper"
+    command -v pacman &> /dev/null && SCRIPT_PACK_MANAGER="pacman"
+    command -v dnf &> /dev/null && SCRIPT_PACK_MANAGER="dnf"
+    command -v apt &> /dev/null && SCRIPT_PACK_MANAGER="apt"
+    command -v emerge &> /dev/null && SCRIPT_PACK_MANAGER="emerge"
 
-	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $SCRIPT_OS_FAMILY est toujours nulle (aucune commande trouvée)
-	if test "$SCRIPT_OS_FAMILY" = ""; then
-		handle_errors "LE GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION N'EST PAS SUPPORTÉ"
+	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $SCRIPT_PACK_MANAGER est toujours nulle (aucune commande trouvée)
+	if test "$SCRIPT_PACK_MANAGER" = ""; then
+		handle_errors "AUCUN GESTIONNAIRE DE PAQUETS SUPPORTÉ TROUVÉ"
 	else
-		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($SCRIPT_OS_FAMILY)"
+		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($SCRIPT_PACK_MANAGER)"
 	fi
 }
 
@@ -582,40 +624,37 @@ function launch_script()
 
 	j_echo "Assurez-vous d'avoir lu au moins le mode d'emploi (Mode d'emploi.odt) avant de lancer l'installation."
     j_echo "Êtes-vous sûr de bien vouloir lancer l'installation ? (oui/non)"
-	echo "$SCRIPT_VOID"
+	newline
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
 	function read_launch_script()
 	{
         # On demande à l'utilisateur d'entrer une réponse
-		read -r -p "Entrez votre réponse : " rep_launch
+		read -r -p "Entrez votre réponse : " rep_launch_script
+		echo "$rep_launch_script" >> "$SCRIPT_LOGPATH"
+		newline
 
-		# Dans le cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non"
-		# Les deux virgules suivant directement le "launch" signifient que les mêmes réponses avec des majuscules sont permises
-		case ${rep_launch,,} in
+		# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
+		case ${rep_launch_script,,} in
 	        "oui")
-				echo "$SCRIPT_VOID"
-
 				v_echo "Vous avez confirmé vouloir exécuter ce script."
 				v_echo "C'est parti !!!"
 
 				return
 	            ;;
 	        "non")
-				echo "$SCRIPT_VOID"
-
 				r_echo "Le script ne sera pas exécuté"
 	            r_echo "Abandon"
-				echo "$SCRIPT_VOID"
+				newline
 
 				exit 1
 	            ;;
             # Si une réponse différente de "oui" ou de "non" est rentrée
 			*)
-				echo "$SCRIPT_VOID"
+				newline
 
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
-				echo "$SCRIPT_VOID"
+				newline
 
 				# On rappelle la fonction "read_launch_script" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée
 				read_launch_script
@@ -634,7 +673,7 @@ function check_internet_connection()
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
 	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
-	if ping -q -c 1 -W 1 opendns.com > /dev/null; then
+	if ping -q -c 1 -W 1 opendns.com >> "$SCRIPT_LOGPATH"; then
 		v_echo "Votre ordinateur est connecté à Internet"
 
 		return
@@ -651,27 +690,27 @@ function dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_OS_FAMILY",
+	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_PACK_MANAGER",
 	# puis on appelle sa commande de mise à jour des paquets installés
-	case "$SCRIPT_OS_FAMILY" in
-		opensuse)
+	case "$SCRIPT_PACK_MANAGER" in
+		zypper)
 			zypper -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		archlinux)
+		pacman)
 			pacman --noconfirm -Syu 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		fedora)
+		dnf)
 			dnf -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		debian)
+		apt)
 			apt -y update; apt -y upgrade 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		gentoo)
+		emerge)
 			emerge -u world 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 	esac
 
-	echo "$SCRIPT_VOID"
+	newline
 
 	v_echo "Mise à jour du système effectuée avec succès"
 
@@ -696,51 +735,53 @@ function set_sudo()
 				pack_install sudo
 			} \
 		&& { v_echo "La commande \"sudo\" est déjà installée sur votre système"; }
-	echo "$SCRIPT_VOID"
+	newline
 
 	j_echo "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré"
 	j_echo "depuis le dossier des fichiers ressources de mon dépôt Git : "
 	echo ">>>> https://github.com/DimitriObeid/Linux-reinstall/tree/master/Ressources"
-	echo "$SCRIPT_VOID"
+	newline
 
 	j_echo "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
-	echo "$SCRIPT_VOID"
+	newline
 
 	echo ">>>> REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
 	echo ">>>> Si vous avez déjà un fichier sudoers modifié, une sauvegarde du fichier actuel sera effectuée dans le même dossier"
-	echo "$SCRIPT_VOID"
+	newline
 
 	function read_set_sudo()
 	{
-		read -r -p "Entrez votre réponse : " rep_sudo
+		read -r -p "Entrez votre réponse : " rep_set_sudo
+		echo "$rep_set_sudo" >> "$SCRIPT_LOGPATH"
 
-		case ${rep_sudo,,} in
+		# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
+		case ${rep_set_sudo,,} in
 			"oui")
-				echo "$SCRIPT_VOID"
+				newline
 
 				# Téléchargement du fichier sudoers configuré
 				j_echo "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
 				sleep 1
-				echo "$SCRIPT_VOID"
+				newline
 
 				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers -O "$SCRIPT_TMPPATH/sudoers" \
 					|| { r_echo "Impossible de télécharger le fichier \"sudoers\""; return; } \
 					&& v_echo "Fichier \"sudoers\" téléchargé avec succès"
-				echo "$SCRIPT_VOID"
+				newline
 
 				# Sauvegarde du fichier "/etc/sudoers" existant en "sudoers.old"
 				j_echo "Création d'une sauvegarde de votre fichier sudoers existant nommée \"sudoers $SCRIPT_DATE.old\""
 				cat "/etc/sudoers" > "$sudoers_old" \
 					|| { r_echo "Impossible de créer une sauvegarde du fichier sudoers"; return; } \
 					&& v_echo "Le fichier de sauvegarde \"$sudoers_old\" a été créé avec succès"
-				echo "$SCRIPT_VOID"
+				newline
 
 				# Déplacement du fichier vers le dossier "/etc/"
 				j_echo "Déplacement du fichier \"sudoers\" vers \"/etc/\""
 				mv "$SCRIPT_TMPPATH/sudoers" /etc/sudoers \
 					|| { r_echo "Impossible de déplacer le fichier \"sudoers\" vers le dossier \"/etc/\""; return; } \
 					&& { v_echo "Fichier sudoers déplacé avec succès vers le dossier "; }
-				echo "$SCRIPT_VOID"
+				newline
 
 				# Ajout de l'utilisateur au groupe "sudo"
 				j_echo "Ajout de l'utilisateur ${SCRIPT_USERNAME} au groupe sudo"
@@ -751,14 +792,14 @@ function set_sudo()
 				return
 				;;
 			"non")
-				echo "$SCRIPT_VOID"
+				newline
 
 				v_echo "Le fichier \"/etc/sudoers\" ne sera pas modifié"
 
 				return
 				;;
 			*)
-				echo "$SCRIPT_VOID"
+				newline
 
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				read_set_sudo
@@ -778,49 +819,50 @@ function autoremove()
 	script_header "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 
 	j_echo "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
-	echo "$SCRIPT_VOID"
+	newline
 
 	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
 	function read_autoremove()
 	{
 		read -r -p "Entrez votre réponse : " rep_autoremove
+		echo "$rep_autoremove" >> "$SCRIPT_LOGPATH"
 
 		case ${rep_autoremove,,} in
 			"oui")
-				echo "$SCRIPT_VOID"
+				newline
 
 				j_echo "Suppression des paquets"
-				echo "$SCRIPT_VOID"
+				newline
 
-	    		case "$SCRIPT_OS_FAMILY" in
-	        		opensuse)
+	    		case "$SCRIPT_PACK_MANAGER" in
+	        		zypper)
 	            		j_echo "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
 						j_echo "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
 	            		;;
-	        		archlinux)
+	        		pacman)
 	            		pacman --noconfirm -Qdt
 	            		;;
-	        		fedora)
+	        		dnf)
 	            		dnf -y autoremove
 	            		;;
-	        		debian)
+	        		apt)
 	            		apt -y autoremove
 	            		;;
-	        		gentoo)
+	        		emerge)
 	            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
 	            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
 	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
 	            		;;
 				esac
 
-				echo "$SCRIPT_VOID"
+				newline
 
 				v_echo "Auto-suppression des paquets obsolètes effectuée avec succès"
 
 				return
 				;;
 			"non")
-				echo "$SCRIPT_VOID"
+				newline
 
 				v_echo "Les paquets obsolètes ne seront pas supprimés"
 				v_echo "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
@@ -828,7 +870,7 @@ function autoremove()
 				return
 				;;
 			*)
-				echo "$SCRIPT_VOID"
+				newline
 
 				j_echo "Veuillez répondre EXACTEMENT par \"oui\" ou par \"non\""
 				read_autoremove
@@ -849,15 +891,17 @@ function is_installation_done()
 	rm -r -f -v "$SCRIPT_TMPPATH" >> "$SCRIPT_LOGPATH" \
 		|| r_echo "Suppression du dossier temporaire impossible. Essayez de le supprimer à la main" \
 		&& v_echo "Le dossier temporaire \"$SCRIPT_TMPPATH\" a été supprimé avec succès"
-	echo "$SCRIPT_VOID"
+	newline
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
 
-	j_echo "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script, vous pouvez m'envoyer le fichier de logs situé dans le dossier \"$SCRIPT_LOGPATH\""
+	j_echo "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script"
+	echo "vous pouvez m'envoyer le fichier de logs situé dans le dossier \"$SCRIPT_LOGPATH\"."
+	echo "Il porte le nom de $SCRIPT_LOG"
 
-    # On tue le processus de connexion en mode super-utilisateur, par précaution
+    # On tue le processus de connexion en mode super-utilisateur
 	sudo -k
-	echo "$SCRIPT_VOID"
+	newline
 
 	return
 }
@@ -923,14 +967,14 @@ script_header "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE D
 j_echo "Les logiciels téléchargés via la commande \"wget\" sont déplacés vers le nouveau dossier \"Logiciels.Linux-reinstall\","
 j_echo "localisé dans votre dossier personnel"
 sleep 1
-echo "$SCRIPT_VOID"
+newline
 
 v_echo "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 v_echo "La partie d'installation de vos programmes commence véritablement"
 sleep 1
-echo "$SCRIPT_VOID"
+newline
 
-echo "$SCRIPT_VOID"
+newline
 
 sleep 3
 
