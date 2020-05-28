@@ -106,8 +106,10 @@ function newline() { echo "" | tee -a "$SCRIPT_LOGPATH"; }
 # Fonction de saut de ligne uniquement pour le fichier de logs (utiliser la fonction précédente en redirigeant sa sortie vers le fichier de logs provoque un saut de deux lignes au lieu d'une)
 function newlogline() { echo "" >> "$SCRIPT_LOGPATH"; }
 
+function j_echo_nolog() { j_n_string=$1; echo "$SCRIPT_J_TAB $j_n_string $SCRIPT_C_RESET"; }
+
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function j_echo() { j_string=$1; echo "$SCRIPT_J_TAB $j_string $SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function j_echo() { j_string=$1; j_echo_nolog "$j_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function r_echo_nolog() { r_n_string=$1; echo "$SCRIPT_R_TAB $r_n_string $SCRIPT_C_RESET"; }
@@ -320,20 +322,20 @@ function pack_install()
 	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
 	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
 	case $SCRIPT_PACK_MANAGER in
-		zypper)
-			pack_manager_install "$(zypper -y install)"
+		"Zypper")
+			pack_manager_install zypper -y install
 			;;
-		pacman)
-			pack_manager_install "$(pacman --noconfirm -S)"
+		"Pacman")
+			pack_manager_install pacman --noconfirm -S
 			;;
-		dnf)
-			pack_manager_install "$(dnf -y install)"
+		"DNF")
+			pack_manager_install dnf -y install
 			;;
-		apt)
-			pack_manager_list "$(apt list --installed)"
-			pack_manager_install "$(apt -y install)"
+		"APT")
+			pack_manager_list apt list --installed
+			pack_manager_install apt -y install
 			;;
-		emerge)
+		"Emerge")
 			pack_manager_install emerge
 			;;
 	esac
@@ -363,15 +365,15 @@ function snap_install()
 # Fonction de création de dossiers ET d'attribution récursive des droits de lecture et d'écriture à l'utilisateur
 function makedir()
 {
-	dirparent=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
+	parentdir=$1					# Emplacement de création du dossier depuis la racine (dossier parent)
 	dirname=$2						# Nom du dossier à créer dans son dossier parent
-	dirpath="$dirparent/$dirname"	# Chemin complet du dossier
+	dirpath="$parentdir/$dirname"	# Chemin complet du dossier
 
 	if test ! -d "$dirpath"; then
-		j_echo "Création du dossier \"$dirname\" dans le dossier \"$dirparent\""
+		j_echo "Création du dossier \"$dirname\" dans le dossier \"$parentdir\""
 		mkdir -v "$dirpath" >> "$SCRIPT_LOGPATH" \
-			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT \"$dirparent\"" \
-			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$dirparent\""
+			|| handle_errors "LE DOSSIER \"$dirname\" N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT \"$parentdir\"" \
+			&& v_echo "Le dossier \"$dirname\" a été créé avec succès dans le dossier \"$parentdir\""
 		newline
 
 		# On change les droits du dossier créé par le script
@@ -397,7 +399,7 @@ function makedir()
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent
 	# MAIS que ce dossier contient AU MOINS un fichier ou dossier
 	elif test -d "$dirpath" && test "$(ls -A "$dirpath")"; then
-		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$dirparent\""
+		j_echo "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible \"$parentdir\""
 		j_echo "Suppression du contenu du dossier \"$dirpath\""
 		newline
 
@@ -425,15 +427,15 @@ function makedir()
 # Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur
 function makefile()
 {
-	file_dirparent=$1	# Dossier parent du fichier à créer
+	file_parentdir=$1	# Dossier parent du fichier à créer
 	filename=$2			# Nom du fichier à créer
-	filepath="$file_dirparent/$filename"
+	filepath="$file_parentdir/$filename"
 
 	# Si le fichier à créer n'existe pas
 	if test ! -s "$filepath"; then
-		touch "$file_dirparent/$filename" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
-			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_dirparent\"" \
-			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_dirparent\""
+		touch "$file_parentdir/$filename" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+			|| handle_errors "LE FICHIER \"$filename\" n'a pas pu être créé dans le dossier \"$file_parentdir\"" \
+			&& v_echo "Le fichier \"$filename\" a été créé avec succès dans le dossier \"$file_parentdir\""
 
 		chown -v "$SCRIPT_USERNAME" "$filepath" >> "$SCRIPT_LOGPATH" \
 			|| {
@@ -481,17 +483,13 @@ function create_log_file()
 	v_echo_nolog "Fichier de logs créé avec succès" >> "$SCRIPT_LOGPATH"
 	newlogline
 
-	# Récupération d'éléments servant à mieux identifier le système d'exploitation de l'utilisateur
-	echo "Kernel : $(uname -s)" >> "$SCRIPT_LOGPATH"				# Récupération du nom du noyau
-	echo "Version du Kernel : $(uname -r)" >> "$SCRIPT_LOGPATH"		# Récupération du numéro de version du noyau
-
 	# Récupération des informations sur le système d'exploitation de l'utilisateur contenues dans le fichier "/etc/os-release"
-	echo "Informations sur le système d'exploitation :" >> "$SCRIPT_LOGPATH"
+	j_echo_nolog "Informations sur le système d'exploitation de l'utilisateur $SCRIPT_USERNAME :" >> "$SCRIPT_LOGPATH"
 	cat "/etc/os-release" >> "$SCRIPT_LOGPATH"
 	newlogline
 
 	v_echo_nolog "Fin de la récupération d'informations sur le système d'exploitation" >> "$SCRIPT_LOGPATH"
-	newline >> "$SCRIPT_LOGPATH"
+	newlogline >> "$SCRIPT_LOGPATH"
 
 	return
 }
@@ -603,17 +601,17 @@ function get_dist_package_manager()
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-    command -v zypper &> /dev/null && SCRIPT_PACK_MANAGER="zypper"
-    command -v pacman &> /dev/null && SCRIPT_PACK_MANAGER="pacman"
-    command -v dnf &> /dev/null && SCRIPT_PACK_MANAGER="dnf"
-    command -v apt &> /dev/null && SCRIPT_PACK_MANAGER="apt"
-    command -v emerge &> /dev/null && SCRIPT_PACK_MANAGER="emerge"
+    command -v zypper &> /dev/null && SCRIPT_PACK_MANAGER="Zypper"
+    command -v pacman &> /dev/null && SCRIPT_PACK_MANAGER="Pacman"
+    command -v dnf &> /dev/null && SCRIPT_PACK_MANAGER="DNF"
+    command -v apt &> /dev/null && SCRIPT_PACK_MANAGER="APT"
+    command -v emerge &> /dev/null && SCRIPT_PACK_MANAGER="Emerge"
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $SCRIPT_PACK_MANAGER est toujours nulle (aucune commande trouvée)
 	if test "$SCRIPT_PACK_MANAGER" = ""; then
 		handle_errors "AUCUN GESTIONNAIRE DE PAQUETS SUPPORTÉ TROUVÉ"
 	else
-		v_echo "Le gestionnaire de paquets de votre distribution est supporté ($SCRIPT_PACK_MANAGER)"
+		v_echo "Gestionnaire de paquets trouvé : $SCRIPT_PACK_MANAGER"
 	fi
 }
 
@@ -673,7 +671,7 @@ function check_internet_connection()
 	script_header "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
 	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
-	if ping -q -c 1 -W 1 opendns.com >> "$SCRIPT_LOGPATH"; then
+	if ping -q -c 1 -W 1 opendns.com >> /dev/null; then
 		v_echo "Votre ordinateur est connecté à Internet"
 
 		return
@@ -690,22 +688,35 @@ function dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
+	# APT renvoie souvent un message d'avertissement en cas d'utilisation de ce dernier dans un script :
+	# 	--> "WARNING: apt does not have a stable CLI interface. Use with caution in scripts."
+
+	# Ce n'est pas un message problématique, mais il est assez ennuyeux, car il arrive à chaque appel de la commande
+	# Pour y remédier, je renvoie ses sorties d'erreur vers un fichier temporaire, avant de renvoyer ces messages dans le fichier de logs
+	# (il est impossible de rediriger directement une sortie d'erreur vers un fichier ET de rediriger tout de suite après la sortie standard
+	# vers ce même fichier ET vers le terminal (apt-get -y update 2>> "$SCRIPT_LOGPATH" | tee -a "$SCRIPT_LOGPATH") <-- Code problématique)
+	# Pour y remédier
+	tmpapt="$SCRIPT_TMPPATH/apterrors.log"
+
+	v_echo "Mise à jour du système en cours"
+	newline
+
 	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_PACK_MANAGER",
 	# puis on appelle sa commande de mise à jour des paquets installés
 	case "$SCRIPT_PACK_MANAGER" in
-		zypper)
+		"Zypper")
 			zypper -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		pacman)
+		"Pacman")
 			pacman --noconfirm -Syu 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		dnf)
+		"DNF")
 			dnf -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		apt)
-			apt -y update; apt -y upgrade 2>&1 | tee -a "$SCRIPT_LOGPATH"
+		"APT")
+			apt -y update >> "$tmpapt" | tee -a "$SCRIPT_LOGPATH" && apt -y upgrade 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
-		emerge)
+		"Emerge")
 			emerge -u world 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 	esac
@@ -835,20 +846,20 @@ function autoremove()
 				newline
 
 	    		case "$SCRIPT_PACK_MANAGER" in
-	        		zypper)
+	        		"Zypper")
 	            		j_echo "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
 						j_echo "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
 	            		;;
-	        		pacman)
+	        		"Pacman")
 	            		pacman --noconfirm -Qdt
 	            		;;
-	        		dnf)
+	        		"DNF")
 	            		dnf -y autoremove
 	            		;;
-	        		apt)
+	        		"APT")
 	            		apt -y autoremove
 	            		;;
-	        		emerge)
+	        		"Emerge")
 	            		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
 	            		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
 	            		eix-test-obsolete       # Tester s'il reste des paquets obsolètes
