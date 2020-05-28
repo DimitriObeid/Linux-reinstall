@@ -264,7 +264,7 @@ function pack_install()
 
 		# Cette ligne sert à m'assurer que le code fonctionne
 		j_echo "Vérification de la présence du paquet $package_name" # >> "$SCRIPT_LOGPATH"
-		$list_command "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+		"$($list_command "$package_name")" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 			|| is_installed=0 \
 			&& {
 				is_installed=1
@@ -288,7 +288,7 @@ function pack_install()
 
 			# On appelle la commande d'installation du gestionnaire de paquets,
 			# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
-			"$install_command" "$package_name" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+			"$($install_command "package_name")" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 				|| {
 						r_echo "Le paquet \"$package_name\" est introuvable dans les dépôts de votre gestionnaire de paquets"
 
@@ -326,6 +326,7 @@ function pack_install()
 			pack_manager_install zypper -y install
 			;;
 		"Pacman")
+      pack_manager_list pacman -Q
 			pack_manager_install pacman --noconfirm -S
 			;;
 		"DNF")
