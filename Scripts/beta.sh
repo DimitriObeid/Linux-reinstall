@@ -263,14 +263,12 @@ function pack_install()
 		list_command="$*"
 
 		# Cette ligne sert à m'assurer que le code fonctionne
-		j_echo "Vérification de la présence du paquet $package_name" # >> "$SCRIPT_LOGPATH"
-		"$($list_command "$package_name")" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+		j_echo "Vérification de la présence du paquet $SCRIPT_C_CYAN\"$package_name\"" # >> "$SCRIPT_LOGPATH"
+		"$($list_command "$package_name")" 2>&1 | grep -o "$package_name" | tee -a "$SCRIPT_LOGPATH" \
 			|| is_installed=0 \
 			&& {
 				is_installed=1
-				v_echo "Le paquet \"$package_name\" est déjà installé"
-				newline
-
+				v_echo "Le paquet $SCRIPT_C_CYAN\"$package_name\"$SCRIPT_C_VERT est déjà installé"
 				newline
 			}
 
@@ -288,9 +286,10 @@ function pack_install()
 
 			# On appelle la commande d'installation du gestionnaire de paquets,
 			# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
-			"$($install_command "package_name")" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+			"$($install_command "$package_name")" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 				|| {
 						r_echo "Le paquet \"$package_name\" est introuvable dans les dépôts de votre gestionnaire de paquets"
+						newline
 
 						return
 					} \
@@ -326,7 +325,7 @@ function pack_install()
 			pack_manager_install zypper -y install
 			;;
 		"Pacman")
-      pack_manager_list pacman -Q
+      		pack_manager_list pacman -Q
 			pack_manager_install pacman --noconfirm -S
 			;;
 		"DNF")
@@ -689,16 +688,6 @@ function dist_upgrade()
 {
 	script_header "MISE À JOUR DU SYSTÈME"
 
-	# APT renvoie souvent un message d'avertissement en cas d'utilisation de ce dernier dans un script :
-	# 	--> "WARNING: apt does not have a stable CLI interface. Use with caution in scripts."
-
-	# Ce n'est pas un message problématique, mais il est assez ennuyeux, car il arrive à chaque appel de la commande
-	# Pour y remédier, je renvoie ses sorties d'erreur vers un fichier temporaire, avant de renvoyer ces messages dans le fichier de logs
-	# (il est impossible de rediriger directement une sortie d'erreur vers un fichier ET de rediriger tout de suite après la sortie standard
-	# vers ce même fichier ET vers le terminal (apt-get -y update 2>> "$SCRIPT_LOGPATH" | tee -a "$SCRIPT_LOGPATH") <-- Code problématique)
-	# Pour y remédier
-	tmpapt="$SCRIPT_TMPPATH/apterrors.log"
-
 	v_echo "Mise à jour du système en cours"
 	newline
 
@@ -715,7 +704,19 @@ function dist_upgrade()
 			dnf -y update 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 		"APT")
-			apt -y update >> "$tmpapt" | tee -a "$SCRIPT_LOGPATH" && apt -y upgrade 2>&1 | tee -a "$SCRIPT_LOGPATH"
+			# APT renvoie souvent un message d'avertissement en cas d'utilisation de ce dernier dans un script :
+			# 	--> "WARNING: apt does not have a stable CLI interface. Use with caution in scripts."
+
+			# Ce n'est pas un message problématique, mais il est assez ennuyeux, car il arrive à chaque appel de la commande
+			# Pour y remédier, je renvoie ses sorties d'erreur vers un fichier temporaire, avant de renvoyer ces messages dans le fichier de logs
+			# (il est impossible de rediriger directement une sortie d'erreur vers un fichier ET de rediriger tout de suite après la sortie standard
+			# vers ce même fichier ET vers le terminal (apt-get -y update 2>> "$SCRIPT_LOGPATH" | tee -a "$SCRIPT_LOGPATH") <-- Code problématique)
+			tmpapt="$SCRIPT_TMPPATH/apterrors.log"
+
+			makefile "$SCRIPT_TMPPATH" "apterrors.log"
+			newline
+
+			apt -y update 2>> "$tmpapt" | tee -a "$SCRIPT_LOGPATH" && apt -y upgrade 2>&1 | tee -a "$SCRIPT_LOGPATH"
 			;;
 		"Emerge")
 			emerge -u world 2>&1 | tee -a "$SCRIPT_LOGPATH"
@@ -906,10 +907,11 @@ function is_installation_done()
 	newline
 
     v_echo "Installation terminée. Votre distribution Linux est prête à l'emploi"
+	newline
 
 	j_echo "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script"
-	echo "vous pouvez m'envoyer le fichier de logs situé dans le dossier \"$SCRIPT_LOGPATH\"."
-	echo "Il porte le nom de $SCRIPT_LOG"
+	echo "vous pouvez m'envoyer le fichier de logs situé dans votre dossier personnel."
+	echo "Il porte le nom de $SCRIPT_C_JAUNE$SCRIPT_LOG"
 
     # On tue le processus de connexion en mode super-utilisateur
 	sudo -k
@@ -941,15 +943,15 @@ get_dist_package_manager
 # Assurance que l'utilisateur soit sûr de lancer le script
 launch_script
 
+# Création du dossier temporaire où sont stockés les fichiers temporaires
+script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$SCRIPT_TMPPARENT\""
+makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
+
 # Détection de la connexion à Internet
 check_internet_connection
 
 # Mise à jour des paquets actuels
 dist_upgrade
-
-# Création du dossier temporaire où sont stockés les fichiers temporaires
-script_header "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$SCRIPT_TMPPARENT\""
-makedir "$SCRIPT_TMPPARENT" "$SCRIPT_TMPDIR"
 
 
 ## INSTALLATIONS PRIORITAIRES ET CONFIGURATIONS DE PRÉ-INSTALLATION
