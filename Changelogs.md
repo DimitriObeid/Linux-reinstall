@@ -115,6 +115,9 @@
             - C:\ **get_dist_package_manager() :** Suppression d'une chaîne de caractères redondante --> ***"Détection de votre gestionnaire de paquets"***, déjà écrite identiquement dans le header.  
             - C:\ **pack_install() :** Changement du tableau d'arguments (**$@**) en premier argument (**$1**).
 
+            - C:\ RENOMMAGE DE TOUTES LES FONCTIONS : PASSAGE DES NOMS DE FONCTIONS SANS MAJUSCULES À CHAQUE DÉBUT DE MOT ET DE LA LIAISON DES MOTS PAR UN TIRET DU BAS À L'INVERSE.
+            Exemple : passage de **script_init** à **ScriptInit**.
+
         - **<u>1.2) Paquets</u> :**
             - A:\ **g++ :** Paquet installant le compilateur G++ pour le langage C++.  
             - A:\ **gcc :** Paquet installant le compilateur GCC pour le langage C.  
