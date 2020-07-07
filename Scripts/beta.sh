@@ -33,20 +33,20 @@ SCRIPT_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 # Met en pause le script pendant une demi-seconde pour mieux voir l'arrivée d'une nouvelle étape majeure.
 # Pour changer une durée de chronométrage, changez la valeur de la commande "sleep" voulue.
 # Pour désactiver cette fonctionnalité, mettez la valeur de la commande "sleep" à 0.
-# NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE "sleep" NE SERA PAS PRISE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-SCRIPT_SLEEP=sleep\ .5			# Temps d'affichage d'un texte de sous-étape
-SCRIPT_SLEEP_HEADER=sleep\ 1.5	# Temps d'affichage d'un header uniquement, avant d'afficher le reste de l'étape, lors d'un changement d'étape
-SCRIPT_SLEEP_INST=sleep\ .5		# Temps d'affichage du nom du paquet, avant d'afficher le reste de l'étape, lors de l'installation d'un nouveau paquet
+# ATTENTION À NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE LA COMMANDE "sleep" NE SERA PAS INTERPRÉTÉE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
+SCRIPT_SLEEP_0_5=sleep\ .5		# Met le script en pause pendant 0,5 seconde. Exemple d'utilisation : temps d'affichage d'un texte de sous-étape
+SCRIPT_SLEEP_1_5=sleep\ 1.5		# Met le script en pause pendant 1,5 seconde. Exemple d'utilisation : temps d'affichage d'un header uniquement, avant l'affichage du reste de l'étape lors d'un changement d'étape
+SCRIPT_SLEEP_1=sleep\ 1			# Met le script en pause pendant une seconde. Exemple d'utilisation : temps d'affichage du nom du paquet avant l'affichage du reste de l'étape lors de l'installation d'un nouveau paquet
 
 
 ## COULEURS
 
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
 SCRIPT_C_CYAN=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers
-SCRIPT_C_JAUNE=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
+SCRIPT_C_ERR=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape
 SCRIPT_C_RESET=$(tput sgr0)        	# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
-SCRIPT_C_ROUGE=$(tput setaf 196)   	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape
-SCRIPT_C_VERT=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
+SCRIPT_C_STEP=$(tput setaf 226) 	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
+SCRIPT_C_SUCC=$(tput setaf 82)     	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
 
 
 # DATE
@@ -78,9 +78,9 @@ SCRIPT_COLS=$(tput cols)	# Affichage du nombre de colonnes sur le terminal
 SCRIPT_TAB=">>>>"				# Nombre de chevrons à afficher avant les chaînes de caractères jaunes, vertes et rouges
 
 # Affichage de chevrons suivant l'encodage de la couleur d'une chaîne de caractères
-SCRIPT_J_TAB="$SCRIPT_C_JAUNE$SCRIPT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons
-SCRIPT_R_TAB="$SCRIPT_C_ROUGE$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
-SCRIPT_V_TAB="$SCRIPT_C_VERT$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
+SCRIPT_J_TAB="$SCRIPT_C_STEP$SCRIPT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons
+SCRIPT_R_TAB="$SCRIPT_C_ERR$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
+SCRIPT_V_TAB="$SCRIPT_C_SUCC$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
 
 
 ## VERSION
@@ -101,22 +101,22 @@ SCRIPT_VERSION="2.0"
 
 ## DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function EchoNewstepNolog() { j_n_string=$1; echo "$SCRIPT_J_TAB $j_n_string $SCRIPT_C_RESET"; }
+function EchoNewstepNolog() { e_nws_n_string=$1; echo "$SCRIPT_J_TAB $j_n_string $SCRIPT_C_RESET"; }
 
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoNewstep() { j_string=$1; EchoNewstepNolog "$j_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function EchoNewstep() { e_nws_string=$1; EchoNewstepNolog "$j_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_0_5; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function EchoErrorNolog() { e_err_n_string=$1; echo "$SCRIPT_R_TAB $e_err_n_string $SCRIPT_C_RESET"; }
 
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoError() { e_err_string=$1; EchoErrorNolog "$e_err_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function EchoError() { e_err_string=$1; EchoErrorNolog "$e_err_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_0_5; }
 
 # Affichage d'un message en vert avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function EchoSuccessNolog() { e_succ_n_string=$1; echo "$SCRIPT_V_TAB $e_succ_n_string $SCRIPT_C_RESET"; }
 
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoSuccess() { e_succ_string=$1; EchoSuccessNolog "$e_succ_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP; }
+function EchoSuccess() { e_succ_string=$1; EchoSuccessNolog "$e_succ_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_0_5; }
 
 # Fonction de saut de ligne pour la zone de texte du terminal et pour le fichier de logs
 function Newline() { echo "" | tee -a "$SCRIPT_LOGPATH"; }
@@ -187,7 +187,7 @@ function HeaderBase()
 	Newline
 
 	# Décommenter la ligne ci dessous pour activer un chronomètre avant l'affichage du header
-	# $SCRIPT_SLEEP_HEADER
+	# $SCRIPT_SLEEP_1_5
 	DrawHeaderLine "$header_base_line_color" "$header_base_line_char" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	# Affichage une autre couleur pour le texte
 	echo "$header_base_string_color""##>" "$header_base_string" "$SCRIPT_C_RESET" 2>&1 | tee -a "$SCRIPT_LOGPATH"
@@ -198,7 +198,7 @@ function HeaderBase()
 
 	Newline
 
-	$SCRIPT_SLEEP_HEADER
+	$SCRIPT_SLEEP_1_5
 
 	return
 }
@@ -218,7 +218,7 @@ function HeaderInstall()
 {
 	header_install_string=$1	# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
-	HeaderBase "$SCRIPT_C_JAUNE" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_VERT" "$header_install_string"
+	HeaderBase "$SCRIPT_C_STEP" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_SUCC" "$header_install_string"
 
 	return
 }
@@ -228,7 +228,7 @@ function HandleErrors()
 {
 	error_string=$1		# Chaîne de caractères à passer en argument lors de l'appel de la fonction
 
-	HeaderBase "$SCRIPT_C_ROUGE" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_ROUGE" "ERREUR FATALE : $error_string"
+	HeaderBase "$SCRIPT_C_ERR" "$SCRIPT_HEADER_LINE_CHAR" "$SCRIPT_C_ERR" "ERREUR FATALE : $error_string"
 
 	EchoErrorNolog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$SCRIPT_LOGPATH"
 	EchoErrorNolog "$error_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"
@@ -242,7 +242,7 @@ function HandleErrors()
 		mv -v "$SCRIPT_LOG" "$SCRIPT_HOMEDIR" >> "$SCRIPT_LOGPATH"
 	fi
 
-	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel. Il porte le nom de $SCRIPT_C_JAUNE\"$SCRIPT_LOG\"$SCRIPT_C_RESET"
+	echo "En cas de bug, veuillez m'envoyer le fichier de logs situé dans votre dossier personnel. Il porte le nom de $SCRIPT_C_STEP\"$SCRIPT_LOG\"$SCRIPT_C_RESET"
 	Newline
 
 	exit 1
@@ -264,12 +264,17 @@ function PackInstall()
 		list_command="$*"
 
 		# Cette ligne sert à m'assurer que le code fonctionne
-		EchoNewstep "Vérification de la présence du paquet $SCRIPT_C_CYAN\"$package_name\"" # >> "$SCRIPT_LOGPATH"
-		"$($list_command "$package_name")" 2>&1 | grep -o "$package_name" | tee -a "$SCRIPT_LOGPATH" \
-			|| is_installed=0 \
+		EchoNewstep "Vérification de la présence du paquet $SCRIPT_C_CYAN$package_name" # >> "$SCRIPT_LOGPATH"
+		"$($list_command "$package_name")" 2>&1 | grep -o "$package_name" >> "$SCRIPT_LOGPATH" \
+			|| {
+					is_installed=0
+					PackManagerInstall "$*"
+				} \
 			&& {
 				is_installed=1
-				EchoSuccess "Le paquet $SCRIPT_C_CYAN\"$package_name\"$SCRIPT_C_VERT est déjà installé"
+				EchoSuccess "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_SUCC est déjà installé"
+				Newline
+
 				Newline
 			}
 
@@ -283,32 +288,34 @@ function PackInstall()
 
 		if test "$is_installed" = 0; then
 			EchoNewstep "Installation du paquet $package_name"
-			$SCRIPT_SLEEP_INST
+			$SCRIPT_SLEEP_1
 
 			# On appelle la commande d'installation du gestionnaire de paquets,
 			# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
 			"$($install_command "$package_name")" 2>&1 | tee -a "$SCRIPT_LOGPATH" \
 				|| {
-						EchoError "Le paquet \"$package_name\" est introuvable dans les dépôts de votre gestionnaire de paquets"
+						EchoError "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_ERR est introuvable dans les dépôts de votre gestionnaire de paquets"
+						Newline
+
 						Newline
 
 						return
 					} \
 				&& is_installed=1
-			$SCRIPT_SLEEP_INST
+			$SCRIPT_SLEEP_1
 			Newline
 
 			# On vérifie que le paquet à installer a été correctement installé
 			EchoNewstep "Vérification de l'installation du paquet \"$package_name\"" # >> "$SCRIPT_LOGPATH"
 			if test "$is_installed" = 1; then
-				EchoSuccess "Le paquet \"$package_name\" a été installé avec succès"
+				EchoSuccess "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_SUCC a été installé avec succès"
 				is_installed=0
 				Newline
 
 				Newline
 
 			else
-				EchoError "L'installation du paquet \"$package_name\" a échoué"
+				EchoError "L'installation du paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_ERR a échoué"
 				Newline
 
 				Newline
@@ -327,14 +334,14 @@ function PackInstall()
 			;;
 		"Pacman")
       		PackManagerList pacman -Q
-			PackManagerInstall pacman --noconfirm -S
+#			PackManagerInstall pacman --noconfirm -S
 			;;
 		"DNF")
 			PackManagerInstall dnf -y install
 			;;
 		"APT")
 			PackManagerList apt list --installed
-			PackManagerInstall apt -y install
+#			PackManagerInstall apt -y install
 			;;
 		"Emerge")
 			PackManagerInstall emerge
@@ -350,12 +357,12 @@ function SnapInstall()
 	EchoNewstep "Installation du paquet $*"
     snap install "$@" \
 		|| {
-				EchoError "L'installation du paquet \"$*\" a échoué"
+				EchoError "L'installation du paquet $SCRIPT_C_CYAN$*$SCRIPT_C_ERR a échoué"
 				Newline
 
 				return
 		 	} \
-		&& EchoSuccess "Installation du paquet \"$*\" effectuée avec succès"
+		&& EchoSuccess "Installation du paquet $SCRIPT_C_CYAN$*$SCRIPT_C_SUCC effectuée avec succès"
 	Newline
 
 	return
@@ -367,7 +374,7 @@ function SoftwareInstall()
 	software_name=$1	# Nom du logiciel
 	software_link=$2	# Adresse de téléchargement du logiciel (téléchargement via la commande "wget")
 
-	EchoNewstep "Installation de \"$software_name\""
+	EchoNewstep "Installation de $SCRIPT_C_CYAN$software_name"
 	Newline
 
 	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels
@@ -926,7 +933,7 @@ function IsInstallationDone()
 
 	EchoNewstep "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script"
 	echo "vous pouvez m'envoyer le fichier de logs situé dans votre dossier personnel."
-	echo "Il porte le nom de $SCRIPT_C_JAUNE$SCRIPT_LOG"
+	echo "Il porte le nom de $SCRIPT_C_STEP$SCRIPT_LOG"
 
     # On tue le processus de connexion en mode super-utilisateur
 	sudo -k
@@ -956,7 +963,7 @@ EchoSuccess "Début de l'installation"
 GetDistPackageManager
 
 # Assurance que l'utilisateur soit sûr de lancer le script
-launch_script
+LaunchScript
 
 # Création du dossier temporaire où sont stockés les fichiers temporaires
 ScriptHeader "CRÉATION DU DOSSIER TEMPORAIRE \"$SCRIPT_TMPDIR\" DANS LE DOSSIER \"$SCRIPT_TMPPARENT\""
