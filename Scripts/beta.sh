@@ -73,13 +73,13 @@ SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"					# Chemin du fichier de logs depuis la raci
 # changez le caractère entre les double guillemets.
 # Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes
 # (une ligne de chaque caractère).
-SCRIPT_HEADER_LINE_CHAR="-"
-SCRIPT_COLS=$(tput cols)	# Affichage du nombre de colonnes sur le terminal
+SCRIPT_HEADER_LINE_CHAR="-"		# Caractère à afficher en boucle pour créer une ligne des headers de changement d'étapes
+SCRIPT_COLS=$(tput cols)		# Affichage du nombre de colonnes sur le terminal
 SCRIPT_TAB=">>>>"				# Nombre de chevrons à afficher avant les chaînes de caractères jaunes, vertes et rouges
 
 # Affichage de chevrons suivant l'encodage de la couleur d'une chaîne de caractères
 SCRIPT_J_TAB="$SCRIPT_C_STEP$SCRIPT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons
-SCRIPT_R_TAB="$SCRIPT_C_ERR$SCRIPT_TAB$SCRIPT_TAB"	# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
+SCRIPT_R_TAB="$SCRIPT_C_ERR$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
 SCRIPT_V_TAB="$SCRIPT_C_SUCC$SCRIPT_TAB$SCRIPT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
 
 
@@ -101,10 +101,10 @@ SCRIPT_VERSION="2.0"
 
 ## DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
 # Affichage d'un message en jaune avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function EchoNewstepNolog() { e_nws_n_string=$1; echo "$SCRIPT_J_TAB $j_n_string $SCRIPT_C_RESET"; }
+function EchoNewstepNolog() { e_nws_n_string=$1; echo "$SCRIPT_J_TAB $e_nws_n_string $SCRIPT_C_RESET"; }
 
 # Appel de la fonction précédemment créée redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoNewstep() { e_nws_string=$1; EchoNewstepNolog "$j_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_0_5; }
+function EchoNewstep() { e_nws_string=$1; EchoNewstepNolog "$e_nws_string" 2>&1 | tee -a "$SCRIPT_LOGPATH"; $SCRIPT_SLEEP_0_5; }
 
 # Affichage d'un message en rouge avec des chevrons, sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function EchoErrorNolog() { e_err_n_string=$1; echo "$SCRIPT_R_TAB $e_err_n_string $SCRIPT_C_RESET"; }
@@ -257,6 +257,16 @@ function PackInstall()
 	# ci-dessous par "$@" et enlevez les doubles guillemets "" entourant chaque variable "$package_name" de la fonction
 	package_name=$1		# Argument de la fonction "PackInstall" contenant le nom du paquet à installer
 	is_installed=0		# Variable servant à enregistrer la présence d'un paquet
+
+
+	# Si un ou plusieurs paquets n'existent pas dans la base de données du gestionnaire de paquets, le script indique quels paquets manquent
+	# pour que l'utilisateur trouve leurs code source et les compilent
+
+	# On vérifie d'abord que le paquet existe dans la base de données du gestionnaire de paquets
+	function PackManagerCheckPackageExistenceInDatabase()
+	{
+
+	}
 
 	# Adaptation de la commande de vérification de présence de paquets selon le gestionnaire de paquets
 	function PackManagerList()
@@ -774,7 +784,7 @@ function SetSudo()
 
 	EchoNewstep "Le script va tenter de télécharger un fichier \"sudoers\" déjà configuré"
 	EchoNewstep "depuis le dossier des fichiers ressources de mon dépôt Git : "
-	echo ">>>> https://github.com/DimitriObeid/Linux-reinstall/tree/master/Ressources"
+	echo ">>>> https://github.com/DimitriObeid/Linux-reinstall/tree/Beta/Ressources"
 	Newline
 
 	EchoNewstep "Souhaitez vous le télécharger PUIS l'installer maintenant dans le dossier \"/etc/\" ? (oui/non)"
@@ -806,7 +816,7 @@ function SetSudo()
 				sleep 1
 				Newline
 
-				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/master/Ressources/sudoers -O "$SCRIPT_TMPPATH/sudoers" \
+				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/Beta/Ressources/sudoers -O "$SCRIPT_TMPPATH/sudoers" \
 					|| { EchoError "Impossible de télécharger le fichier \"sudoers\""; return; } \
 					&& EchoSuccess "Fichier \"sudoers\" téléchargé avec succès"
 				Newline
@@ -931,9 +941,10 @@ function IsInstallationDone()
     EchoSuccess "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	Newline
 
-	EchoNewstep "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script"
+	echo "$SCRIPT_C_CYAN"
+	echo "Note :$SCRIPT_C_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script"
 	echo "vous pouvez m'envoyer le fichier de logs situé dans votre dossier personnel."
-	echo "Il porte le nom de $SCRIPT_C_STEP$SCRIPT_LOG"
+	echo "Il porte le nom de $SCRIPT_C_CYAN$SCRIPT_LOG$SCRIPT_C_RESET"
 
     # On tue le processus de connexion en mode super-utilisateur
 	sudo -k
