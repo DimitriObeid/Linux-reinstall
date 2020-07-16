@@ -59,12 +59,15 @@ SCRIPT_DATE=$(date +"%Y-%m-%d %Hh-%Mm-%Ss")
 # Définition du dossier personnel de l'utilisateur
 SCRIPT_HOMEDIR="/home/${SCRIPT_USERNAME}"	# Dossier personnel de l'utilisateur
 
-# Création du dossier temporaire et définition du chemin vers ce dossier temporaire
+# Définition du dossier temporaire et de son chemin
 SCRIPT_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
 SCRIPT_TMPPARENT="/tmp"								# Dossier parent du dossier temporaire
 SCRIPT_TMPPATH="$SCRIPT_TMPPARENT/$SCRIPT_TMPDIR"	# Chemin complet du dossier temporaire
 
-# Création de fichiers
+# Définition du dossier d'installation de logiciels indisponibles via les gestionnaires de paquets
+SOFTWARE_DIR="Logiciels.Linux-reinstall.d"
+
+# Définition du nom et du chemin du fichier de logs
 SCRIPT_LOG="Linux-reinstall $SCRIPT_DATE.log"		# Nom du fichier de logs
 SCRIPT_LOGPATH="$PWD/$SCRIPT_LOG"					# Chemin du fichier de logs depuis la racine, dans le dossier actuel
 
@@ -150,7 +153,7 @@ function DrawHeaderLine()
 	# alors on écrit l'encodage de la couleur dans le terminal, qui affiche la couleur, et non son encodage en texte.
 	# L'encodage de la couleur peut être écrit via la commande "tput cols $encodage_de_la_couleur"
 	if test "$line_color" != ""; then
-		echo -n -e "$line_color"
+		echo -ne "$line_color"
 	fi
 
 	# Affichage du caractère souhaité sur toute la ligne. Pour cela, en utilisant une boucle "for", on commence à la lire à partir
@@ -169,7 +172,7 @@ function DrawHeaderLine()
 	# commandes encodée avec la couleur des headers si l'exécution du script est interrompue de force avec la combinaison "CTRL + C"
 	# ou mise en pause avec la combinaison "CTRL + Z", par exemple.
 	if test "$line_color" != ""; then
-        echo -n -e "$SCRIPT_C_RESET"
+        echo -ne "$SCRIPT_C_RESET"
 	fi
 
 	return
@@ -187,7 +190,7 @@ function HeaderBase()
 	if test "$header_base_line_color" == ""; then
         # Définition de la couleur de la ligne.
         # Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
-		echo -n -e "$header_base_line_color"
+		echo -ne "$header_base_line_color"
 	fi
 
 	# Ligne
@@ -288,14 +291,14 @@ function PackInstall()
 	{
 		search_command=$*
 
-		EchoNewstep "Vérification de la présence du paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_STEP dans la base de données du gestionnaire $SCRIPT_C_CYAN$SCRIPT_PACK_MANAGER"
+		EchoNewstep "Vérification de la présence du paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_STEP dans la base de données du gestionnaire $SCRIPT_C_CYAN$SCRIPT_MAIN_PACK_MANAGER"
 		if test "$($search_command "$package_name")"; then
-			EchoSuccess "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_SUCC a été trouvé dans la base de données du gestionnaire $SCRIPT_C_CYAN$SCRIPT_PACK_MANAGER"
+			EchoSuccess "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_SUCC a été trouvé dans la base de données du gestionnaire $SCRIPT_C_CYAN$SCRIPT_MAIN_PACK_MANAGER"
 			Newline
 
 			return
 		else
-			EchoError "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_SUCC n'a pas été trouvé dans la base de données du gestionnaire $SCRIPT_C_CYAN$SCRIPT_PACK_MANAGER"
+			EchoError "Le paquet $SCRIPT_C_CYAN$package_name$SCRIPT_C_SUCC n'a pas été trouvé dans la base de données du gestionnaire $SCRIPT_C_CYAN$SCRIPT_MAIN_PACK_MANAGER"
 			Newline
 
 			if test ! -d "$package_not_found_dir"; then
@@ -309,7 +312,7 @@ function PackInstall()
 	}
 
 	if test -f "$package_not_found_dir/$package_name not found"; then
-		echo "Passage à un autre paquet"
+		EchoError "Passage à un autre paquet"
 		return
 	fi
 
@@ -384,7 +387,7 @@ function PackInstall()
 	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
 	# Pour chaque gestionnaire de paquets, on appelle la fonction "pack_full_install()" en passant en argument la commande d'installation
 	# complète, avec l'option permettant d'installer le paquet sans demander à l'utilisateur s'il souhaite installer le paquet
-	case $SCRIPT_PACK_MANAGER in
+	case $SCRIPT_MAIN_PACK_MANAGER in
 		"Zypper")
 			PackManagerInstall zypper -y install
 			;;
@@ -425,18 +428,81 @@ function SnapInstall()
 	return
 }
 
-# Installation d'autres logiciels
+# Installation de logiciels absents de la base de données de tous les gestionnaires de paquets
 function SoftwareInstall()
 {
-	software_name=$1	# Nom du logiciel
-	software_link=$2	# Adresse de téléchargement du logiciel (téléchargement via la commande "wget")
+	# Paramètres
+	software_web_link=$1		# Adresse de téléchargement du logiciel (téléchargement via la commande "wget"), SANS LE NOM DE L'ARCHIVE
+	software_archive=$2			# Nom de l'archive contenant les fichiers du logiciel
+	software_name=$3			# Nom du logiciel
+	software_comment=$4			# Affichage d'un commentaire descriptif du logiciel lorsque l'utilisateur passe le curseur de sa souris pas dessus le fichier ".desktop"
+	software_exec=$5			# Adresse du fichier exécutable du logiciel
+	software_icon=$6			# Emplacement du fichier image de l'icône du logiciel
+	software_type=$7			# Détermine si le fichier ".desktop" pointe vers une application, un lien ou un dossier
+	software_category=$8		# Catégorie(s) du logiciel (jeu, développement, bureautique, etc...)
 
-	EchoNewstep "Installation de $SCRIPT_C_CYAN$software_name"
-	Newline
+	# Dossiers
+	software_inst_dir="$SOFTWARE_DIR/$software_name"						# Dossier d'installation du logiciel
+	software_shortcut_dir="$SCRIPT_USERNAME/Bureau/Linux-reinstall.links"	# Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés
+
+	# Téléchargement
+	software_dl_link="$software_web_link/$software_archive"
+
+	EchoNewstep "Téléchargement de $SCRIPT_C_CYAN$software_name"
 
 	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels
-	mkdir "$SOFTWARE_DIR/$software_name"
-	wget "$software_link"
+	Makedir "$SOFTWARE_DIR" "$software_name" "1" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+	wget -v "$software_dl_link" -O "$software_inst_dir" >> "$SCRIPT_LOGPATH" \
+		|| EchoError "Échec du téléchargement du logiciel $software_name" \
+		&& EchoSuccess "Le logiciel $software_name a été téléchargé avec succès"
+	Newline
+
+	# On décompresse l'archive téléchargée selon le format de comporession
+	EchoNewstep "Décompression de l'archive $software_archive"
+	{
+		case "$software_archive" in
+			"*.zip")
+				unzip "$SOFTWARE_DIR/$software_name/$software_archive" || EchoError "La décompression de l'archive $software_archive a échouée" && EchoSuccess "La décompression de l'archive $software_archive s'est faite avec brio"
+				;;
+			"*.7z")
+				7z e "$SOFTWARE_DIR/$software_name/$software_archive" || EchoError "La décompression de l'archive $software_archive a échouée" && EchoSuccess "La décompression de l'archive $software_archive s'est faite avec brio"
+				;;
+			"*.rar")
+				unrar e "$SOFTWARE_DIR/$software_name/$software_archive" || EchoError "La décompression de l'archive $software_archive a échouée" && EchoSuccess "La décompression de l'archive $software_archive s'est faite avec brio"
+				;;
+			"*.tar.gz")
+				tar -zxvf "$SOFTWARE_DIR/$software_name/$software_archive" || EchoError "La décompression de l'archive $software_archive a échouée"	&& EchoSuccess "La décompression de l'archive $software_archive s'est faite avec brio"
+				;;
+			"*.tar.bz2")
+				tar -jxvf "$SOFTWARE_DIR/$software_name/$software_archive" || EchoError "La décompression de l'archive $software_archive a échouée"	&& EchoSuccess "La décompression de l'archive $software_archive s'est faite avec brio"
+				;;
+		esac
+	} 2>&1 | tee -a "$SCRIPT_LOGPATH"
+
+	# On vérifie que le dossier contenant les fichiers desktop (servant de raccourci) existe, pour ne pas encombrer le bureau de l'utilisateur
+	if test ! -d "$SCRIPT_USERNAME/Bureau/Linux-reinstall.links"; then
+		EchoNewstep "Création d'un dossier contenant les raccourcis vers les logiciels téléchargés via la commande wget"
+		Makedir "$SCRIPT_USERNAME/Bureau/" "Linux-reinstall.link" "1" 2>&1 | tee -a "$SCRIPT_LOGPATH"
+
+		Newline
+	fi
+
+	EchoNewstep "Création d'un lien symbolique pointant vers le fichier exécutable du logiciel $software_name"
+	ln -s "$software_exec" "$software_name" \
+		|| EchoError "Impossible de créer un lien symbolique pointant vers $software_exec" \
+		&& EchoSuccess "Le lien symbolique a été créé avec succès"
+	Newline
+
+	EchoNewstep "Création du raccourci vers le fichier exécutable du logiciel $software_name"
+	echo"[Desktop Entry]
+		Name=$software_name
+		Comment=$software_comment
+		Exec=$software_exec
+		Icon=$software_icon
+		Type=$software_type
+		Categories=$software_category;" > "$software_shortcut_dir/$software_name.desktop"
+	EchoSuccess "Le fichier $software_name.desktop a été créé avec succès dans le dossier $software_shortcut_dir"
+	Newline
 }
 
 
@@ -488,21 +554,18 @@ function Makedir()
 		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible $parentdir_col" "$makedir_sleep"
 		EchoNewstepCustomTimer "Suppression du contenu du dossier $dirpath_col" "$makedir_sleep"
 
-		# On supprime les dossiers un par un pour afficher dans le fichier de logs chaque message de suppression généré
-		for i in $( (eval echo "{1..$(tree -d "$dirpath")}") && ("$dirpath"=~[a-z][A-Z][0-9])); do
-			# ATTENTION À NE PAS MODIFIER LA COMMANDE " rm -r -f -v "${dirpath/:?}/"* ", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
-			# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
-			if test ! "$(rm -r -f -v "${dirpath/:?}/* 2>&1 | tee -a $SCRIPT_LOGPATH")"; then \
-				EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $dirpath_col" "$makedir_sleep";
-				EchoErrorCustomTimer "Le contenu de tout fichier du dossier $dirpath_col$SCRIPT_C_ERR portant le même nom qu'un des fichiers téléchargés sera écrasé" "$makedir_sleep"
-				Newline
+		# ATTENTION À NE PAS MODIFIER LA COMMANDE " rm -rfv "${dirpath/:?}/"* ", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
+		# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
+		if test ! "$(rm -rfv "${dirpath/:?}/* 2>&1 | tee -a $SCRIPT_LOGPATH")"; then \
+			EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $dirpath_col" "$makedir_sleep";
+			EchoErrorCustomTimer "Le contenu de tout fichier du dossier $dirpath_col$SCRIPT_C_ERR portant le même nom qu'un des fichiers téléchargés sera écrasé" "$makedir_sleep"
+			Newline
 
-				return
-			else
-				Newlogline
-				EchoSuccessCustomTimer "Suppression du contenu du dossier $dirpath_col$SCRIPT_C_SUCC effectuée avec succès" "$makedir_sleep"
-			fi
-		done
+			return
+		else
+			Newlogline
+			EchoSuccessCustomTimer "Suppression du contenu du dossier $dirpath_col$SCRIPT_C_SUCC effectuée avec succès" "$makedir_sleep"
+		fi
 
 		return
 
@@ -521,9 +584,10 @@ function Makefile()
 	file_parentdir_col=$SCRIPT_C_CYAN$file_parentdir
 
 	filename=$2			# Nom du fichier à créer
-	filename=$SCRIPT_C_CYAN$
+	filename_col=$SCRIPT_C_CYAN$filename
 
 	filepath="$file_parentdir/$filename"
+	filepath_col=$SCRIPT_C_CYAN$filepath
 
 	# Si le fichier à créer n'existe pas
 	if test ! -s "$filepath"; then
@@ -717,26 +781,26 @@ function ScriptInit()
 }
 
 # Détection du gestionnaire de paquets de la distribution utilisée
-function GetDistPackageManager()
+function GetMainPackageManager()
 {
-	ScriptHeader "DÉTECTION DE VOTRE GESTIONNAIRE DE PAQUETS"
+	ScriptHeader "DÉTECTION DU GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION"
 
 	# On cherche la commande du gestionnaire de paquets de la distribution de l'utilisateur dans les chemins de la variable d'environnement "$PATH" en l'exécutant.
 	# On redirige chaque sortie ("STDOUT (sortie standard) si la commande est trouvée" et "STDERR (sortie d'erreurs) si la commande n'est pas trouvée")
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-    command -v zypper &> /dev/null && SCRIPT_PACK_MANAGER="Zypper"
-    command -v pacman &> /dev/null && SCRIPT_PACK_MANAGER="Pacman"
-    command -v dnf &> /dev/null && SCRIPT_PACK_MANAGER="DNF"
-    command -v apt &> /dev/null && SCRIPT_PACK_MANAGER="APT"
-    command -v emerge &> /dev/null && SCRIPT_PACK_MANAGER="Emerge"
+    command -v zypper &> /dev/null && SCRIPT_MAIN_PACK_MANAGER="Zypper"
+    command -v pacman &> /dev/null && SCRIPT_MAIN_PACK_MANAGER="Pacman"
+    command -v dnf &> /dev/null && SCRIPT_MAIN_PACK_MANAGER="DNF"
+    command -v apt &> /dev/null && SCRIPT_MAIN_PACK_MANAGER="APT"
+    command -v emerge &> /dev/null && SCRIPT_MAIN_PACK_MANAGER="Emerge"
 
-	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $SCRIPT_PACK_MANAGER est toujours nulle (aucune commande trouvée)
-	if test "$SCRIPT_PACK_MANAGER" = ""; then
-		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS SUPPORTÉ TROUVÉ"
+	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $SCRIPT_MAIN_PACK_MANAGER est toujours nulle (aucune commande trouvée)
+	if test "$SCRIPT_MAIN_PACK_MANAGER" = ""; then
+		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ"
 	else
-		EchoSuccess "Gestionnaire de paquets trouvé : $SCRIPT_PACK_MANAGER"
+		EchoSuccess "Gestionnaire de paquets principak trouvé : $SCRIPT_MAIN_PACK_MANAGER"
 	fi
 }
 
@@ -806,7 +870,7 @@ function CheckInternetConnection()
 	fi
 }
 
-# Mise à jour des paquets actuels selon le gestionnaire de paquets supporté
+# Mise à jour des paquets actuels selon le gestionnaire de paquets principal supporté
 # (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
 # SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS !!!)
 function DistUpgrade()
@@ -816,9 +880,8 @@ function DistUpgrade()
 	EchoSuccess "Mise à jour du système en cours"
 	Newline
 
-	# On récupère la commande du gestionnaire de paquets stocké dans la variable "$SCRIPT_PACK_MANAGER",
-	# puis on appelle sa commande de mise à jour des paquets installés
-	case "$SCRIPT_PACK_MANAGER" in
+	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$SCRIPT_MAIN_PACK_MANAGER",
+	case "$SCRIPT_MAIN_PACK_MANAGER" in
 		"Zypper")
 			zypper -y update | tee -a "$SCRIPT_LOGPATH"
 			;;
@@ -972,7 +1035,7 @@ function Autoremove()
 				EchoNewstep "Suppression des paquets"
 				Newline
 
-	    		case "$SCRIPT_PACK_MANAGER" in
+	    		case "$SCRIPT_MAIN_PACK_MANAGER" in
 	        		"Zypper")
 	            		EchoNewstep "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
 						EchoNewstep "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
@@ -1064,7 +1127,7 @@ ScriptHeader "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $
 EchoSuccess "Début de l'installation"
 
 # Détection du gestionnaire de paquets de la distribution utilisée
-GetDistPackageManager
+GetMainPackageManager
 
 # Assurance que l'utilisateur soit sûr de lancer le script
 LaunchScript
@@ -1094,10 +1157,33 @@ SetSudo
 # Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
 ScriptHeader "CRÉATION DU DOSSIER D'INSTALLATION DES LOGICIELS"
 
-SOFTWARE_DIR="Logiciels.Linux-reinstall.d"
-Makedir "$SCRIPT_HOMEDIR" "$SOFTWARE_DIR"
+"
+# Paramètres
+software_weblink=$1			# Adresse de téléchargement du logiciel (téléchargement via la commande "wget"), SANS LE NOM DE L'ARCHIVE
+software_archive=$2			# Nom de l'archive contenant les fichiers du logiciel
+software_name=$3			# Nom du logiciel
+software_comment=$4			# Affichage d'un commentaire descriptif du logiciel lorsque l'utilisateur passe le curseur de sa souris pas dessus le fichier ".desktop"
+software_exec=$5			# Adresse du fichier exécutable du logiciel
+software_icon=$6			# Emplacement du fichier image de l'icône du logiciel
+software_type=$7			# Détermine si le fichier ".desktop" pointe vers une application, un lien ou un dossier
+software_category=$8		# Catégorie(s) du logiciel (jeu, développement, bureautique, etc...)
+"
 
+## INSTALLATION DES LOGICIELS ABSENTS DES GESTIONNAIRES DE PAQUETS
 # Affichage du message de création du dossier "Logiciels.Linux-reinstall.d"
+Makedir "$SCRIPT_HOMEDIR" "$SOFTWARE_DIR" "1"
+
+# Installation de JMerise
+SoftwareInstall "http://www.jfreesoft.com"
+				"JMerise/JMeriseEtudiant.zip" \
+				"JMerise"
+				"Logiciel de "
+				"$SOFTWARE_DIR/$software_name/JMerise.jar"
+				""
+				"Application"
+				"Développement"
+
+
 ScriptHeader "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
 
 EchoNewstep "Les logiciels téléchargés via la commande \"wget\" sont déplacés vers le nouveau dossier \"Logiciels.Linux-reinstall\","
@@ -1116,7 +1202,7 @@ sleep 3
 
 # Commandes
 HeaderInstall "INSTALLATION DES COMMANDES PRATIQUES"
-PackInstall hssss
+PackInstall htop
 PackInstall neofetch
 PackInstall tree
 
