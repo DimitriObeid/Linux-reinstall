@@ -110,7 +110,7 @@ VER_SCRIPT="2.0"
 
 #### DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
 # Fonction servant à colorer d'une autre colueur une partie du texte de changement de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou cuccès)
-function DechoN() { string=$1; echo "$COL_CYAN $string$COL_STEP"; }
+function DechoN() { string=$1; echo "$COL_CYAN$string$COL_YELLOW"; }
 
 # Affichage d'un message de changement de sous-étape en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs, en jaune, avec des chevrons et sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
 function EchoNewstep() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIM_0_5; }
@@ -123,7 +123,7 @@ function EchoNewstepNoLog() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; }
 
 
 # Fonction servant à colorer d'une autre colueur une partie du message d'échec de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou succès)
-function DechoE() { string=$1; echo "$COL_CYAN $string$COL_ERR"; }
+function DechoE() { string=$1; echo "$COL_CYAN$string$COL_RED"; }
 
 # Appel de la fonction "EchoErrorNoLog" en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
 function EchoError() { string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIM_0_5; }
@@ -136,7 +136,7 @@ function EchoErrorNoLog() { string=$1; echo "$TXT_R_TAB $string $COL_RESET"; }
 
 
 # Fonction servant à colorer d'une autre colueur une partie du texte de réussite de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou succès)
-function DechoS() { string=$1; echo "$COL_CYAN $string$COL_SUCC"; }
+function DechoS() { string=$1; echo "$COL_CYAN$string$COL_GREEN"; }
 
 # Appel de la fonction "EchoSuccessNoLog" en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
 function EchoSuccess() { string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIM_0_5; }
@@ -207,10 +207,10 @@ function DrawHeaderLine()
 # Fonction de création de base d'un header (Couleur et caractère de ligne, couleur et chaîne de caractères)
 function HeaderBase()
 {
-	line_color=$1			# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
-	line_char=$2			# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
+	line_color=$1		# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
+	line_char=$2		# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 	string_color=$3		# Définition de la couleur de la chaîne de caractères du header
-	string=$4					# Chaîne de caractères affichée dans chaque header
+	string=$4			# Chaîne de caractères affichée dans chaque header
 
 	# Définition de la couleur de la ligne du caractère souhaité.
 	# Ce code produit le même résultat que la première condition de la fonction "DrawHeaderLine", mais il a été
@@ -269,8 +269,10 @@ function HeaderInstall()
 # Fonction de gestion d'erreurs fatales (impossibles à corriger)
 function HandleErrors()
 {
+	#***** Paramètre *****
 	string=$1
 
+	# ***** Code
 	Newline
 
 	HeaderBase "$COL_ERR" "$TXT_HEADER_LINE_CHAR" "$COL_ERR" "ERREUR FATALE : $string" 2>&1 | tee -a "$FILE_LOGPATH"
@@ -303,18 +305,16 @@ function HandleErrors()
 # LORS DE SON APPEL, LA SORTIE DE CETTE FONCTION DOIT ÊTRE REDIRIGÉE SOIT VERS LE TERMINAL ET LE FICHIER DE LOGS, SOIT VERS LE FICHIER DE LOGS UNIQUEMENT
 function Makedir()
 {
-	## Paramètres
+	#***** Paramètres *****
 	dir_parent=$1		# Emplacement depuis la racine du dossier parent du dossier à créer
 	dir_name=$2			# Nom du dossier à créer (dans son dossier parent)
 	dir_sleep=$3		# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
 
-	## Autres variables
-			# Chemin
+	#***** Autres variables *****
+		# Chemin
 	dir_path="$dir_parent/$dir_name"
 
-
-	## Code
-
+	#***** Code *****
 	if test ! -d "$dir_path"; then
 		EchoNewstepCustomTimer "Création du dossier $(DechoN "$dir_name") dans le dossier $(DechoN "$dir_parent")" "$dir_sleep"
 		# Attention à ne pas supprimer le '/' suivant immédiatement la variable "$dir_path"
@@ -351,29 +351,23 @@ function Makedir()
 
 		# ATTENTION À NE PAS MODIFIER LA COMMANDE SUIVANTE", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
 		# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
-#		rm -rfv "${dir_path/:?}/"* \
-		mkdir -v "$dir_path $DATE_TIME" >> "$FILE_LOGPATH" \
-			|| HandleErrors "LE DOSSIER $(DechoE "$dir_name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$dir_parent")" \
-			&& EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_name") a été créé avec succès dans le dossier $(DechoS "$dir_parent")" "$dir_sleep"
-		echo ""	# On ne redirige pas les sauts de ligne vers le fichier de logs, pour éviter de les afficher en double en cas d'appel de la fonction avec redirections
-	#		||
-	#		{
-	#			EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $(DechoE "$dir_path")" "$dir_sleep";
-	#			EchoErrorCustomTimer "Le contenu de tout fichier du dossier $(DechoE "$dir_path") portant le même nom qu'un des fichiers téléchargés sera écrasé" "$dir_sleep"
-	#			echo ""
-#
-#				return
-#			} \
-#			&&
-#			{
-#				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$dir_path") effectuée avec succès" "$dir_sleep"
-#				echo ""
-#			}
-#
-#		return
+		rm -rfv "${dir_path/:?}/"* \
+			|| {
+				EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $(DechoE "$dir_path")" "$dir_sleep";
+				EchoErrorCustomTimer "Le contenu de tout fichier du dossier $(DechoE "$dir_path") portant le même nom qu'un des fichiers téléchargés sera écrasé" "$dir_sleep"
+				echo ""
+
+				return
+			} && \
+			{
+				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$dir_path") effectuée avec succès" "$dir_sleep"
+				echo ""
+			}
+
+		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier est vide
-elif test -d "$dir_path/"; then
+	elif test -d "$dir_path/"; then
 		EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_path") existe déjà" "$dir_sleep"
 
 		return
@@ -384,18 +378,16 @@ elif test -d "$dir_path/"; then
 # LORS DE SON APPEL, LA SORTIE DE CETTE FONCTION DOIT ÊTRE REDIRIGÉE SOIT VERS LE TERMINAL ET LE FICHIER DE LOGS, SOIT VERS LE FICHIER DE LOGS UNIQUEMENT
 function Makefile()
 {
-	## Paramètres
+	#***** Paramètres *****
 	file_parent=$1		# Emplacement depuis la racine du dossier parent du fichier à créer
 	file_name=$2			# Nom du fichier à créer (dans son dossier parent)
 	file_sleep=$3			# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
 
-	## Autres variables
+	#***** Autres variables *****
 		# Chemin
 	file_path="$file_parent/$file_name"
 
-
-	## Code
-
+	#***** Code *****
 	# Si le fichier à créer n'existe pas
 	if test ! -s "$file_path"; then
 		touch "$file_path" >> "$FILE_LOGPATH" \
@@ -406,15 +398,15 @@ function Makefile()
 		# On vérifie si la valeur de l'argument correspond au nom de l'utilisateur pour éviter d'afficher un message d'erreur s'il rentre un mauvais nom en argument
 		if test "$(pwd | cut -d '/' -f-3 | cut -d '/' -f3-)" = "${ARG_USERNAME}"; then
 			chown -v "${ARG_USERNAME}" "$file_path" >> "$FILE_LOGPATH" \
-				|| {
-					EchoErrorCustomTimer "Impossible de changer les droits du fichier $(DechoE "$file_path")" "$file_sleep"
-					EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$file_path")," "$file_sleep"
-					EchoErrorCustomTimer "utilisez la commande :" "$file_sleep"
-					echo "	chown ${ARG_USERNAME} $file_path"
+			|| {
+				EchoErrorCustomTimer "Impossible de changer les droits du fichier $(DechoE "$file_path")" "$file_sleep"
+				EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$file_path")," "$file_sleep"
+				EchoErrorCustomTimer "utilisez la commande :" "$file_sleep"
+				echo "	chown ${ARG_USERNAME} $file_path"
 
-					return
-				} \
-				&& EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep"
+				return
+			} \
+			&& EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep"
 
 			echo ""
 
@@ -447,6 +439,9 @@ elif test -f "$file_path" && test ! -s "$file_path"; then
 	packages_not_installed="Packages not installed.txt"
 	packages_not_found_file_path="$packages_not_found_dir/$packages_not_found_file"
 
+		# Commandes des gestionnaires de paquets
+	
+
 		# Vérification de la présence d'un paquet
 	exists_in_package_manager_database="False"
 	is_installed="False"		# Variable servant à enregistrer la présence d'un paquet sur le disque dur de l'utilisateur
@@ -461,7 +456,6 @@ function PackManagerCheck()
 	package_name=$1
 		# Commande complète de recherche du paquet dans la base de données du gestionnaire de paquets# Commandes du gestionnaire de paquets
 	search_command="$*"
-
 
 	#***** Code *****
 	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
@@ -498,7 +492,6 @@ function PackManagerList()
 		# Commande complète de recherche du paquet sur le disque dur de l'utilisateur
 	list_command="$*"
 
-
 	#***** Code *****
 	# Cette ligne sert à m'assurer que le code fonctionne
 	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")" # >> "$FILE_LOGPATH"
@@ -533,13 +526,13 @@ function PackManagerInstall()
 		# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
 		"$($install_command)" "$package_name" 2>&1 | tee -a "$FILE_LOGPATH" \
 			|| {
-					EchoError "Le paquet $(DechoE "$package_name") est introuvable dans les dépôts de votre gestionnaire de paquets"
-					Newline
+				EchoError "Le paquet $(DechoE "$package_name") est introuvable dans les dépôts de votre gestionnaire de paquets"
+				Newline
 
-					Newline
+				Newline
 
-					return
-				} \
+				return
+			} \
 			&& is_installed="True"
 		Newline
 
@@ -736,7 +729,7 @@ function CreateLogFile()
 		NewlineLog
 
 		EchoSuccessNoLog "Fin de la récupération d'informations sur le système d'exploitation"
-	} | tee -a "$FILE_LOGPATH"
+	} >> "$FILE_LOGPATH"
 
 	# Au moment de la création du fichier de logs, la variable "$FILE_LOGPATH" correspond au dossier actuel de l'utilisateur
 
@@ -756,7 +749,7 @@ function Mktmpdir()
 
 		Makedir "$DIR_TMPPARENT" "$DIR_TMPDIR" "0"		# Dossier principal
 		Makedir "$DIR_TMPPATH" "Logs" "0"				# Dossier d'enregistrement des fichiers de logs
-	} | tee -a "$FILE_LOGPATH"
+	} >> "$FILE_LOGPATH"
 }
 
 # Détection de l'exécution du script en mode super-utilisateur (root)
@@ -1022,9 +1015,9 @@ function SetSudo()
 	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
 	command -v sudo > /dev/null 2>&1 \
 		|| {
-				EchoNewstep "La commande $(DechoN "sudo") n'est pas installé sur votre système"
-				PackInstall sudo
-			} \
+			EchoNewstep "La commande $(DechoN "sudo") n'est pas installé sur votre système"
+			PackInstall sudo
+		} \
 		&& EchoSuccess "La commande $(DechoS "sudo") est déjà installée sur votre système";
 	Newline
 
