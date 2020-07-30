@@ -33,9 +33,9 @@ ARG_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 # Pour changer une durée de chronométrage, changez la valeur de la commande "sleep" voulue.
 # Pour désactiver cette fonctionnalité, mettez la valeur de la commande "sleep" à 0.
 # ATTENTION À NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE LA COMMANDE "sleep" NE SERA PAS INTERPRÉTÉE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-TIM_0_5=sleep\ .5			# Met le script en pause pendant 0,5 seconde. Exemple d'utilisation : temps d'affichage d'un texte de sous-étape
-TIM_1=sleep\ 1				# Met le script en pause pendant une seconde. Exemple d'utilisation : temps d'affichage du nom du paquet avant l'affichage du reste de l'étape lors de l'installation d'un nouveau paquet
-TIM_1_5=sleep\ 1.5		# Met le script en pause pendant 1,5 seconde. Exemple d'utilisation : temps d'affichage d'un header uniquement, avant l'affichage du reste de l'étape lors d'un changement d'étape
+TIME_0_5=sleep\ .5			# Met le script en pause pendant 0,5 seconde. Exemple d'utilisation : temps d'affichage d'un texte de sous-étape
+TIME_1=sleep\ 1				# Met le script en pause pendant une seconde. Exemple d'utilisation : temps d'affichage du nom du paquet avant l'affichage du reste de l'étape lors de l'installation d'un nouveau paquet
+TIME_1_5=sleep\ 1.5		# Met le script en pause pendant 1,5 seconde. Exemple d'utilisation : temps d'affichage d'un header uniquement, avant l'affichage du reste de l'étape lors d'un changement d'étape
 
 
 ## COULEURS
@@ -113,7 +113,7 @@ VER_SCRIPT="2.0"
 function DechoN() { string=$1; echo "$COL_CYAN$string$COL_YELLOW"; }
 
 # Affichage d'un message de changement de sous-étape en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs, en jaune, avec des chevrons et sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function EchoNewstep() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIM_0_5; }
+function EchoNewstep() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIME_0_5; }
 
 # Affichage d'un message de changement de sous-étape dont le temps de pause du script peut être choisi en argument
 function EchoNewstepCustomTimer() { string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET"; sleep "$timer"; }
@@ -126,20 +126,20 @@ function EchoNewstepNoLog() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; }
 function DechoE() { string=$1; echo "$COL_CYAN$string$COL_RED"; }
 
 # Appel de la fonction "EchoErrorNoLog" en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoError() { string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIM_0_5; }
+function EchoError() { string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIME_0_5; }
 
 # Affichage d'un message d'échec de sous-étape dont le temps de pause du script peut être choisi en argument
 function EchoErrorCustomTimer() { string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET"; sleep "$timer"; }
 
 # Affichage d'un message d'échec de sous-étape sans redirections vers le fichier de logs
-function EchoErrorNoLog() { string=$1; echo "$TXT_R_TAB $string $COL_RESET"; }
+function EchoErrorNoLog() { string=$1; echo "$TXT_R_TAB $string$COL_RESET"; }
 
 
 # Fonction servant à colorer d'une autre colueur une partie du texte de réussite de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou succès)
 function DechoS() { string=$1; echo "$COL_CYAN$string$COL_GREEN"; }
 
 # Appel de la fonction "EchoSuccessNoLog" en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoSuccess() { string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIM_0_5; }
+function EchoSuccess() { string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOGPATH"; $TIME_0_5; }
 
 # Affichage d'un message de succès de sous-étape dont le temps de pause du script peut être choisi en argument
 function EchoSuccessCustomTimer() { string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET"; sleep "$timer"; }
@@ -159,9 +159,11 @@ function NewlineLog() { echo "" >> "$FILE_LOGPATH"; }
 # Fonction de création et d'affichage des lignes des headers
 function DrawHeaderLine()
 {
+	#***** Paramètres *****
 	line_color=$1			# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 	line_char=$2			# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 
+	#***** Code *****
 	# Définition de la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
 	# Si la chaîne de caractère de la variable $line_color (qui contient l'encodage de la couleur du texte) n'est pas vide,
 	# alors on écrit l'encodage de la couleur dans le terminal, qui affiche la couleur, et non son encodage en texte.
@@ -207,23 +209,23 @@ function DrawHeaderLine()
 # Fonction de création de base d'un header (Couleur et caractère de ligne, couleur et chaîne de caractères)
 function HeaderBase()
 {
+	#***** Paramètres *****
 	line_color=$1		# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
 	line_char=$2		# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 	string_color=$3		# Définition de la couleur de la chaîne de caractères du header
 	string=$4			# Chaîne de caractères affichée dans chaque header
 
+	#***** Code *****
 	# Définition de la couleur de la ligne du caractère souhaité.
 	# Ce code produit le même résultat que la première condition de la fonction "DrawHeaderLine", mais il a été
 	# réécrit ici car aucune partie d'une fonction ne peut être utilisée individuellement depuis une autre fonction
 	if test "$line_color" == ""; then
-        # Définition de la couleur de la ligne.
-		# Ne pas ajouter de '$' avant le nom de la variable "header_color", sinon la couleur souhaitée ne s'affiche pas
 		echo -ne "$line_color"
 	fi
 
 	DrawHeaderLine "$line_color" "$line_char"
 	# Affichage une autre couleur pour le texte
-	echo "$string_color""##>" "$string" "$COL_RESET"
+	echo "$string_color""##>" "$string$COL_RESET"
 	DrawHeaderLine "$line_color" "$line_char"
 
 	# Ne pas appeler la fonction "Newline" ici, car cette dernière est automatiquement réappelée lors de la redirection de la fonction "HeaderBase"
@@ -236,8 +238,11 @@ function HeaderBase()
 # Fonction d'affichage des headers lors d'un changement d'étape
 function ScriptHeader()
 {
+	#***** Paramètre *****
+	# Chaîne de caractères contenant la phrase à afficher
 	string=$1
 
+	# ***** Code *****
 	Newline
 
 	HeaderBase "$COL_CYAN" "$TXT_HEADER_LINE_CHAR" "$COL_CYAN" "$string" 2>&1 | tee -a "$FILE_LOGPATH"
@@ -245,7 +250,7 @@ function ScriptHeader()
 	Newline
 	Newline
 
-	$TIM_1_5
+	$TIME_1_5
 
 	return
 }
@@ -253,15 +258,18 @@ function ScriptHeader()
 # Fonction d'affichage de headers lors du passage à une nouvelle catégorie de paquets lors de l'installation de ces derniers
 function HeaderInstall()
 {
+	#***** Paramètre *****
+	# Chaîne de caractères contenant la phrase à afficher
 	string=$1
 
+	# ***** Code *****
 	Newline
 
-	HeaderBase "$COL_STEP" "$TXT_HEADER_LINE_CHAR" "$COL_SUCC" "$string"  2>&1 | tee -a "$FILE_LOGPATH"
+	HeaderBase "$COL_YELLOW" "$TXT_HEADER_LINE_CHAR" "$COL_GREEN" "$string"  2>&1 | tee -a "$FILE_LOGPATH"
 	Newline
 	Newline
 
-	$TIM_1_5
+	$TIME_1_5
 
 	return
 }
@@ -270,27 +278,34 @@ function HeaderInstall()
 function HandleErrors()
 {
 	#***** Paramètre *****
+	# Chaîne de caractères du type d'erreur à afficher
 	string=$1
 
-	# ***** Code
+	# ***** Code *****
 	Newline
 
-	HeaderBase "$COL_ERR" "$TXT_HEADER_LINE_CHAR" "$COL_ERR" "ERREUR FATALE : $string" 2>&1 | tee -a "$FILE_LOGPATH"
+	HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $string" 2>&1 | tee -a "$FILE_LOGPATH"
 	Newline
 	Newline
 
-	$TIM_1_5
+	$TIME_1_5
 
 	EchoErrorNoLog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$FILE_LOGPATH"
-	EchoErrorNoLog "$string" 2>&1 | tee -a "$FILE_LOGPATH"
+	EchoError "$string"
 	Newline
 
-	EchoErrorNoLog "Arrêt de l'installation" 2>&1 | tee -a "$FILE_LOGPATH"
+	EchoError "Arrêt de l'installation"
 	Newline
 
 	# Si le fichier de logs se trouve toujours dans le dossier actuel (si le script a été exécuté depuis un autre dossier)
 	if test ! -f "$DIR_HOMEDIR/$FILE_LOGNAME"; then
-		mv -v "$FILE_LOGNAME" "$DIR_HOMEDIR" >> "$FILE_LOGPATH"
+		if test "$FILE_LOGPATH" == "$PWD/$FILE_LOGNAME"; then
+			FILE_LOGPATH="$DIR_HOMEDIR/$FILE_LOGNAME"
+			cp -v "$FILE_LOGNAME" "$DIR_HOMEDIR" 2>&1 | tee -a "$FILE_LOGPATH"
+		elif test "$FILE_LOGPATH" == "$DIR_TMPPATH/Logs/$FILE_LOGNAME"; then
+			FILE_LOGPATH="$DIR_HOMEDIR/$FILE_LOGNAME"
+			cp -v "$DIR_TMPPATH/Logs/$FILE_LOGNAME" "$DIR_HOMEDIR" 2>&1 | tee -a "$FILE_LOGPATH"
+		fi
 	fi
 
 	EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé à l'adresse suivante : $(DechoE "$FILE_LOGPATH")"
@@ -311,13 +326,12 @@ function Makedir()
 	dir_sleep=$3		# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
 
 	#***** Autres variables *****
-		# Chemin
+	# Chemin
 	dir_path="$dir_parent/$dir_name"
 
 	#***** Code *****
 	if test ! -d "$dir_path"; then
 		EchoNewstepCustomTimer "Création du dossier $(DechoN "$dir_name") dans le dossier $(DechoN "$dir_parent")" "$dir_sleep"
-		# Attention à ne pas supprimer le '/' suivant immédiatement la variable "$dir_path"
 		mkdir -v "$dir_path" >> "$FILE_LOGPATH" \
 			|| HandleErrors "LE DOSSIER $(DechoE "$dir_name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$dir_parent")" \
 			&& EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_name") a été créé avec succès dans le dossier $(DechoS "$dir_parent")" "$dir_sleep"
@@ -345,7 +359,7 @@ function Makedir()
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier contient AU MOINS un fichier ou dossier
-	elif test -d "$dir_path" && test "$(ls -A "$dir_path/")"; then
+	elif test -d "$dir_path/" && test "$(ls -A "$dir_path/")"; then
 		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible $(DechoN "$dir_parent")" "$dir_sleep"
 		EchoNewstepCustomTimer "Suppression du contenu du dossier $(DechoN "$dir_path")" "$dir_sleep"
 
@@ -384,7 +398,7 @@ function Makefile()
 	file_sleep=$3			# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
 
 	#***** Autres variables *****
-		# Chemin
+	# Chemin
 	file_path="$file_parent/$file_name"
 
 	#***** Code *****
@@ -420,7 +434,7 @@ function Makefile()
 		return
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il n'est pas vide
-elif test -f "$file_path" && test ! -s "$file_path"; then
+	elif test -f "$file_path" && test ! -s "$file_path"; then
 		true > "$file_path" \
 			|| EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$file_path") n'a pas été écrasé" "$file_sleep" \
 			&& EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$file_path") a été écrasé avec succès" "$file_sleep"
@@ -431,184 +445,166 @@ elif test -f "$file_path" && test ! -s "$file_path"; then
 }
 
 
-#### DÉFINITION DES FONCTIONS D'INSTALLATION DE PAQUETS DEPUIS UN GESTIONNAIRE DE PAQUETS
-## VARIABLES
-		# Vérification de la présence d'un paquet dans la base de données du gestionnaire
-	packages_not_found_dir="$DIR_TMPPATH/Packages not found"	# Chemin du fichier contenant les paquets introuvables dans la base données du gestionnaire de paquets
-	packages_not_found_file="Packages not found.txt"
-	packages_not_installed="Packages not installed.txt"
-	packages_not_found_file_path="$packages_not_found_dir/$packages_not_found_file"
-
-		# Commandes des gestionnaires de paquets
-	
-
-		# Vérification de la présence d'un paquet
-	exists_in_package_manager_database="False"
-	is_installed="False"		# Variable servant à enregistrer la présence d'un paquet sur le disque dur de l'utilisateur
-
-## FONCTIONS
-# Vérification de l'existence du paquet dans la base de données du gestionnaire de paquets.
-#     Mettre ce commentaire dans la doc, puis le supprimer du script --> S'il n'existe pas, le nom est envoyé dans un fichier texte pour indiquer à l'utilisateur quels sont les paquets à télécharger sur Internet pour récupérer et compiler leur code source s'il le souhaite
-function PackManagerCheck()
-{
-	#***** Paramètres *****
-		# Nom du paquet à installer
-	package_name=$1
-		# Commande complète de recherche du paquet dans la base de données du gestionnaire de paquets# Commandes du gestionnaire de paquets
-	search_command="$*"
-
-	#***** Code *****
-	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
-	if test "$($search_command "$package_name")"; then
-		EchoSuccess "Le paquet $(DechoS "$package_name") a été trouvé dans la base de données du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")"
-		Newline
-
-		return
-	else
-		EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
-		Newline
-
-		if test ! -d "$packages_not_found_dir"; then
-			Makedir "$DIR_TMPPATH" "$packages_not_found_dir" 2>&1 | tee -a "$FILE_LOGPATH"
-		fi
-
-		Makefile "$packages_not_found_dir" "" 2>&1 | tee -a "$FILE_LOGPATH"
-
-		if test -f "$packages_not_found_file_path"; then
-			echo "$package_name" >> "$packages_not_found_file_path"
-			return
-		fi
-
-		return
-	fi
-}
-
-# Adaptation de la commande de vérification de présence de paquets selon le gestionnaire de paquets
-function PackManagerList()
-{
-	#***** Paramètres *****
-		# Nom du paquet à installer
-	package_name=$1
-		# Commande complète de recherche du paquet sur le disque dur de l'utilisateur
-	list_command="$*"
-
-	#***** Code *****
-	# Cette ligne sert à m'assurer que le code fonctionne
-	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")" # >> "$FILE_LOGPATH"
-	"$($list_command)" "$package_name" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH" \
-		|| PackManagerInstall "$*" \
-		&& {
-			is_installed="True"
-			EchoSuccess "Le paquet $(DechoS "$package_name") est déjà installé"
-			Newline
-
-			Newline
-		}
-
-	return
-}
-
-# Adaptation de la commande d'installation selon le gestionnaire de paquets
-function PackManagerInstall()
-{
-	#***** Paramètres *****
-		# Nom du paquet à installer
-	package_name=$1
-		# Commande complète d'installation de paquet
-	install_command="$*"
-
-	#***** Code *****
-	if test "$is_installed" == "False"; then
-		EchoNewstep "Installation du paquet $(DechoN "$package_name")"
-		$TIM_1
-
-		# On appelle la commande d'installation du gestionnaire de paquets,
-		# puis on assigne la valeur de la variable "is_installed" à 1 si l'opération est un succès (&&)
-		"$($install_command)" "$package_name" 2>&1 | tee -a "$FILE_LOGPATH" \
-			|| {
-				EchoError "Le paquet $(DechoE "$package_name") est introuvable dans les dépôts de votre gestionnaire de paquets"
-				Newline
-
-				Newline
-
-				return
-			} \
-			&& is_installed="True"
-		Newline
-
-		$TIM_1
-
-		# On vérifie que le paquet à installer a été correctement installé
-		EchoNewstep "Vérification de l'installation du paquet $(DechoN "$package_name")" # >> "$FILE_LOGPATH"
-		if test "$is_installed" == "True"; then
-			EchoSuccess "Le paquet $(DechoS "$package_name") a été installé avec succès"
-			# On remet la valeur de la variable "is_installed" à "False"
-			is_installed="False"
-			Newline
-
-			Newline
-
-		else
-			EchoError "L'installation du paquet $(DechoE "$package_name") a échoué"
-			Newline
-
-			Newline
-		fi
-	fi
-
-	return
-}
-
-# Téléchargement des paquets directement depuis les dépôts officiels de la distribution utilisée selon la commande d'installation de paquets, puis installation des paquets
+#### DÉFINITION DES FONCTIONS D'INSTALLATION
+# Installation d'un paquet selon le gestionnaire de paquets, ainsi que sa commande de recherche de paquets dans le système de l'utilisateur,
+# sa commande de recherche de paquets dans sa base de données, ainsi que sa commande d'installation de paquets
 function PackInstall()
 {
-	# Installation du paquet souhaité selon la commande d'installation du gestionnaire de paquets de la distribution de l'utilisateur
-	# Pour chaque gestionnaire de paquets, on appelle la fonction "PackManagerCheck" pour vérifier la présence du paquet dans la base de données du gestionnaire,
-	# puis on appelle la fonction "PackManagerList" pour vérifier si le paquet désiré est déjà installé sur le disque dur de l'utilisateur.
-	# Enfin, on appelle la fonction "PackManagerInstall" pour installer le paquet tout en forçant le choix de l'utilisateur
-	case $PACK_MAIN_PACKAGE_MANAGER in
-		"APT")
-			PackManagerCheck apt-get show
-			PackManagerList apt-get list --installed
-			PackManagerInstall apt-get -y install
+	#***** Paramètres *****
+	# Nom du gestionnaire de paquets
+	package_manager_name=$1
+	# Nom du paquet à installer
+	package_name=$2
+
+	#***** Autres variables *****
+	# Vérification de la présence d'un paquet dans la base de données du gestionnaire
+	packages_failed_dir="$DIR_TMPPATH/Packages"				# Dossier parent du fichier contenant les noms des paquets introuvables dans la base données du gestionnaire de paquets, ainsi que du fichier contenant les noms des paquets dont l'installation a échouée
+	packages_not_found_file="Packages not found.txt"		# Nom du fichier
+	packages_not_found_file_path="$packages_failed_dir/$packages_not_found_file"		#
+
+	packages_not_installed_dir=""
+	packages_not_installed_file="Packages not installed.txt"
+
+	# Vérification de la présence d'un paquet
+	exists_in_database="False"	# Variable servant à vérifier l'existence d'un paquet dans la base de données du gestionnaire de paquets
+	is_installed="False"		# Variable servant à vérifier l'existence d'un paquet sur le disque dur de l'utilisateur
+
+	#***** Code *****
+	# On définit les commandes de recherche et d'installation de paquets selon le nom du gestionnaire de paquets passé en premier argument.
+	# Également, on permet l'insensibilité à la casse au cas où l'utilisateur veut ajouter un paquet dans la liste de paquets à installer et qu'il passe
+	# en premier argument le nom du gestionnaire de paquets avec ou sans majuscule (par exemple : PackInstall "snap" paquet OU PackInstall "Snap" paquet).
+	case ${package_manager_name,,} in
+		"$PACK_MAIN_PACKAGE_MANAGER")
+			case $PACK_MAIN_PACKAGE_MANAGER in
+				"APT")
+					search_pack_hdrive_command="apt-get list --installed"	# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
+					search_pack_db_command="apt-get show"					# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
+					install_command="apt-get -y install"					# Commande d'installation de paquets
+					;;
+				"DNF")
+					search_pack_hdrive_command=""
+					search_pack_db_command=""
+					install_command="dnf -y install"
+					;;
+				"Emerge")
+					search_pack_hdrive_command=""
+					search_pack_db_command=""
+					install_command="emerge"
+					;;
+				"Pacman")
+					search_pack_hdrive_command="pacman -Q"
+					search_pack_db_command=""
+					install_command="pacman --noconfirm -S"
+					;;
+				"Zypper")
+					search_pack_hdrive_command=""
+					search_pack_db_command=""
+					install_command="zypper -y install"
+					;;
+			esac
 			;;
-		"DNF")
-			PackManagerCheck
-			PackManagerList
-			PackManagerInstall dnf -y install
+		"snap")
+			search_pack_hdrive_command=""
+			search_pack_db_command=""
+			install_command="snap install $*"
 			;;
-		"Emerge")
-			PackManagerCheck
-			PackManagerList
-			PackManagerInstall emerge
+		"")
+			EchoError "Aucun nom de gestionnaire de paquets n'a été passé en argument"
+			EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 			;;
-		"Pacman")
-			PackManagerCheck
-	    	PackManagerList pacman -Q
-			# PackManagerInstall pacman --noconfirm -S
-			;;
-		"Zypper")
-			PackManagerCheck
-			PackManagerList
-			PackManagerInstall zypper -y install
+		*)
+			EchoError "Le nom du gestionnaire de paquets passé en premier argument ne correspond à aucun gestionnaire de paquets présent sur votre système"
 			;;
 	esac
 
+	## VÉRIFICATION DE LA PRÉSENCE DU PAQUET SUR LE DISQUE DUR DE L'UTILISATEUR
+	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")"
+
+	# Si le paquet à installer est déjà installé
+	if test "$($search_pack_hdrive_command "$package_name")" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH"; then
+		is_installed="True"
+		EchoSuccess "Le paquet $(DechoS "$package_name") est déjà installé sur votre système"
+		Newline
+		Newline
+
+		return
+	# Sinon, si le paquet à installer n'est pas déjà installé sur le disque dur de l'utilisateur
+	else
+		EchoNewstep "Le paquet $(DechoN "$package_name") n'est pas installé sur votre système"
+		Newline
+		Newline
+
+		## VÉRIFICATION DE LA PRÉSENCE DU PAQUET DANS LA BASE DE DONNÉES DU GESTIONNAIRE DE PAQUETS
+		EchoNewstep "Préparation de l'installation du paquet $(DechoN "$package_name")"
+		Newline
+		$TIME_1
+
+		EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
+
+		# Si le paquet est instrouvable dans la base de données du gestionnaire de paquets
+		if test ! "$($search_pack_db_command)" "$package_name"; then
+			EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
+
+			if test ! -d "$packages_failed_dir"; then
+				Makedir "$DIR_TMPPATH" "test$packages_failed_dir" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+			fi
+
+			if test ! -f "$packages_not_found_file_path"; then
+				Makefile "$packages_failed_dir" "$packages_not_found_file" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+			fi
+
+			echo "$package_name" >> "$packages_not_found_file_path"
+
+			EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+			Newline
+
+			return
+		# Sinon, si le paquet à installer est présent dans la base de données du gestionnaire de paquets
+		else
+			exists_in_database="True"
+			EchoSuccess "Le paquet $(DechoS "$package_name") existe dans la base de données du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")"
+			Newline
+
+			EchoNewstep "Installation du paquet $(DechoN "$package_name")"
+			$TIME_1
+
+			# On appelle la commande d'installation du gestionnaire de paquets,
+			# puis on vérifie d'abord si l'installation du paquet a échouée
+			if test ! "$($install_command)" "$package_name" 2>&1 | tee -a "$FILE_LOGPATH"; then
+				EchoError "Impossible d'installer le paquet $(DechoE "$package_name")"
+				EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+				Newline
+			# Sinon, si le paquet a été installé avec succès, on assigne la valeur de la variable "is_installed" à "True"
+			else
+				$TIME_1
+
+				# On vérifie que le paquet à installer a été correctement installé
+				EchoNewstep "Vérification de l'installation du paquet $(DechoN "$package_name")"
+				if test "$($search_pack_hdrive_command "$package_name")" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH"; then
+					is_installed="True"
+					EchoSuccess "Le paquet $(DechoS "$package_name") a été installé avec succès"
+					Newline
+					Newline
+
+				# Sinon, si l'installation du paquet a échouée
+				else
+					EchoError "L'installation du paquet $(DechoE "$package_name") a échoué"
+					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+					Newline
+
+					Newline
+				fi
+
+				# On réinitalise les valeurs des variables "exists_in_database" et "is_installed"
+				exists_in_database="False"
+				is_installed="False"
+			fi
+		fi
+	fi
+
 	return
 }
 
-# Installation de paquets via le gestionnaire de paquets Snap
-function SnapInstall()
-{
-    PackManagerCheck
-	PackManagerList
-	PackManagerInstall snap install "$@"	# Ce tableau d'arguments sert à utiliser les options de téléchargement passées en argument
-
-	return
-}
-
-
-#### DÉFINITION DE LA FONCTION D'INSTALLATION DES LOGICIELS ABSENTS DES BASES DE DONNÉES DES GESTIONNAIRES DE PAQUETS
 # Installation de logiciels absents de la base de données de tous les gestionnaires de paquets
 function SoftwareInstall()
 {
@@ -623,11 +619,11 @@ function SoftwareInstall()
 	software_category=$8		# Catégorie(s) du logiciel (jeu, développement, bureautique, etc...)
 
 	#***** Autres variables *****
-		# Dossiers
+	# Dossiers
 	software_inst_dir="$DIR_SOFTWARE/$software_name"					# Dossier d'installation du logiciel
 	software_shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	# Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés
 
-		# Fichiers
+	# Fichiers
 	software_dl_link="$software_web_link/$software_archive"				# Lien de téléchargement de l'archive
 
 
@@ -636,10 +632,16 @@ function SoftwareInstall()
 
 	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels
 	Makedir "$DIR_SOFTWARE" "$software_name" "1" 2>&1 | tee -a "$FILE_LOGPATH"
-	wget -v "$software_dl_link" -O "$software_inst_dir" >> "$FILE_LOGPATH" \
-		|| EchoError "Échec du téléchargement du logiciel $software_name" \
-		&& EchoSuccess "Le logiciel $software_name a été téléchargé avec succès"
-	Newline
+	if test wget -v "$software_dl_link" -O "$software_inst_dir" >> "$FILE_LOGPATH"; then \
+		EchoSuccess "Le logiciel $software_name a été téléchargé avec succès"
+		Newline
+
+	else
+		EchoError "Échec du téléchargement du logiciel $software_name"
+		Newline
+
+		return
+	fi
 
 	# On décompresse l'archive téléchargée selon le format de comporession
 	EchoNewstep "Décompression de l'archive $(DechoN "$software_archive")"
@@ -659,6 +661,11 @@ function SoftwareInstall()
 				;;
 			"*.tar.bz2")
 				tar -jxvf "$DIR_SOFTWARE/$software_name/$software_archive" || { EchoError "La décompression de l'archive $(DechoE "$software_archive") a échouée"; return; } && EchoSuccess "La décompression de l'archive $(DechoS "$software_archive") s'est faite avec brio"
+				;;
+			*)
+				EchoError "Le format de fichier de l'archive $(DechoE "$software_archive") n'est pas supporté"
+
+				return
 				;;
 		esac
 	} 2>&1 | tee -a "$FILE_LOGPATH"
@@ -709,7 +716,7 @@ function SoftwareInstall()
 function CreateLogFile()
 {
 	# Si le fichier de logs n'existe pas, le script le crée via la fonction "Makefile"
-	Makefile "$PWD" "$FILE_LOGNAME" "0" | tee -a "$FILE_LOGPATH"
+	Makefile "$PWD" "$FILE_LOGNAME" "0" >> "$FILE_LOGPATH"
 	NewlineLog	# On appelle la fonction "NewlineLog" pour rediriger le saut de ligne vers le fichier de logs, car les sauts de ligne de la fonction Makefile ne sont pas redirigés vers le fichier de logs
 
 	# On évite d'appeler les fonctions d'affichage propre "EchoSuccess" ou "EchoError" (sans le "NoLog") pour éviter
@@ -761,8 +768,6 @@ function ScriptInit()
 	# Puis la fonction de création du dossier temporaire
 	Mktmpdir
 
-	Makefile "/home/dimob/Bureau" "Linux-reinstall.test" "0" 2>&1 | tee -a "$FILE_LOGPATH"
-
 	# On déplace le fichier de logs vers le dossier temporaire tout en vérifiant s'il ne s'y trouve pas déjà
 	if test ! -f "$DIR_TMPPATH/Logs/$FILE_LOGNAME"; then
 		mv -v "$FILE_LOGNAME" "$DIR_TMPPATH/Logs" >> "$FILE_LOGPATH" \
@@ -786,12 +791,12 @@ function ScriptInit()
 
     	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
     	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	echo "	sudo $0 votre_nom_d'utilisateur"
+    	echo "	sudo $0 votre_nom_d'utilisateur" 2>&1 | tee -a "$FILE_LOGPATH"
 		Newline
 
 		EchoError "Ou connectez vous directement en tant que super-utilisateur"
 		EchoError "Et tapez cette commande :"
-		echo "	$0 votre_nom_d'utilisateur"
+		echo "	$0 votre_nom_d'utilisateur" 2>&1 | tee -a "$FILE_LOGPATH"
 
 		HandleErrors "SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
 
@@ -800,7 +805,7 @@ function ScriptInit()
 		# Si aucun argument n'est entré
 		if test -z "${ARG_USERNAME}"; then
 			EchoError "Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script :"
-			echo "	sudo $0 votre_nom_d'utilisateur"
+			echo "	sudo $0 votre_nom_d'utilisateur" 2>&1 | tee -a "$FILE_LOGPATH"
 
 			HandleErrors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
 
@@ -876,7 +881,7 @@ function GetMainPackageManager()
 	command -v dnf &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="DNF"
 	command -v emerge &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Emerge"
 	command -v pacman &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Pacman"
-  command -v zypper &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Zypper"
+  	command -v zypper &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Zypper"
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée)
 	if test "$PACK_MAIN_PACKAGE_MANAGER" = ""; then
@@ -965,20 +970,8 @@ function DistUpgrade()
 	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER",
 	case "$PACK_MAIN_PACKAGE_MANAGER" in
 		"APT")
-			# APT renvoie souvent un message d'avertissement en cas d'utilisation de ce dernier dans un script :
-			# 	--> "Warning : apt does not have a stable CLI interface. Use with caution in scripts."
 
-			# Ce n'est pas un message problématique, mais il est assez ennuyeux, car il arrive à chaque appel de la commande
-			# Pour y remédier, je renvoie ses sorties d'erreur vers un fichier temporaire, avant de renvoyer ces messages dans le fichier de logs
-			# (il est impossible de rediriger directement une sortie d'erreur vers un fichier ET de rediriger tout de suite après la sortie standard
-			# vers ce même fichier ET vers le terminal (apt-get -y update 2>> "$FILE_LOGPATH" | tee -a "$FILE_LOGPATH") <-- Code problématique)
-
-#			tmpapt="$DIR_TMPPATH/Logs/aptEchoErrors.log"
-#
-#			Makefile "$DIR_TMPPATH/Logs" "aptEchoErrors.log" "1" 2>&1 | tee -a "$FILE_LOGPATH"
-#			Newline
-
-			apt-get -y update | tee -a "$SCRIPT_LOGPATH" && apt-get -y upgrade | tee -a "$FILE_LOGPATH"
+			apt-get -y update 2>&1 | tee -a "$SCRIPT_LOGPATH" && apt-get -y upgrade 2>&1 | tee -a "$FILE_LOGPATH"
 			;;
 		"DNF")
 			dnf -y update | tee -a "$FILE_LOGPATH"
@@ -1238,10 +1231,13 @@ DistUpgrade
 
 
 ## INSTALLATIONS PRIORITAIRES ET CONFIGURATIONS DE PRÉ-INSTALLATION
+# On déclare une variable "main" et on lui assigne en valeur le nom du gestionnaire de paquet principal stocké dans la variable "$PACK_MAIN_PACKAGE_MANAGER"
+main="$PACK_MAIN_PACKAGE_MANAGER"
+
 ScriptHeader "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
-PackInstall curl
-PackInstall snapd
-PackInstall wget
+PackInstall "$main" curl
+PackInstall "$main" snapd
+PackInstall "$main" wget
 
 command -v curl snap wget >> "$FILE_LOGPATH" \
 	|| HandleErrors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" \
@@ -1265,62 +1261,63 @@ sleep 3
 
 # Commandes
 HeaderInstall "INSTALLATION DES COMMANDES PRATIQUES"
-PackInstall htop
-PackInstall neofetch
-PackInstall tree
+PackInstall "$main" htop
+PackInstall "$main" neofetch
+PackInstall "$main" tree
 
 # Développement
 HeaderInstall "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
-SnapInstall atom --classic --stable		# Éditeur de code Atom
-SnapInstall code --classic	--stable	# Éditeur de code Visual Studio Code
-PackInstall emacs
-PackInstall g++
-PackInstall gcc
-PackInstall git
+PackInstall "snap" atom --classic --stable		# Éditeur de code Atom
+PackInstall "snap" code --classic	--stable	# Éditeur de code Visual Studio Code
+PackInstall "$main" emacs
+PackInstall "$main" g++
+PackInstall "$main" gcc
+PackInstall "$main" git
 
-PackInstall make
-PackInstall umlet
-PackInstall valgrind
+PackInstall "$main" make
+PackInstall "$main" umlet
+PackInstall "$main" valgrind
 
 # Logiciels de nettoyage de disque
 HeaderInstall "INSTALLATION DES LOGICIELS DE NETTOYAGE DE DISQUE"
-PackInstall k4dirstat
+PackInstall "$main" k4dirstat
 
 # Internet
 HeaderInstall "INSTALLATION DES CLIENTS INTERNET"
-SnapInstall discord --stable
-PackInstall thunderbird
+PackInstall "snap" discord --stable
+PackInstall "snap" skype --stable
+PackInstall "$main" thunderbird
 
 # LAMP
 HeaderInstall "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
-PackInstall apache2
-PackInstall php
-PackInstall libapache2-mod-php
-PackInstall mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server"
-PackInstall php-mysql
-PackInstall php-curl
-PackInstall php-gd
-PackInstall php-intl
-PackInstall php-json
-PackInstall php-mbstring
-PackInstall php-xml
-PackInstall php-zip
+PackInstall "$main" apache2
+PackInstall "$main" php
+PackInstall "$main" libapache2-mod-php
+PackInstall "$main" mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server"
+PackInstall "$main" php-mysql
+PackInstall "$main" php-curl
+PackInstall "$main" php-gd
+PackInstall "$main" php-intl
+PackInstall "$main" php-json
+PackInstall "$main" php-mbstring
+PackInstall "$main" php-xml
+PackInstall "$main" php-zip
 
 # Librairies
 HeaderInstall "INSTALLATION DES LIBRAIRIES"
-PackInstall python3.7
+PackInstall "$main" python3.7
 
 # Réseau
 HeaderInstall "INSTALLATION DES LOGICIELS RÉSEAU"
-PackInstall wireshark
+PackInstall "$main" wireshark
 
 # Vidéo
 HeaderInstall "INSTALLATION DES LOGICIELS VIDÉO"
-PackInstall vlc
+PackInstall "$main" vlc
 
 # Wine
 HeaderInstall "INSTALLATION DE WINE"
-PackInstall wine-stable
+PackInstall "$main" wine-stable
 
 EchoSuccess "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS DEPUIS LES  GESTIONNAIRES DE PAQUETS !"
 
