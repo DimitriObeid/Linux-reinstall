@@ -33,19 +33,19 @@ ARG_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur
 # Pour changer une durée de chronométrage, changez la valeur de la commande "sleep" voulue.
 # Pour désactiver cette fonctionnalité, mettez la valeur de la commande "sleep" à 0.
 # ATTENTION À NE PAS SUPPRIMER LES ANTISLASHS, SINON LA VALEUR DE LA COMMANDE "sleep" NE SERA PAS INTERPRÉTÉE EN TANT QU'ARGUMENT, MAIS COMME UNE NOUVELLE COMMANDE
-TIME_0_5=sleep\ .5			# Met le script en pause pendant 0,5 seconde. Exemple d'utilisation : temps d'affichage d'un texte de sous-étape
-TIME_1=sleep\ 1				# Met le script en pause pendant une seconde. Exemple d'utilisation : temps d'affichage du nom du paquet avant l'affichage du reste de l'étape lors de l'installation d'un nouveau paquet
+TIME_0_5=sleep\ .5		# Met le script en pause pendant 0,5 seconde. Exemple d'utilisation : temps d'affichage d'un texte de sous-étape
+TIME_1=sleep\ 1			# Met le script en pause pendant une seconde. Exemple d'utilisation : temps d'affichage du nom du paquet avant l'affichage du reste de l'étape lors de l'installation d'un nouveau paquet
 TIME_1_5=sleep\ 1.5		# Met le script en pause pendant 1,5 seconde. Exemple d'utilisation : temps d'affichage d'un header uniquement, avant l'affichage du reste de l'étape lors d'un changement d'étape
 
 
 ## COULEURS
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script
-COL_BLUE=$(tput setaf 4)				# Bleu foncé	--> Couleur des headers à n'écrire que dans le fichier de logs
-COL_CYAN=$(tput setaf 6)				# Bleu cyan		--> Couleur des headers
-COL_GREEN=$(tput setaf 82)		 	# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
+COL_BLUE=$(tput setaf 4)		# Bleu foncé	--> Couleur des headers à n'écrire que dans le fichier de logs
+COL_CYAN=$(tput setaf 6)		# Bleu cyan		--> Couleur des headers
+COL_GREEN=$(tput setaf 82)		# Vert clair	--> Couleur d'affichage des messages de succès la sous-étape
 COL_RED=$(tput setaf 196) 	  	# Rouge clair	--> Couleur d'affichage des messages d'erreur de la sous-étape
-COL_RESET=$(tput sgr0)     			# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
-COL_YELLOW=$(tput setaf 226) 		# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
+COL_RESET=$(tput sgr0)     		# Restauration de la couleur originelle d'affichage de texte selon la configuration du profil du terminal
+COL_YELLOW=$(tput setaf 226)	# Jaune clair	--> Couleur d'affichage des messages de passage à la prochaine sous-étapes
 
 
 # DATE
@@ -58,8 +58,8 @@ DATE_TIME=$(date +"%Y-%m-%d %Hh-%Mm-%Ss")
 DIR_HOMEDIR="/home/${ARG_USERNAME}"					# Dossier personnel de l'utilisateur
 
 # Définition du dossier temporaire et de son chemin
-DIR_TMPDIR="Linux-reinstall.tmp.d"					# Nom du dossier temporaire
-DIR_TMPPARENT="/tmp"												# Dossier parent du dossier temporaire
+DIR_TMPDIR="Linux-reinstall.tmp.d"				# Nom du dossier temporaire
+DIR_TMPPARENT="/tmp"							# Dossier parent du dossier temporaire
 DIR_TMPPATH="$DIR_TMPPARENT/$DIR_TMPDIR"		# Chemin complet du dossier temporaire
 
 # Définition du dossier d'installation de logiciels indisponibles via les gestionnaires de paquets
@@ -69,7 +69,7 @@ DIR_SOFTWARE="Logiciels.Linux-reinstall.d"
 ## FICHIERS
 # Définition du nom et du chemin du fichier de logs
 FILE_LOGNAME="Linux-reinstall $DATE_TIME.log"		# Nom du fichier de logs
-FILE_LOGPATH="$PWD/$FILE_LOGNAME"								# Chemin du fichier de logs depuis la racine, dans le dossier actuel (il est mis à jour pendant l'initialisation du script)
+FILE_LOGPATH="$PWD/$FILE_LOGNAME"					# Chemin du fichier de logs depuis la racine, dans le dossier actuel (il est mis à jour pendant l'initialisation du script)
 
 
 ## TEXTE
@@ -87,8 +87,8 @@ TXT_TAB=">>>>"
 
 # Affichage de chevrons suivant l'encodage de la couleur d'une chaîne de caractères
 TXT_G_TAB="$COL_GREEN$TXT_TAB$TXT_TAB"		# Encodage de la couleur en vert et affichage de 4 * 2 chevrons
-TXT_R_TAB="$COL_RED$TXT_TAB$TXT_TAB"			# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
-TXT_Y_TAB="$COL_YELLOW$TXT_TAB"						# Encodage de la couleur en jaune et affichage de 4 chevrons
+TXT_R_TAB="$COL_RED$TXT_TAB$TXT_TAB"		# Encodage de la couleur en rouge et affichage de 4 * 2 chevrons
+TXT_Y_TAB="$COL_YELLOW$TXT_TAB"				# Encodage de la couleur en jaune et affichage de 4 chevrons
 
 
 ## VERSION
@@ -153,6 +153,10 @@ function Newline() { echo "" | tee -a "$FILE_LOGPATH"; }
 
 # Fonction de saut de ligne pour le fichier de logs uniquement (utiliser la fonction "Newline" en redirigeant sa sortie vers le fichier de logs provoque un saut de deux lignes au lieu d'une)
 function NewlineLog() { echo "" >> "$FILE_LOGPATH"; }
+
+
+# Fonction servant à colorer d'une autre colueur une partie du texte d'un header (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du mot "header"
+function DechoH() { string=$1; }
 
 
 ## DÉFINITION DES FONCTIONS DE CRÉATION DE HEADERS
@@ -311,7 +315,7 @@ function HandleErrors()
 	EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé à l'adresse suivante : $(DechoE "$FILE_LOGPATH")"
 	Newline
 
-	exit 1
+	exit 0
 }
 
 
@@ -458,12 +462,14 @@ function PackInstall()
 
 	#***** Autres variables *****
 	# Vérification de la présence d'un paquet dans la base de données du gestionnaire
-	packages_failed_dir="$DIR_TMPPATH/Packages"				# Dossier parent du fichier contenant les noms des paquets introuvables dans la base données du gestionnaire de paquets, ainsi que du fichier contenant les noms des paquets dont l'installation a échouée
+	packages_failed_dir="Packages"							# Dossier parent du fichier contenant les noms des paquets introuvables dans la base données du gestionnaire de paquets, ainsi que du fichier contenant les noms des paquets dont l'installation a échouée
+	packages_failed_dir_path="$DIR_TMPPATH/$packages_failed_dir"
+
 	packages_not_found_file="Packages not found.txt"		# Nom du fichier
 	packages_not_found_file_path="$packages_failed_dir/$packages_not_found_file"		#
 
-	packages_not_installed_dir=""
 	packages_not_installed_file="Packages not installed.txt"
+	packages_not_installed_file_path="$packages_failed_dir/$packages_not_installed_file"
 
 	# Vérification de la présence d'un paquet
 	exists_in_database="False"	# Variable servant à vérifier l'existence d'un paquet dans la base de données du gestionnaire de paquets
@@ -476,52 +482,65 @@ function PackInstall()
 	case ${package_manager_name,,} in
 		"$PACK_MAIN_PACKAGE_MANAGER")
 			case $PACK_MAIN_PACKAGE_MANAGER in
-				"APT")
-					search_pack_hdrive_command="apt-get list --installed"	# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
-					search_pack_db_command="apt-get show"					# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
-					install_command="apt-get -y install"					# Commande d'installation de paquets
+				"apt")
+					search_pack_hdrive_command=apt-get list --installed "$package_name" > /dev/null | grep "Package: $package_name"	2>&1 | tee -a "$FILE_LOGPATH"# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
+					search_pack_db_command=apt-cache show "$package_name" 2>&1 | tee -a "$FILE_LOGPATH"													# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
+					install_command="$(apt-get -y install)" "$package_name" 2>&1 | tee -a "$FILE_LOGPATH"														# Commande d'installation de paquets
 					;;
-				"DNF")
-					search_pack_hdrive_command=""
-					search_pack_db_command=""
-					install_command="dnf -y install"
-					;;
-				"Emerge")
-					search_pack_hdrive_command=""
-					search_pack_db_command=""
-					install_command="emerge"
-					;;
-				"Pacman")
-					search_pack_hdrive_command="pacman -Q"
-					search_pack_db_command=""
-					install_command="pacman --noconfirm -S"
-					;;
-				"Zypper")
-					search_pack_hdrive_command=""
-					search_pack_db_command=""
-					install_command="zypper -y install"
-					;;
+			#	"dnf")
+			#		search_pack_hdrive_command=""
+			#		search_pack_db_command=""
+			#		install_command=$(dnf -y install) "$package_name"
+			#		;;
+			#	"emerge")
+			#		search_pack_hdrive_command=""
+			#		search_pack_db_command=""
+			#		install_command=$(emerge) "$package_name"
+			#		;;
+			#	"pacman")
+			#		search_pack_hdrive_command=pacman -Q "$package_name"
+			#		search_pack_db_command=""
+			#		install_command=pacman --noconfirm -S "$package_name"
+			#		;;
+			#	"zypper")
+			#		search_pack_hdrive_command=""
+			#		search_pack_db_command=""
+			#		install_command=zypper -y install "$package_name"
+			#		;;
 			esac
 			;;
 		"snap")
-			search_pack_hdrive_command=""
+			search_pack_hdrive_command=snap list "$package_name"
 			search_pack_db_command=""
-			install_command="snap install $*"
+			install_command=snap install "$*"
 			;;
 		"")
-			EchoError "Aucun nom de gestionnaire de paquets n'a été passé en argument"
-			EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+			HandleErrors "Aucun nom de gestionnaire de paquets n'a été passé en argument"
 			;;
 		*)
-			EchoError "Le nom du gestionnaire de paquets passé en premier argument ne correspond à aucun gestionnaire de paquets présent sur votre système"
+			EchoError "Le nom du gestionnaire de paquets passé en premier argument \"$(DechoE "$package_manager_name")\" ne correspond à aucun gestionnaire de paquets présent sur votre système"
+			EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande"
+			Newline
+
+			HandleErrors "Le nom du gestionnaire de paquets passé en premier argument \"$(DechoE "$package_manager_name")\" ne correspond à aucun gestionnaire de paquets présent sur votre système"
 			;;
 	esac
+
+	## CRÉATION D'UN DOSSIER CONTENANT DES INFORMATIONS CONCERNANT LES ÉVENTUELS PAQUETS NON-TROUVÉS DANS LA BASE DE DONNÉES
+	## DU GESTIONNAIRE DE PAQUETS OU LES ÉVENTUELS PAQUETS IMPOSSIBLES À INSTALLER SUR LE DISQUE DUR DE L'UTILISATEUR
+	EchoNewstep "Création du dossier $(DechoN "$packages_failed_dir") dans le dossier temporaire $(DechoN "$DIR_TMPPATH")"
+	EchoNewstep "en cas d'absence du paquet dans la base de données du gestionnaire de paquets ou d'échec d'installation"
+	Newline
+
+	if test ! -d "$packages_failed_dir"; then
+		Makedir "$DIR_TMPPATH" "$packages_failed_dir" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+	fi
 
 	## VÉRIFICATION DE LA PRÉSENCE DU PAQUET SUR LE DISQUE DUR DE L'UTILISATEUR
 	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")"
 
 	# Si le paquet à installer est déjà installé
-	if test "$($search_pack_hdrive_command "$package_name")" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH"; then
+	if "$($search_pack_hdrive_command)" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH"; then
 		is_installed="True"
 		EchoSuccess "Le paquet $(DechoS "$package_name") est déjà installé sur votre système"
 		Newline
@@ -542,15 +561,11 @@ function PackInstall()
 		EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
 
 		# Si le paquet est instrouvable dans la base de données du gestionnaire de paquets
-		if test ! "$($search_pack_db_command)" "$package_name"; then
+		if ! "$($search_pack_db_command)" 2>&1 | tee -a "$FILE_LOGPATH"; then
 			EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
 
-			if test ! -d "$packages_failed_dir"; then
-				Makedir "$DIR_TMPPATH" "test$packages_failed_dir" "1" 2>&1 | tee -a "$FILE_LOGPATH"
-			fi
-
 			if test ! -f "$packages_not_found_file_path"; then
-				Makefile "$packages_failed_dir" "$packages_not_found_file" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+				Makefile "$packages_failed_dir_path" "$packages_not_found_file" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 			fi
 
 			echo "$package_name" >> "$packages_not_found_file_path"
@@ -570,17 +585,29 @@ function PackInstall()
 
 			# On appelle la commande d'installation du gestionnaire de paquets,
 			# puis on vérifie d'abord si l'installation du paquet a échouée
-			if test ! "$($install_command)" "$package_name" 2>&1 | tee -a "$FILE_LOGPATH"; then
+			if ! "$($install_command)" 2>&1 | tee -a "$FILE_LOGPATH"; then
 				EchoError "Impossible d'installer le paquet $(DechoE "$package_name")"
 				EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 				Newline
+
+				if test ! -f "$packages_not_installed_file_path"; then
+					Makefile "$packages_failed_dir_path" "$packages_not_installed_file" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+				fi
+
+				echo "$package_name" >> "$packages_not_installed_file_path"
+
+				EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+				Newline
+
+				return
+
 			# Sinon, si le paquet a été installé avec succès, on assigne la valeur de la variable "is_installed" à "True"
 			else
 				$TIME_1
 
 				# On vérifie que le paquet à installer a été correctement installé
 				EchoNewstep "Vérification de l'installation du paquet $(DechoN "$package_name")"
-				if test "$($search_pack_hdrive_command "$package_name")" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH"; then
+				if "$($search_pack_hdrive_command)" "$package_name" 2>&1 | grep -o "$package_name" >> "$FILE_LOGPATH"; then
 					is_installed="True"
 					EchoSuccess "Le paquet $(DechoS "$package_name") a été installé avec succès"
 					Newline
@@ -592,7 +619,16 @@ function PackInstall()
 					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 					Newline
 
+					if test ! -f "$packages_not_installed_file_path"; then
+						Makefile "$packages_failed_dir_path" "$packages_not_installed_file" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+					fi
+
+					echo "$package_name" >> "$packages_not_installed_file_path"
+
+					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 					Newline
+
+					return
 				fi
 
 				# On réinitalise les valeurs des variables "exists_in_database" et "is_installed"
@@ -717,7 +753,6 @@ function CreateLogFile()
 {
 	# Si le fichier de logs n'existe pas, le script le crée via la fonction "Makefile"
 	Makefile "$PWD" "$FILE_LOGNAME" "0" >> "$FILE_LOGPATH"
-	NewlineLog	# On appelle la fonction "NewlineLog" pour rediriger le saut de ligne vers le fichier de logs, car les sauts de ligne de la fonction Makefile ne sont pas redirigés vers le fichier de logs
 
 	# On évite d'appeler les fonctions d'affichage propre "EchoSuccess" ou "EchoError" (sans le "NoLog") pour éviter
 	# d'écrire deux fois le même texte, vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
@@ -877,11 +912,11 @@ function GetMainPackageManager()
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-	command -v apt-get &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="APT"
-	command -v dnf &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="DNF"
-	command -v emerge &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Emerge"
-	command -v pacman &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Pacman"
-  	command -v zypper &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="Zypper"
+	command -v apt-get &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="apt"
+	command -v dnf &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="dnf"
+	command -v emerge &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="emerge"
+	command -v pacman &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="pacman"
+  	command -v zypper &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="zypper"
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée)
 	if test "$PACK_MAIN_PACKAGE_MANAGER" = ""; then
@@ -947,7 +982,7 @@ function CheckInternetConnection()
 	ScriptHeader "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
 	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
-	if ping -q -c 1 -W 1 opendns.com >> /dev/null; then
+	if ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOGPATH"; then
 		EchoSuccess "Votre ordinateur est connecté à Internet"
 
 		return
@@ -969,20 +1004,20 @@ function DistUpgrade()
 
 	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER",
 	case "$PACK_MAIN_PACKAGE_MANAGER" in
-		"APT")
+		"apt")
 
 			apt-get -y update 2>&1 | tee -a "$SCRIPT_LOGPATH" && apt-get -y upgrade 2>&1 | tee -a "$FILE_LOGPATH"
 			;;
-		"DNF")
+		"dnf")
 			dnf -y update | tee -a "$FILE_LOGPATH"
 			;;
-		"Emerge")
+		"emerge")
 			emerge -u world 2>&1 | tee -a "$FILE_LOGPATH"
 			;;
-		"Pacman")
+		"pacman")
 			pacman --noconfirm -Syu | tee -a "$FILE_LOGPATH"
 			;;
-		"Zypper")
+		"zypper")
 			zypper -y update | tee -a "$FILE_LOGPATH"
 			;;
 	esac
@@ -1001,6 +1036,7 @@ function SetSudo()
 {
 	ScriptHeader "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
+	# On crée une backup du fichier de configuration "sudoers" au cas où l'utilisateur souhaite revenir à son ancienne configuration
 	sudoers_old="/etc/sudoers - $DATE_TIME.old"
 
     EchoNewstep "Détection de sudo $COL_RESET"
@@ -1113,21 +1149,21 @@ function Autoremove()
 				Newline
 
 	    		case "$PACK_MAIN_PACKAGE_MANAGER" in
-					"APT")
+					"apt")
 	            		apt-get -y autoremove
 	            		;;
-					"DNF")
+					"dnf")
 		           		dnf -y autoremove
 		           		;;
-		       		"Emerge")
+		       		"emerge")
 		           		emerge -uDN @world      # D'abord, vérifier qu'aucune tâche d'installation est active
 		           		emerge --depclean -a    # Suppression des paquets obsolètes. Demande à l'utilisateur s'il souhaite supprimer ces paquets
 		            	eix-test-obsolete       # Tester s'il reste des paquets obsolètes
 		            	;;
-	        		"Pacman")
+	        		"pacman")
 	            		pacman --noconfirm -Qdt
 	            		;;
-					"Zypper")
+					"zypper")
 		           		EchoNewstep "Le gestionnaire de paquets Zypper n'a pas de commande de suppression automatique de tous les paquets obsolètes"
 						EchoNewstep "Référez vous à la documentation du script ou à celle de Zypper pour supprimer les paquets obsolètes"
 		           		;;
