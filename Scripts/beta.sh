@@ -1031,15 +1031,22 @@ function DistUpgrade()
 {
 	ScriptHeader "MISE À JOUR DU SYSTÈME"
 
-	EchoSuccess "Mise à jour du système en cours"
+	EchoNewstep "Mise à jour du système en cours"
 	Newline
 
 	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER",
 	case "$PACK_MAIN_PACKAGE_MANAGER" in
 		"apt")
+			EchoNewstep "Mise à jour du cache d'APT"
+			apt-get -y update 2>&1 | tee -a "$SCRIPT_LOGPATH" \
+				|| EchoError "Impossible de mettre à jour le cache d'APT correctement" \
+				&& EchoSuccess "Le cache d'APT a été mis à jour avec succès"
+			Newline
 
-			script -c "apt-file update" "$SCRIPT_LOGPATH"
-			apt-get -y upgrade 2>&1 | tee -a "$FILE_LOGPATH"
+			EchoNewstep "Mise à jour des paquets"
+			apt-get -y upgrade 2>&1 | tee -a "$FILE_LOGPATH" \
+				|| EchoError "La mise à jour des paquets installés a échouée" \
+				&& EchoSuccess "La mise à jour des paquets installés s'est effectuée avec succès"
 			;;
 		"dnf")
 			dnf -y update | tee -a "$FILE_LOGPATH"
