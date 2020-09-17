@@ -829,11 +829,10 @@ function Mktmpdir()
 		Makedir "$DIR_TMPPATH" "Logs" "0"				# Dossier d'enregistrement des fichiers de logs
 	} >> "$FILE_LOGPATH"
 
-	# On déplace le fichier de logs vers le dossier temporaire tout en vérifiant s'il ne s'y trouve pas déjà
+	# Une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà
 	if test ! -f "$DIR_TMPPATH/Logs/$FILE_LOGNAME"; then
 		mv -v "$FILE_LOGNAME" "$DIR_TMPPATH/Logs" >> "$FILE_LOGPATH" \
-			|| HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_HOMEDIR") EN RAISON D'UN MANQUE DE DROITS" \
-				"Relancez le script avec les droits de super-utilisateur (avec la commande $(DechoE "sudo")) ou en vous connectant en mode root"
+			|| HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_HOMEDIR")" "" \
 			&& FILE_LOGPATH="$DIR_TMPPATH/Logs/$FILE_LOGNAME"	# Une fois que le fichier de logs est déplacé dans le dossier temporaire, on redéfinit le chemin du fichier de logs de la variable "$FILE_LOGPATH"
 	fi
 }
@@ -841,15 +840,49 @@ function Mktmpdir()
 # Détection de l'exécution du script en mode super-utilisateur (root)
 function ScriptInit()
 {
-	# On vérifie que le nom d'utilisateur passé en argument correspond à un compte d'utilisateur existant
-	if ! id -u "${ARG_USERNAME}" > /dev/null; then
-		EchoError "Nom d'utilisateur incorrect"
-		EchoError "Veuillez entrer correctement votre nom d'utilisateur"
+	# Si le script n'est pas lancé en mode super-utilisateur (root)
+	if test "$EUID" -ne 0; then
+		EchoErrorNoLog "Ce script doit être exécuté en tant que super-utilisateur (root)"
+		EchoErrorNoLog "Exécutez ce script en plaçant la commande $(DechoE "sudo") devant votre commande :"
+
+		# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
+		# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
+		echo "	sudo $0 votre_nom_d'utilisateur"
+		echo ""
+
+		EchoErrorNoLog "Ou connectez vous directement en tant que super-utilisateur"
+		EchoErrorNoLog "Et tapez cette commande :"
+		echo "	$0 votre_nom_d'utilisateur"
+		echo ""
+
+		EchoErrorNoLog "SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+		EchoErrorNoLog "Relancez le script avec les droits de super-utilisateur (avec la commande $(DechoE "sudo")) ou en vous connectant en mode root"
+		echo ""
+
+		exit
+
+	# Sinon, si le nom d'utilisateur passé en argument ne correspond à aucun compte d'utilisateur existant
+	elif ! id -u "${ARG_USERNAME}" > /dev/null; then
+		EchoErrorNoLog "NOM D'UTILISATEUR INCORRECT"
+		EchoErrorNoLog "Veuillez entrer correctement votre nom d'utilisateur"
+		echo ""
+
+		exit
+
+	# Sinon, si le script est lancé en mode super-utilisateur, accompagnée d'un argument
+	elif test -z "${ARG_USERNAME}"; then
+		EchoErrorNoLog "Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script :"
+		echo "	sudo $0 votre_nom_d'utilisateur"
+		echo ""
+
+		EchoErrorNoLog "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
+		EchoErrorNoLog "Entrez votre nom d'utilisateur juste après le nom du script"
+		echo ""
 
 		exit
 	fi
 
-	# On appelle la fonction de création du fichier de logs
+	# On appelle la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
 	CreateLogFile
 
 	# Puis la fonction de création du dossier temporaire
@@ -859,79 +892,48 @@ function ScriptInit()
 	{
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" \
 			"VÉRIFICATION DES INFORMATIONS PASSÉES EN ARGUMENT" >> "$FILE_LOGPATH"
-
 		Newline
 	} >> "$FILE_LOGPATH"
 
-	# Si le script n'est pas lancé en mode super-utilisateur (root)
-	if test "$EUID" -ne 0; then
-    	EchoErrorNoLog "Ce script doit être exécuté en tant que super-utilisateur (root)"
-    	EchoErrorNoLog "Exécutez ce script en plaçant la commande $(DechoE "sudo") devant votre commande :"
+	# On demande à l'utilisateur de bien confirmer son nom d'utilisateur, au cas où son compte utilisateur cohabite avec d'autres comptes
+	EchoNewstep "Nom d'utilisateur entré :$COL_RESET ${ARG_USERNAME}"
+	EchoNewstep "Est-ce correct ? (oui/non)"
+	Newline
+
+	# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
+	# Les deux virgules suivant directement le "rep_ScriptInit" entre les accolades signifient que les mêmes réponses avec des
+	# majuscules sont permises, peu importe où elles se situent dans la chaîne de caractères (pas de sensibilité à la casse).
+	function ReadScriptInit()
+	{
+		read -r -p "Entrez votre réponse : " rep_script_init
+		echo "$rep_script_init" >> "$FILE_LOGPATH"
 		Newline
 
-    	# Le paramètre "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
-    	# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
-    	echo "	sudo $0 votre_nom_d'utilisateur" 2>&1 | tee -a "$FILE_LOGPATH"
-		Newline
+		case ${rep_script_init,,} in
+			"oui")
+				EchoSuccess "Lancement du script"
 
-		EchoError "Ou connectez vous directement en tant que super-utilisateur"
-		EchoError "Et tapez cette commande :"
-		echo "	$0 votre_nom_d'utilisateur" 2>&1 | tee -a "$FILE_LOGPATH"
-
-		HandleErrors "SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL" "Relancez le script avec les droits de super-utilisateur (avec la commande $(DechoE "sudo")) ou en vous connectant en mode root"
-
-	# Sinon, si le script est lancé en mode super-utilisateur, on vérifie que la commande d'exécution du script soit accompagnée d'un argument
-	else
-		# Si aucun argument n'est entré
-		if test -z "${ARG_USERNAME}"; then
-			EchoErrorNoLog "Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script :"
-			echo "	sudo $0 votre_nom_d'utilisateur" 2>&1 | tee -a "$FILE_LOGPATH"
-
-			HandleErrors "VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT" "Entrez votre nom d'utilisateur juste après le nom du script"
-
-		# Sinon, si l'argument attendu est entré
-		else
-			# On demande à l'utilisateur de bien confirmer son nom d'utilisateur, au cas où son compte utilisateur cohabite avec d'autres comptes
-			EchoNewstep "Nom d'utilisateur entré :$COL_RESET ${ARG_USERNAME}"
-			EchoNewstep "Est-ce correct ? (oui/non)"
-			Newline
-
-			# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
-			# Les deux virgules suivant directement le "rep_ScriptInit" entre les accolades signifient que les mêmes réponses avec des
-			# majuscules sont permises, peu importe où elles se situent dans la chaîne de caractères (pas de sensibilité à la casse).
-			function ReadScriptInit()
-			{
-				read -r -p "Entrez votre réponse : " rep_script_init
-				echo "$rep_script_init" >> "$FILE_LOGPATH"
+				return
+				;;
+			"non")
+				EchoError "Abandon"
 				Newline
 
-				case ${rep_script_init,,} in
-					"oui")
-						EchoSuccess "Lancement du script"
+				exit 1
+				;;
+			*)
+				EchoError "Réponses attendues : \"oui\" ou \"non\" (pas de sensibilité à la casse)"
+				EchoError "Abandon"
+				Newline
 
-						return
-						;;
-					"non")
-						EchoError "Abandon"
-						Newline
+				exit 1
+				;;
+		esac
+	}
 
-						exit 1
-						;;
-					*)
-						EchoError "Réponses attendues : \"oui\" ou \"non\" (pas de sensibilité à la casse)"
-						EchoError "Abandon"
-						Newline
+	ReadScriptInit
 
-						exit 1
-						;;
-				esac
-			}
-
-			ReadScriptInit
-
-			return
-		fi
-	fi
+	return
 }
 
 # Détection du gestionnaire de paquets de la distribution utilisée
