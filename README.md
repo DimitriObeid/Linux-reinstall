@@ -23,9 +23,7 @@ La lecture de la documentation du script que vous souhaitez installer est viveme
 ## 2) Gestionnaires de paquets supportés par distributions :
 - **APT** (Debian, Ubuntu, Mint, Kali)  
 - **DNF** (RHEL, Fedora, CentOS)  
-- **Emerge** (Gentoo)  
 - **Pacman** (Arch Linux, Manjaro)  
-- **Zypper** (OpenSUSE)  
 
 ## 3) Fichiers à télécharger :
 
@@ -69,8 +67,7 @@ Ce dépôt Github s'organise en un dossier de fichiers contenant 5 fichiers et 6
 * *__4.6) Scripts :__*  
     - **Documentation.odt :** La documentation officielle des deux scripts de réinstallation en version stable.  
     - **Mode d'emploi.odt :** Ce fichier contient le mode d'emploi d'exécution de chaque script, avec de nombreuses informations supplémentaires.  
-    - **personnel.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation personnalisé.  
-    - **sio.sh :** Le fichier exécutable de la dernière version stable du script de réinstallation SIO.  
+    - **sio.sh :** Le fichier exécutable de la version Beta du script de réinstallation SIO.  
 
 
 ## 5) Ajouts futurs (version 2.0 et au-delà)
