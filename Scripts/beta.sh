@@ -15,7 +15,7 @@
 #	En ligne de commandes -> shellcheck beta.sh
 #		--> Commande d'installation de l'utilitaire : sudo $gestionnaire_de_paquets $option_d'installation shellcheck
 
-
+echo "$$"
 
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
@@ -164,7 +164,7 @@ function DechoH() { string=$1; echo "$COL_BLUE$string$COL_CYAN"; }
 
 ## DÉFINITION DES FONCTIONS DE CRÉATION DE HEADERS
 # Fonction de création et d'affichage des lignes des headers
-function DrawHeaderLine()
+function DrawLine()
 {
 	#***** Paramètres *****
 	line_color=$1			# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
@@ -224,16 +224,16 @@ function HeaderBase()
 
 	#***** Code *****
 	# Définition de la couleur de la ligne du caractère souhaité.
-	# Ce code produit le même résultat que la première condition de la fonction "DrawHeaderLine", mais il a été
+	# Ce code produit le même résultat que la première condition de la fonction "DrawLine", mais il a été
 	# réécrit ici car aucune partie d'une fonction ne peut être utilisée individuellement depuis une autre fonction
 	if test "$line_color" == ""; then
 		echo -ne "$line_color"
 	fi
 
-	DrawHeaderLine "$line_color" "$line_char"
+	DrawLine "$line_color" "$line_char"
 	# Affichage une autre couleur pour le texte
 	echo "$string_color" "##>" "$string$COL_RESET"
-	DrawHeaderLine "$line_color" "$line_char"
+	DrawLine "$line_color" "$line_char"
 
 	# Ne pas appeler la fonction "Newline" ici, car cette dernière est automatiquement réappelée lors de la redirection de la fonction "HeaderBase"
 	# vers le terminal et le fichier de logs, puis une troisième fois dans les fonctions "ScriptHeader" et "HeaderInstall" (dans le cas où on appelle
@@ -309,8 +309,8 @@ function HandleErrors()
 
 	# Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur)
 	if test ! -f "$DIR_HOMEDIR/$FILE_LOGNAME"; then
-		mv "$FILE_LOGPATH" "$DIR_HOMEDIR"
-		FILE_LOGPATH="$DIR_HOMEDIR"
+		mv -v "$FILE_LOGPATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOGNAME"
+		FILE_LOGPATH="$DIR_HOMEDIR/$FILE_LOGNAME"
 	fi
 
 	EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé à l'adresse suivante : $(DechoE "$FILE_LOGPATH")"
@@ -326,90 +326,111 @@ function HandleErrors()
 function Makedir()
 {
 	#***** Paramètres *****
-	dir_parent=$1		# Emplacement depuis la racine du dossier parent du dossier à créer
-	dir_name=$2			# Nom du dossier à créer (dans son dossier parent)
-	dir_sleep=$3		# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
+	dir_parent=$1		# Emplacement depuis la racine du dossier parent du dossier à traiter
+	dir_name=$2			# Nom du dossier à traiter (dans son dossier parent)
+	dir_sleep_block=$3	# Temps de pause du script avant et après la création d'une ligne d'un bloc d'informations sur le traitement du dossier
+	dir_sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès lors du traitement du dossier
 
 	#***** Autres variables *****
-	dir_path="$dir_parent/$dir_name"	# Chemin du dossier à traiter
+	local dir_path="$dir_parent/$dir_name"	# Chemin du dossier à traiter
 
 	#***** Code *****
-	DrawHeaderLine "$COL_RESET" "#"
+	# On commence par dessiner la première ligne du bloc
+	sleep "$dir_sleep_block"
+	DrawLine "$COL_RESET" "#"
+	echo ""
 	echo ""
 
-	EchoNewstepCustomTimer "Traitement du dossier $(Decho "$dir_path")" "$dir_sleep"
+	EchoNewstepCustomTimer "Traitement du dossier $(Decho "$dir_path")" "$dir_sleep_txt"
 	echo ""
 
-	if test ! -d "$dir_path"; then
-		EchoNewstepCustomTimer "Création du dossier $(DechoN "$dir_name") dans le dossier $(DechoN "$dir_parent")" "$dir_sleep"
-		mkdir -v "$dir_path" \
+	# Si le dossier à traiter n'existe pas
+	if test ! -d "$dir_path/"; then
+		EchoNewstepCustomTimer "Création du dossier $(DechoN "$dir_name") dans le dossier $(DechoN "$dir_parent")" "$dir_sleep_txt"
+		mkdir -v "$dir_path/" \
 			|| HandleErrors "LE DOSSIER $(DechoE "$dir_name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$dir_parent")" "Essayez de le créer manuellement" \
-			&& EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_name") a été créé avec succès dans le dossier $(DechoS "$dir_parent")" "$dir_sleep"
+			&& EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_name") a été créé avec succès dans le dossier $(DechoS "$dir_parent")" "$dir_sleep_txt"
 		echo ""	# On ne redirige pas les sauts de ligne vers le fichier de logs, pour éviter de les afficher en double en cas d'appel de la fonction avec redirections
 
-		# On change les droits du dossier créé par le script
-		# Comme il est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
-		# Pour attribuer les droits de lecture, d'écriture et d'exécution (rwx) à l'utilisateur normal, on appelle
-		# la commande chown avec pour arguments :
+		# On change les droits du dossier nouvellement créé par le script
+		# Comme ce dernier est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
+		# Pour attribuer récursivement la propriété du dossier à l'utilisateur normal, on appelle la commande chown avec pour arguments :
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 
-		EchoNewstepCustomTimer "Changement récursif des droits du nouveau dossier $(DechoN "$dir_path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$dir_sleep"
+		EchoNewstepCustomTimer "Changement récursif des droits du nouveau dossier $(DechoN "$dir_path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$dir_sleep_txt"
+		echo ""
 
-		chown -Rv "${ARG_USERNAME}" "$dir_path" \
+		chown -Rv "${ARG_USERNAME}" "$dir_path/" \
 			|| {
-				EchoErrorCustomTimer "Impossible de changer les droits du dossier $(DechoE "$dir_path")" "$dir_sleep"
-				EchoErrorCustomTimer "Pour changer les droits du dossier $(DechoE "$dir_path") de manière récursive," "$dir_sleep"
-				EchoErrorCustomTimer "utilisez la commande :" "$dir_sleep"
+				echo ""
+
+				EchoErrorCustomTimer "Impossible de changer les droits du dossier $(DechoE "$dir_path")" "$dir_sleep_txt"
+				EchoErrorCustomTimer "Pour changer les droits du dossier $(DechoE "$dir_path") de manière récursive," "$dir_sleep_txt"
+				EchoErrorCustomTimer "utilisez la commande :" "$dir_sleep_txt"
 				echo "	chown -R ${ARG_USERNAME} $dir_path"
 				echo ""
 
-				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path")" "$dir_sleep"
+				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path")" "$dir_sleep_txt"
 
-				DrawHeaderLine "$COL_RESET" "#"
+				# On dessine la deuxième et dernière ligne du bloc
+				DrawLine "$COL_RESET" "#"
+				sleep "$dir_sleep_block"
+				echo ""
 				echo ""
 
 				return
 			} \
-			&& EchoSuccessCustomTimer "Les droits du dossier $(DechoS "$dir_name") ont été changés avec succès" "$dir_sleep"
-			echo ""
+			&& { echo ""; EchoSuccessCustomTimer "Les droits du dossier $(DechoS "$dir_name") ont été changés avec succès" "$dir_sleep_txt"; }
 
-			EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep"
-			echo ""
+		echo ""
 
-			DrawHeaderLine "$COL_RESET" "#"
-			echo ""
+		EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep_txt"
+		echo ""
+
+		# On dessine la deuxième et dernière ligne du bloc
+		DrawLine "$COL_RESET" "#"
+		sleep "$dir_sleep_block"
+		echo ""
+		echo ""
 
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier contient AU MOINS un fichier ou dossier
 	elif test -d "$dir_path/" && test "$(ls -A "$dir_path/")"; then
-		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible $(DechoN "$dir_parent")" "$dir_sleep"
-		EchoNewstepCustomTimer "Suppression du contenu du dossier $(DechoN "$dir_path")" "$dir_sleep"
+		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom se trouve déjà dans le dossier cible $(DechoN "$dir_parent")" "$dir_sleep_txt"
+		EchoNewstepCustomTimer "Suppression du contenu du dossier $(DechoN "$dir_path")" "$dir_sleep_txt"
 
 		# ATTENTION À NE PAS MODIFIER LA COMMANDE SUIVANTE", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
 		# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
 		rm -rfv "${dir_path/:?}/"* \
 			|| {
-				EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $(DechoE "$dir_path")" "$dir_sleep";
-				EchoErrorCustomTimer "Le contenu de tout fichier du dossier $(DechoE "$dir_path") portant le même nom qu'un des fichiers téléchargés sera écrasé" "$dir_sleep"
+				EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $(DechoE "$dir_path")" "$dir_sleep_txt";
+				EchoErrorCustomTimer "Le contenu de tout fichier du dossier $(DechoE "$dir_path") portant le même nom qu'un des fichiers téléchargés sera écrasé" "$dir_sleep_txt"
 				echo ""
 
-				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path")" "$dir_sleep"
+				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path")" "$dir_sleep_txt"
 				echo ""
 
-				DrawHeaderLine "$COL_RESET" "#"
+				# On dessine la deuxième et dernière ligne du bloc
+				DrawLine "$COL_RESET" "#"
+				sleep "$dir_sleep_block"
+				echo ""
+				echo ""
 
 				return
 			} && \
 			{
-				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$dir_path") effectuée avec succès" "$dir_sleep"
+				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$dir_path") effectuée avec succès" "$dir_sleep_txt"
 				echo ""
 
-				EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep"
+				EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep_txt"
 				echo ""
 
-				DrawHeaderLine "$COL_RESET" "#"
+				# On dessine la deuxième et dernière ligne du bloc
+				DrawLine "$COL_RESET" "#"
+				sleep "$dir_sleep_block"
+				echo ""
 				echo ""
 			}
 
@@ -417,13 +438,13 @@ function Makedir()
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier est vide
 	elif test -d "$dir_path/"; then
-		EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_path") existe déjà" "$dir_sleep"
+		EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_path") existe déjà" "$dir_sleep_txt"
 		echo ""
 
-		EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep"
+		EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep_txt"
 		echo ""
 
-		DrawHeaderLine "$COL_RESET" "#"
+		DrawLine "$COL_RESET" "#"
 		echo ""
 
 		return
@@ -435,20 +456,27 @@ function Makedir()
 function Makefile()
 {
 	#***** Paramètres *****
-	file_parent=$1		# Emplacement depuis la racine du dossier parent du fichier à créer
-	file_name=$2		# Nom du fichier à créer (dans son dossier parent)
-	file_sleep=$3		# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
+	file_parent=$1		# Emplacement depuis la racine du dossier parent du fichier à traiter
+	file_name=$2		# Nom du fichier à traiter (dans son dossier parent)
+	file_sleep_block=$3	# Temps de pause du script avant et après la création d'un bloc d'informations sur le traitement du fichier
+	file_sleep_text=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
 
 	#***** Autres variables *****
-	file_path="$file_parent/$file_name"		# Chemin du fichier à traiter
-
+	local file_path="$file_parent/$file_name"		# Chemin du fichier à traiter
 
 	#***** Code *****
-	# Si le fichier à créer n'existe pas
+	# On commence par dessiner la première ligne du bloc
+	sleep "$file_sleep_block"
+	DrawLine "$COL_RESET" "#"
+	echo ""
+	echo ""
+
+
+	# Si le fichier à traiter n'existe pas
 	if test ! -s "$file_path"; then
 		touch "$file_path" \
-			|| HandleErrors "LE FICHIER $(DechoE "$file_name") n'a pas pu être créé dans le dossier $(DechoE "$file_parent")" "Essayez de le créer manuellement" \
-			&& EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") a été créé avec succès dans le dossier $(DechoS "$file_parent")" "$file_sleep"
+			|| HandleErrors "LE FICHIER $(DechoE "$file_name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$file_parent")" "Essayez de le créer manuellement" \
+			&& EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") a été créé avec succès dans le dossier $(DechoS "$file_parent")" "$file_sleep_text"
 		echo ""
 
 		# On change les droits du fichier créé par le script
@@ -458,18 +486,18 @@ function Makefile()
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 
-		EchoNewstepCustomTimer "Changement des droits du nouveau fichier $(DechoN "$file_path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$file_sleep"
+		EchoNewstepCustomTimer "Changement des droits du nouveau fichier $(DechoN "$file_path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$file_sleep_text"
 
 		chown -v "${ARG_USERNAME}" "$file_path" \
 		|| {
-			EchoErrorCustomTimer "Impossible de changer les droits du fichier $(DechoE "$file_path")" "$file_sleep"
-			EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$file_path")," "$file_sleep"
-			EchoErrorCustomTimer "utilisez la commande :" "$file_sleep"
+			EchoErrorCustomTimer "Impossible de changer les droits du fichier $(DechoE "$file_path")" "$file_sleep_text"
+			EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$file_path")," "$file_sleep_text"
+			EchoErrorCustomTimer "utilisez la commande :" "$file_sleep_text"
 			echo "	chown ${ARG_USERNAME} $file_path"
 
 			return
 		} \
-		&& EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep"
+		&& EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep_text"
 
 		echo ""
 
@@ -477,15 +505,15 @@ function Makefile()
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il est vide
 	elif test -f "$file_path" && test -s "$file_path"; then
-		EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") existe déjà dans le dossier $(DechoS "$file_parent")" "$file_sleep"
+		EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") existe déjà dans le dossier $(DechoS "$file_parent")" "$file_sleep_text"
 
 		return
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il n'est pas vide
 	elif test -f "$file_path" && test ! -s "$file_path"; then
 		true > "$file_path" \
-			|| EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$file_path") n'a pas été écrasé" "$file_sleep" \
-			&& EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$file_path") a été écrasé avec succès" "$file_sleep"
+			|| EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$file_path") n'a pas été écrasé" "$file_sleep_text" \
+			&& EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$file_path") a été écrasé avec succès" "$file_sleep_text"
 		Newline
 
 		return
@@ -506,61 +534,67 @@ function PackInstall()
 
 	#***** Autres variables *****
 	# Vérification de la présence d'un paquet dans la base de données du gestionnaire
-	packages_failed_dir="Packages"							# Dossier parent du fichier contenant les noms des paquets introuvables dans la base données du gestionnaire de paquets, ainsi que du fichier contenant les noms des paquets dont l'installation a échouée
-	packages_failed_dir_path="$DIR_TMPPATH/$packages_failed_dir"
+	local packages_failed_dir="Packages"							# Dossier parent du fichier contenant les noms des paquets introuvables dans la base données du gestionnaire de paquets, ainsi que du fichier contenant les noms des paquets dont l'installation a échouée
+	local packages_failed_dir_path="$DIR_TMPPATH/$packages_failed_dir"
 
-	packages_not_found_file="Packages not found.txt"	# Nom du fichier
-	packages_not_found_file_path="$packages_failed_dir/$packages_not_found_file"	# Chemin du fichier
+	# Fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
+	local packages_not_found_file="Packages not found.txt"	# Nom du fichier
+	local packages_not_found_file_path="$packages_failed_dir/$packages_not_found_file"	# Chemin du fichier
 
-	packages_not_installed_file="Packages not installed.txt"
-	packages_not_installed_file_path="$packages_failed_dir/$packages_not_installed_file"
+	# Fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
+	local packages_not_installed_file="Packages not installed.txt"
+	local packages_not_installed_file_path="$packages_failed_dir/$packages_not_installed_file"
 
 	# Vérification de la présence d'un paquet
-	exists_in_database="False"	# Variable servant à vérifier l'existence d'un paquet dans la base de données du gestionnaire de paquets
-	is_installed="False"		# Variable servant à vérifier l'existence d'un paquet sur le disque dur de l'utilisateur
+	local exists_in_database="False"	# Variable servant à vérifier l'existence d'un paquet dans la base de données du gestionnaire de paquets
+	local is_installed="False"			# Variable servant à vérifier l'existence d'un paquet sur le disque dur de l'utilisateur
 
 	#***** Code *****
 	# On définit les commandes de recherche et d'installation de paquets selon le nom du gestionnaire de paquets passé en premier argument.
 	# Également, on permet l'insensibilité à la casse au cas où l'utilisateur veut ajouter un paquet dans la liste de paquets à installer et qu'il passe
 	# en premier argument le nom du gestionnaire de paquets avec ou sans majuscule (par exemple : PackInstall "snap" paquet OU PackInstall "Snap" paquet).
-	case ${package_manager_name,,} in
-		"$PACK_MAIN_PACKAGE_MANAGER")
-			case ${PACK_MAIN_PACKAGE_MANAGER,,} in
-				"apt")
-					search_pack_hdrive_command="$(apt-get list --installed "$package_name" > /dev/null | grep "Package: $package_name" 2>&1 | tee -a "$FILE_LOGPATH")"	# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
-					search_pack_db_command="$(apt-cache show "$package_name" 2>&1 | tee -a "$FILE_LOGPATH")"															# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
-					install_command="$(apt-get -y install "$package_name" 2>&1 | tee -a "$FILE_LOGPATH")"																# Commande d'installation de paquets
-					;;
-			#	"dnf")
-			#		search_pack_hdrive_command=""
-			#		search_pack_db_command=""
-			#		install_command=$(dnf -y install) "$package_name"
-			#		;;
-			#	"pacman")
-			#		search_pack_hdrive_command=pacman -Q "$package_name"
-			#		search_pack_db_command=""
-			#		install_command=pacman --noconfirm -S "$package_name"
-			#		;;
-			esac
-			;;
-		"snap")
-			search_pack_hdrive_command=snap list "$package_name"
-			search_pack_db_command=""
-			install_command=snap install "$*"
-			;;
-		"")
-			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
-				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"))"
-			;;
-		*)
-			EchoError "Le nom du gestionnaire de paquets passé en premier argument \"$(DechoE "$package_manager_name")\" ne correspond à aucun gestionnaire de paquets présent sur votre système"
-			EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande"
-			Newline
 
-			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
-				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯"
-			;;
-	esac
+	# Pour alléger le code, le code contenant la condition "case" est placé entre des accolades pour rediriger toutes les sorties vers le terminal ET le fichier de logs
+	{
+		case ${package_manager_name,,} in
+			"$PACK_MAIN_PACKAGE_MANAGER")
+				case ${PACK_MAIN_PACKAGE_MANAGER,,} in
+					"apt")
+						search_pack_hdrive_command="$(apt-cache policy "$package_name" > /dev/null | grep "$package_name")"	# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
+						search_pack_db_command="$(apt-cache show "^$package_name\$")"										# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
+						install_command="$(apt-get -y install "$package_name")"												# Commande d'installation de paquets
+						;;
+				#	"dnf")
+				#		search_pack_hdrive_command=""								# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
+				#		search_pack_db_command=""									# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
+				#		install_command=$(dnf -y install) "$package_name"			# Commande d'installation de paquets
+				#		;;
+				#	"pacman")
+				#		search_pack_hdrive_command=pacman -Q "$package_name"		# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
+				#		search_pack_db_command=""									# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
+				#		install_command=pacman --noconfirm -S "$package_name"		# Commande d'installation de paquets
+				#		;;
+				esac
+				;;
+			"snap")
+				search_pack_hdrive_command=snap list "$package_name"
+				search_pack_db_command=""
+				install_command=snap install "$*"
+				;;
+			"")
+				HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
+					"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"))"
+				;;
+			*)
+				EchoError "Le nom du gestionnaire de paquets passé en premier argument $(DechoE "$package_manager_name") ne correspond à aucun gestionnaire de paquets présent sur votre système"
+				EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande"
+				Newline
+
+				HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
+					"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯"
+				;;
+		esac
+	} 2>&1 | tee -a "$FILE_LOGPATH"
 
 	## CRÉATION D'UN DOSSIER CONTENANT DES INFORMATIONS CONCERNANT LES ÉVENTUELS PAQUETS NON-TROUVÉS DANS LA BASE DE DONNÉES
 	## DU GESTIONNAIRE DE PAQUETS OU LES ÉVENTUELS PAQUETS IMPOSSIBLES À INSTALLER SUR LE DISQUE DUR DE L'UTILISATEUR
@@ -569,7 +603,7 @@ function PackInstall()
 	Newline
 
 	if test ! -d "$packages_failed_dir"; then
-		Makedir "$DIR_TMPPATH" "$packages_failed_dir" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+		Makedir "$DIR_TMPPATH" "$packages_failed_dir" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 	fi
 
 	## VÉRIFICATION DE LA PRÉSENCE DU PAQUET SUR LE DISQUE DUR DE L'UTILISATEUR
@@ -692,18 +726,18 @@ function SoftwareInstall()
 
 	#***** Autres variables *****
 	# Dossiers
-	software_inst_dir="$DIR_SOFTWARE/$software_name"					# Dossier d'installation du logiciel
-	software_shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	# Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés
+ 	local software_inst_dir="$DIR_SOFTWARE/$software_name"					# Dossier d'installation du logiciel
+	local software_shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	# Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés
 
 	# Fichiers
-	software_dl_link="$software_web_link/$software_archive"				# Lien de téléchargement de l'archive
+	local software_dl_link="$software_web_link/$software_archive"				# Lien de téléchargement de l'archive
 
 
 	#***** Code *****
 	EchoNewstep "Téléchargement de $COL_CYAN$software_name"
 
 	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels
-	Makedir "$DIR_SOFTWARE" "$software_name" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+	Makedir "$DIR_SOFTWARE" "$software_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 	if test wget -v "$software_dl_link" -O "$software_inst_dir" >> "$FILE_LOGPATH"; then \
 		EchoSuccess "Le logiciel $software_name a été téléchargé avec succès"
 		Newline
@@ -747,7 +781,7 @@ function SoftwareInstall()
 		EchoNewstep "Création d'un dossier contenant les raccourcis vers les logiciels téléchargés via la commande wget (pour ne pas encombrer votre bureau)"
 		Newline
 
-		Makedir "$DIR_HOMEDIR/Bureau/" "Linux-reinstall.link" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+		Makedir "$DIR_HOMEDIR/Bureau/" "Linux-reinstall.link" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 		EchoSuccess "Le dossier  vous pourrez déplacer les raccourcis sur votre bureau sans avoir à les modifier"
 	fi
 
@@ -825,8 +859,8 @@ function Mktmpdir()
 
 		Newline
 
-		Makedir "$DIR_TMPPARENT" "$DIR_TMPDIR" "0"		# Dossier principal
-		Makedir "$DIR_TMPPATH" "Logs" "0"				# Dossier d'enregistrement des fichiers de logs
+		Makedir "$DIR_TMPPARENT" "$DIR_TMPDIR" "0" "0"		# Dossier principal
+		Makedir "$DIR_TMPPATH" "Logs" "0" "0"				# Dossier d'enregistrement des fichiers de logs
 	} >> "$FILE_LOGPATH"
 
 	# Une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà
@@ -922,7 +956,7 @@ function ScriptInit()
 				exit 1
 				;;
 			*)
-				EchoError "Réponses attendues : \"oui\" ou \"non\" (pas de sensibilité à la casse)"
+				EchoError "Réponses attendues : $(DechoE "oui") ou $(DechoE "non") (pas de sensibilité à la casse)"
 				EchoError "Abandon"
 				Newline
 
@@ -1071,7 +1105,7 @@ function SetSudo()
 	ScriptHeader "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
 	# On crée une backup du fichier de configuration "sudoers" au cas où l'utilisateur souhaite revenir à son ancienne configuration
-	sudoers_old="/etc/sudoers - $DATE_TIME.old"
+	local sudoers_old="/etc/sudoers - $DATE_TIME.old"
 
     EchoNewstep "Détection de sudo $COL_RESET"
 
@@ -1125,7 +1159,7 @@ function SetSudo()
 				Newline
 
 				# Déplacement du fichier vers le dossier "/etc/"
-				EchoNewstep "Déplacement du fichier \"sudoers\" vers \"/etc/\""
+				EchoNewstep "Déplacement du fichier $(DechoN "sudoers") vers le dossier $(DechoN "/etc")"
 				mv "$DIR_TMPPATH/sudoers" /etc/sudoers \
 					|| { EchoError "Impossible de déplacer le fichier $(DechoE "sudoers") vers le dossier $(DechoE "/etc/")"; return; } \
 					&& { EchoSuccess "Fichier $(DechoS "sudoers") déplacé avec succès vers le dossier $(DechoS "/etc/")"; }
@@ -1226,7 +1260,7 @@ function IsInstallationDone()
 {
 	ScriptHeader "INSTALLATION TERMINÉE"
 
-	EchoNewstep "Souhaitez-vous supprimer le dossier temporaire $(DechoN "$DIR_TMPPATH") ?"
+	EchoNewstep "Souhaitez-vous supprimer le dossier temporaire $(DechoN "$DIR_TMPPATH") ? (oui/non)"
 	Newline
 
 	read -rp "Entrez votre réponse : " rep_erase_tmp
@@ -1234,10 +1268,16 @@ function IsInstallationDone()
 
 	case ${rep_erase_tmp,,} in
 		"oui")
+			EchoNewstep "Déplacement du fichier de logs dans votre dossier personnel"
+			Newline
+
+			mv -v "$FILE_LOGPATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOGNAME" && FILE_LOGPATH=$"$DIR_HOMEDIR" \
+				&& EchoSuccess "Le fichier de logs a bien été deplacé dans votre dossier personnel"
+
 			EchoNewstep "Suppression du dossier temporaire $DIR_TMPPATH"
 			rm -rfv "$DIR_TMPPATH" >> "$FILE_LOGPATH" \
-				|| EchoError "Suppression du dossier temporaire impossible. Essayez de le supprimer à la main" \
-				&& EchoSuccess "Le dossier temporaire \"$DIR_TMPPATH\" a été supprimé avec succès"
+				|| EchoError "Suppression du dossier temporaire impossible. Essayez de le supprimer manuellement" \
+				&& EchoSuccess "Le dossier temporaire $(DechoS "$DIR_TMPPATH") a été supprimé avec succès"
 				Newline
 			;;
 		*)
@@ -1248,8 +1288,7 @@ function IsInstallationDone()
     EchoSuccess "Installation terminée. Votre distribution Linux est prête à l'emploi"
 	Newline
 
-	echo "$COL_CYAN"
-	echo "Note :$COL_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script,"
+	echo "$COL_CYAN\Note :$COL_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script,"
 	echo "vous pouvez m'envoyer le fichier de logs situé dans votre dossier personnel."
 	echo "Il porte le nom de $COL_CYAN$FILE_LOGNAME$COL_RESET"
 	Newline
@@ -1257,7 +1296,7 @@ function IsInstallationDone()
     # On tue le processus de connexion en mode super-utilisateur
 	sudo -k
 
-	return
+	exit
 }
 
 
@@ -1309,7 +1348,7 @@ SetSudo
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS
-ScriptHeader "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS OFFICIELS DE VOTRE DISTRIBUTION"
+ScriptHeader "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS"
 
 EchoSuccess "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 EchoSuccess "La partie d'installation de vos programmes commence véritablement"
@@ -1392,7 +1431,7 @@ Newline
 
 # Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
 EchoNewstep "Création du dossier d'installation des logiciels"
-Makedir "$DIR_HOMEDIR" "$DIR_SOFTWARE" "1"
+Makedir "$DIR_HOMEDIR" "$DIR_SOFTWARE" "2" "1"
 Newline
 
 # Installation de JMerise
