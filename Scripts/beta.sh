@@ -535,81 +535,89 @@ function PackInstall()
 	package_name=$2
 
 	#***** Autres variables *****
-	# Vérification de la présence d'un paquet dans la base de données du gestionnaire
-	local packages_failed_dir="Packages"							# Dossier parent du fichier contenant les noms des paquets introuvables dans la base données du gestionnaire de paquets, ainsi que du fichier contenant les noms des paquets dont l'installation a échouée
-	local packages_failed_dir_path="$DIR_TMPPATH/$packages_failed_dir"
+	#* Noms des dossiers et des fichiers (à passer en deuxième argument dans les fonctions "Makedir" et "Makefile")
+	# Dossier et fichers de test d'installation de paquets
+	local pack_fail_d_name="Packages"							# Nom du dossier contenant les fichiers contenant les noms des paquets
+	local pack_not_found_f_name="Packages not found.txt"		# Nom du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
+	local pack_not_inst_f_name="Packages not installed.txt"		# Nom du fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
 
-	# Fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
-	local packages_not_found_file="Packages not found.txt"	# Nom du fichier
-	local packages_not_found_file_path="$packages_failed_dir/$packages_not_found_file"	# Chemin du fichier
+	# Dossier et fichiers temporaires contenant les commandes de recherche et d'installation des paquets
+	local pack_tmp_d_name="Install tmp"
+	local pack_hd_f_name="hd_search.tmp"
+	local pack_db_f_name="db_search.tmp"
+	local pack_inst_f_name="inst.tmp"
 
-	# Fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
-	local packages_not_installed_file="Packages not installed.txt"
-	local packages_not_installed_file_path="$packages_failed_dir/$packages_not_installed_file"
+	#* Chemins des dossiers et des fichiers
+	# Dossier et fichers de test d'installation de paquets
+	local pack_fail_d_path="$DIR_TMPPATH/$pack_fail_d_name"					# Chemin du dossier contenant les fichiers contenant les noms des paquets introuvables dans la base de données ou dont l'installation a échouée
+	local pack_not_found_f_path="$pack_fail_d_name/$pack_not_found_f_name"	# Chemin du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
+	local pack_not_inst_f_path="$pack_fail_d_name/$pack_not_inst_f_name"	# Chemin du fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
+
+	# Dossier et fichiers temporaires contenant les commandes de recherche et d'installation des paquets
+	local pack_tmp_d_path="$DIR_TMPPATH/$pack_tmp_d_name"			# Chemin du dossier contenant ces fichiers
+	local pack_hd_f_path="$pack_tmp_d_name/$pack_hd_f_name"			# Chemin du fichier contenant la commande de recherche sur le système
+	local pack_db_f_path="$pack_tmp_d_name/$pack_db_f_name"			# Chemin du fichier contenant la commande de recherche dans la base de données
+	local pack_inst_f_path="$pack_tmp_d_name/$pack_inst_f_name"		# Chemin du fichier contenant la commande d'installation
 
 	#***** Code *****
 	# On définit les commandes de recherche et d'installation de paquets selon le nom du gestionnaire de paquets passé en premier argument.
 	# Également, on permet l'insensibilité à la casse au cas où l'utilisateur veut ajouter un paquet dans la liste de paquets à installer et qu'il passe
 	# en premier argument le nom du gestionnaire de paquets avec ou sans majuscule (par exemple : PackInstall "snap" paquet OU PackInstall "Snap" paquet).
-
-	# Pour alléger le code, le code contenant la condition "case" est placé entre des accolades pour rediriger toutes les sorties vers le terminal ET le fichier de logs (ce qui évite d'avoir à le faire à chaque appel de commande)
-	{
-		case ${package_manager_name,,} in
-			"$PACK_MAIN_PACKAGE_MANAGER")
-				case ${PACK_MAIN_PACKAGE_MANAGER,,} in
-					"apt")
-						search_pack_hdrive_command="$(apt-cache policy "$package_name" > /dev/null | grep "$package_name")"	# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
-						search_pack_db_command="$(apt-cache show "^$package_name\$")"										# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
-						install_command="$(apt-get -y install "$package_name")"												# Commande d'installation de paquets
-						;;
-				#	"dnf")
-				#		search_pack_hdrive_command=""								# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
-				#		search_pack_db_command=""									# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
-				#		install_command=$(dnf -y install) "$package_name"			# Commande d'installation de paquets
-				#		;;
-				#	"pacman")
-				#		search_pack_hdrive_command=pacman -Q "$package_name"		# Commande de recherche de paquets installés sur le disque dur de l'utilisateur
-				#		search_pack_db_command=""									# Commande de recherche de paquets dans la base de données du gestionnaire de paquets
-				#		install_command=pacman --noconfirm -S "$package_name"		# Commande d'installation de paquets
-				#		;;
-				esac
-				;;
-			"snap")
-				search_pack_hdrive_command=snap list "$package_name"
-				search_pack_db_command=""
-				install_command=snap install "$*"
-				;;
-			"")
-				HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
-					"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)"
+	case ${package_manager_name,,} in
+		"$PACK_MAIN_PACKAGE_MANAGER")
+			case ${PACK_MAIN_PACKAGE_MANAGER,,} in
+				"apt")
+					echo apt-cache policy "$package_name" > /dev/null | grep "$package_name" > "$pack_hd_f_path"
+					echo apt-cache show "^$package_name\$" > "$pack_db_f_path"
+					echo apt-get -y install "$package_name" > "$pack_inst_f_path"
+					;;
+			#	"dnf")
+			#		search_pack_hdrive_command=""
+			#		search_pack_db_command=""
+			#		echo dnf -y install "$package_name" > "$pack_inst_f_path"
+			#		;;
+			#	"pacman")
+			#		echo pacman -Q "$package_name" > "$pack_hd_f_path"
+			#		search_pack_db_command=""
+			#		echo pacman --noconfirm -S "$package_name" > "$pack_inst_f_path"
+			esac
+			;;
+		"snap")
+			echo snap list "$package_name" > "$pack_hd_f_path"
+			# search_pack_db_command=""
+			snap install "$*" > "$pack_inst_f_path"
+			;;
+		"")
+			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
+				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)"
 				;;
 			*)
-				EchoError "Le nom du gestionnaire de paquets passé en premier argument $(DechoE "$package_manager_name") ne correspond à aucun gestionnaire de paquets présent sur votre système"
-				EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande"
-				Newline
+			EchoError "Le nom du gestionnaire de paquets passé en premier argument $(DechoE "$package_manager_name") ne correspond à aucun gestionnaire de paquets présent sur votre système"
+			EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande"
+			Newline
 
-				HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
-					"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯"
-				;;
-		esac
-	} 2>&1 | tee -a "$FILE_LOGPATH"
+			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
+				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯"
+			;;
+	esac
 
 	## CRÉATION D'UN DOSSIER CONTENANT DES INFORMATIONS CONCERNANT LES ÉVENTUELS PAQUETS NON-TROUVÉS DANS LA BASE DE DONNÉES
 	## DU GESTIONNAIRE DE PAQUETS OU LES ÉVENTUELS PAQUETS IMPOSSIBLES À INSTALLER SUR LE DISQUE DUR DE L'UTILISATEUR
-	EchoNewstep "Création du dossier $(DechoN "$packages_failed_dir") dans le dossier temporaire $(DechoN "$DIR_TMPPATH")"
+	EchoNewstep "Création du dossier $(DechoN "$pack_fail_d_name") dans le dossier temporaire $(DechoN "$DIR_TMPPATH")"
 	EchoNewstep "en cas d'absence du paquet dans la base de données du gestionnaire de paquets ou d'échec d'installation"
 	Newline
 
-	if test ! -d "$packages_failed_dir"; then
-		Makedir "$DIR_TMPPATH" "$packages_failed_dir" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+	if test ! -d "$pack_fail_d_name"; then
+		Makedir "$DIR_TMPPATH" "$pack_fail_d_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 	fi
 
 	## VÉRIFICATION DE LA PRÉSENCE DU PAQUET SUR LE DISQUE DUR DE L'UTILISATEUR
 	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")"
 	Newline
 
-	# On appelle la commande de recherche de paquets installés sur le système de l'utilisateur
-	"$search_pack_hdrive_command"
+	# On appelle la commande de recherche de paquets installés sur le système de l'utilisateur en exécutant le fichier
+	# Pour plus d'informations, veuillez vous référer à cette réponse sur Stack Overflow --> https://stackoverflow.com/a/13568021
+	bash "$pack_hd_f_path"
 
 	# Si le paquet à installer est déjà installé
 	if test "$?" -eq 0; then
@@ -633,17 +641,17 @@ function PackInstall()
 		Newline
 
 		# On appelle la commande de recherche de paquets dans la base de données du gestionnaire selon la distribution de l'utilisateur
-		"$search_pack_db_command"
+		bash "$pack_db_f_path"
 
-		# Si le paquet est instrouvable dans la base de données du gestionnaire de paquets
+		# Si le paquet est introuvable dans la base de données du gestionnaire de paquets
 		if test "$?" -ne 0; then
 			EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
 
-			if test ! -f "$packages_not_found_file_path"; then
-				Makefile "$packages_failed_dir_path" "$packages_not_found_file" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+			if test ! -f "$pack_not_inst_f_path"; then
+				Makefile "$pack_fail_d_path" "$pack_not_found_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 			fi
 
-			echo "$package_name" >> "$packages_not_found_file_path"
+			echo "$package_name" >> "$pack_not_inst_f_path"
 
 			EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 			Newline
@@ -658,7 +666,7 @@ function PackInstall()
 			sleep "$TIME_1"
 
 			# On appelle la commande d'installation du gestionnaire de paquets, puis
-			"$install_command"
+			bash "$pack_inst_f_path"
 
 			# On vérifie d'abord si l'installation du paquet a échouée
 			if test "$?" -ne 0; then
@@ -666,11 +674,11 @@ function PackInstall()
 				EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 				Newline
 
-				if test ! -f "$packages_not_installed_file_path"; then
-					Makefile "$packages_failed_dir_path" "$packages_not_installed_file" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+				if test ! -f "$pack_not_inst_f_path"; then
+					Makefile "$pack_fail_d_path" "$pack_not_inst_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 				fi
 
-				echo "$package_name" >> "$packages_not_installed_file_path"
+				echo "$package_name" >> "$pack_not_inst_f_path"
 
 				EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 				Newline
@@ -685,8 +693,9 @@ function PackInstall()
 				EchoNewstep "Vérification de l'installation du paquet $(DechoN "$package_name")"
 				Newline
 
-				"$search_pack_hdrive_command"
+				bash "$pack_hd_f_path"
 
+				# Si l'installation du paquet s'est faite sans problèmes
 				if test "$?" -eq 0; then
 					EchoSuccess "Le paquet $(DechoS "$package_name") a été installé avec succès"
 					Newline
@@ -698,11 +707,11 @@ function PackInstall()
 					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 					Newline
 
-					if test ! -f "$packages_not_installed_file_path"; then
-						Makefile "$packages_failed_dir_path" "$packages_not_installed_file" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+					if test ! -f "$pack_not_inst_f_path"; then
+						Makefile "$pack_fail_d_path" "Packages not installed.txt" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 					fi
 
-					echo "$package_name" >> "$packages_not_installed_file_path"
+					echo "$package_name" >> "$pack_not_inst_f_path"
 
 					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 					Newline
