@@ -535,7 +535,7 @@ function PackInstall()
 	package_name=$2
 
 	#***** Autres variables *****
-	#* Noms des dossiers et des fichiers (à passer en deuxième argument dans les fonctions "Makedir" et "Makefile")
+	#** Noms des dossiers et des fichiers (à passer en deuxième argument dans les fonctions "Makedir" et "Makefile")
 	# Dossier et fichers de test d'installation de paquets
 	local pack_fail_d_name="Packages"							# Nom du dossier contenant les fichiers contenant les noms des paquets
 	local pack_not_found_f_name="Packages not found.txt"		# Nom du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
@@ -547,7 +547,7 @@ function PackInstall()
 	local pack_db_f_name="db_search.tmp"
 	local pack_inst_f_name="inst.tmp"
 
-	#* Chemins des dossiers et des fichiers
+	#** Chemins des dossiers et des fichiers
 	# Dossier et fichers de test d'installation de paquets
 	local pack_fail_d_path="$DIR_TMPPATH/$pack_fail_d_name"					# Chemin du dossier contenant les fichiers contenant les noms des paquets introuvables dans la base de données ou dont l'installation a échouée
 	local pack_not_found_f_path="$pack_fail_d_name/$pack_not_found_f_name"	# Chemin du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
@@ -560,6 +560,11 @@ function PackInstall()
 	local pack_inst_f_path="$pack_tmp_d_name/$pack_inst_f_name"		# Chemin du fichier contenant la commande d'installation
 
 	#***** Code *****
+	# On crée le dossier contenant les fichiers temporaires contenant les commandes de recherche et d'installation des paquets
+	if test ! -d "$pack_tmp_d_path"; then
+		Makedir "$DIR_TMPPATH" "$pack_tmp_d_name"
+	fi
+
 	# On définit les commandes de recherche et d'installation de paquets selon le nom du gestionnaire de paquets passé en premier argument.
 	# Également, on permet l'insensibilité à la casse au cas où l'utilisateur veut ajouter un paquet dans la liste de paquets à installer et qu'il passe
 	# en premier argument le nom du gestionnaire de paquets avec ou sans majuscule (par exemple : PackInstall "snap" paquet OU PackInstall "Snap" paquet).
@@ -607,7 +612,7 @@ function PackInstall()
 	EchoNewstep "en cas d'absence du paquet dans la base de données du gestionnaire de paquets ou d'échec d'installation"
 	Newline
 
-	if test ! -d "$pack_fail_d_name"; then
+	if test ! -d "$pack_fail_d_path"; then
 		Makedir "$DIR_TMPPATH" "$pack_fail_d_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
 	fi
 
@@ -646,12 +651,18 @@ function PackInstall()
 		# Si le paquet est introuvable dans la base de données du gestionnaire de paquets
 		if test "$?" -ne 0; then
 			EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
+			EchoError "Écriture du nom du paquet $(DechoE "$package_name") dans le fichier $(DechoE "$pack_not_found_f_path")"
+			Newline
 
-			if test ! -f "$pack_not_inst_f_path"; then
+			# S'il n'existe pas, on crée le fichier contenant les noms des paquets introuvables dans la base de données
+			if test ! -f "$pack_not_found_f_path"; then
 				Makefile "$pack_fail_d_path" "$pack_not_found_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+
+				echo "Gestionnaire de paquets : $PACK_MAIN_PACKAGE_MANAGER" > "$pack_not_found_f_path"
+				echo "" >> "$pack_not_found_f_path"
 			fi
 
-			echo "$package_name" >> "$pack_not_inst_f_path"
+			echo "$package_name" >> "$pack_not_found_f_path"
 
 			EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 			Newline
@@ -674,8 +685,12 @@ function PackInstall()
 				EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 				Newline
 
+				# S'il n'existe pas, on crée le fichier contenant les noms des paquets dont l'installation a échouée
 				if test ! -f "$pack_not_inst_f_path"; then
 					Makefile "$pack_fail_d_path" "$pack_not_inst_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+
+					echo "Gestionnaire de paquets : $PACK_MAIN_PACKAGE_MANAGER" > "$pack_not_inst_f_path"
+					echo "" >> "$pack_not_inst_f_path"
 				fi
 
 				echo "$package_name" >> "$pack_not_inst_f_path"
@@ -685,7 +700,7 @@ function PackInstall()
 
 				return
 
-			# Sinon, si le paquet a été installé avec succès, on assigne la valeur de la variable "is_installed" à "True"
+			# Sinon, si le paquet a été installé avec succès
 			else
 				sleep "$TIME_1"
 
@@ -707,8 +722,12 @@ function PackInstall()
 					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
 					Newline
 
+					# S'il n'existe pas, on crée le fichier contenant les noms des paquets dont l'installation a échouée
 					if test ! -f "$pack_not_inst_f_path"; then
-						Makefile "$pack_fail_d_path" "Packages not installed.txt" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+						Makefile "$pack_fail_d_path" "$pack_not_inst_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+
+						echo "Gestionnaire de paquets : $PACK_MAIN_PACKAGE_MANAGER" > "$pack_not_inst_f_path"
+						echo "" >> "$pack_not_inst_f_path"
 					fi
 
 					echo "$package_name" >> "$pack_not_inst_f_path"
