@@ -332,6 +332,7 @@ function Makedir()
 
 	#***** Autres variables *****
 	local dir_path="$dir_parent/$dir_name"	# Chemin du dossier à traiter
+	local dir_block_char="\""				# Caractère composant la ligne
 
 	#***** Code *****
 	# On commence par dessiner la première ligne du bloc
@@ -375,7 +376,7 @@ function Makedir()
 				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path")" "$dir_sleep_txt"
 
 				# On dessine la deuxième et dernière ligne du bloc
-				DrawLine "$COL_RESET" "#"
+				DrawLine "$COL_RESET" "$dir_block_char"
 				sleep "$dir_sleep_block"
 				echo ""
 				echo ""
@@ -388,7 +389,7 @@ function Makedir()
 		echo ""
 
 		# On dessine la deuxième et dernière ligne du bloc
-		DrawLine "$COL_RESET" "#"
+		DrawLine "$COL_RESET" "$dir_block_char"
 		sleep "$dir_sleep_block"
 		echo ""
 		echo ""
@@ -415,14 +416,13 @@ function Makedir()
 				echo ""
 
 				# On dessine la deuxième et dernière ligne du bloc
-				DrawLine "$COL_RESET" "#"
+				DrawLine "$COL_RESET" "$dir_block_char"
 				sleep "$dir_sleep_block"
 				echo ""
 				echo ""
 
 				return
-			} && \
-			{
+			} && {
 				echo ""
 
 				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$dir_path") effectuée avec succès" "$dir_sleep_txt"
@@ -432,7 +432,7 @@ function Makedir()
 				echo ""
 
 				# On dessine la deuxième et dernière ligne du bloc
-				DrawLine "$COL_RESET" "#"
+				DrawLine "$COL_RESET" "$dir_block_char"
 				sleep "$dir_sleep_block"
 				echo ""
 				echo ""
@@ -448,7 +448,7 @@ function Makedir()
 		EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path")" "$dir_sleep_txt"
 		echo ""
 
-		DrawLine "$COL_RESET" "#"
+		DrawLine "$COL_RESET" "$dir_block_char"
 		echo ""
 
 		return
@@ -467,11 +467,12 @@ function Makefile()
 
 	#***** Autres variables *****
 	local file_path="$file_parent/$file_name"		# Chemin du fichier à traiter
+	local file_block_char="'"						# Caractère composant la ligne
 
 	#***** Code *****
 	# On commence par dessiner la première ligne du bloc
 	sleep "$file_sleep_block"
-	DrawLine "$COL_RESET" "~"
+	DrawLine "$COL_RESET" "$file_block_char"
 	echo ""
 	echo ""
 
@@ -498,10 +499,25 @@ function Makefile()
 			EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$file_path")," "$file_sleep_text"
 			EchoErrorCustomTimer "utilisez la commande :" "$file_sleep_text"
 			echo "	chown ${ARG_USERNAME} $file_path"
+			echo ""
+
+			EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$file_path")" "$file_sleep_txt"
+			echo ""
+
+			DrawLine "$COL_RESET" "$file_block_char"
+			echo ""
 
 			return
-		} \
-		&& { EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep_text"; echo ""; }
+		} && {
+				EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep_text"
+				echo ""
+
+				EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
+				echo ""
+
+				DrawLine "$COL_RESET" "$file_block_char"
+				echo ""
+			}
 
 		return
 
@@ -509,15 +525,36 @@ function Makefile()
 	elif test -f "$file_path" && test -s "$file_path"; then
 		EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") existe déjà dans le dossier $(DechoS "$file_parent")" "$file_sleep_text"
 
+		EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
+		echo ""
+
+		DrawLine "$COL_RESET" "$file_block_char"
+		echo ""
+
 		return
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il n'est pas vide
 	elif test -f "$file_path" && test ! -s "$file_path"; then
 		true > "$file_path" \
-			|| EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$file_path") n'a pas été écrasé" "$file_sleep_text" \
-			&& EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$file_path") a été écrasé avec succès" "$file_sleep_text"
-		Newline
+			|| {
+				EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$file_path") n'a pas été écrasé" "$file_sleep_text"
 
+				EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$file_path")" "$file_sleep_txt"
+				echo ""
+
+				DrawLine "$COL_RESET" "$file_block_char"
+				echo ""
+
+			} \
+			&& {
+				EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$file_path") a été écrasé avec succès" "$file_sleep_text"
+
+				EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
+				echo ""
+
+				DrawLine "$COL_RESET" "$file_block_char"
+				echo ""
+			}
 		return
 	fi
 }
@@ -1534,6 +1571,8 @@ Newline
 
 # Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
 EchoNewstep "Création du dossier d'installation des logiciels"
+Newline
+
 Makedir "$DIR_HOMEDIR" "$DIR_SOFTWARE" "2" "1"
 Newline
 
