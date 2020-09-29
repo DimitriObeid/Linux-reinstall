@@ -541,28 +541,28 @@ function PackInstall()
 	local pack_not_found_f_name="Packages not found.txt"		# Nom du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
 	local pack_not_inst_f_name="Packages not installed.txt"		# Nom du fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
 
-	# Dossier et fichiers temporaires contenant les commandes de recherche et d'installation des paquets
-	local pack_tmp_d_name="Install tmp"
-	local pack_hd_f_name="hd_search.tmp"
-	local pack_db_f_name="db_search.tmp"
-	local pack_inst_f_name="inst.tmp"
+	# Dossier et fichiers temporaires contenant les commandes de recherche et d'installation des paquets selon le gestionnaire de paquets de l'utilisateur
+	local pack_tmp_d_name="Install"			# Dossier contenant ces fichiers
+	local pack_hd_f_name="hd_search.tmp"	# Fichier contenant la commande de recherche sur le système
+	local pack_db_f_name="db_search.tmp"	# Fichier contenant la commande de recherche dans la base de données
+	local pack_inst_f_name="inst.tmp"		# Fichier contenant la commande d'installation
 
 	#** Chemins des dossiers et des fichiers
 	# Dossier et fichers de test d'installation de paquets
 	local pack_fail_d_path="$DIR_TMPPATH/$pack_fail_d_name"					# Chemin du dossier contenant les fichiers contenant les noms des paquets introuvables dans la base de données ou dont l'installation a échouée
-	local pack_not_found_f_path="$pack_fail_d_name/$pack_not_found_f_name"	# Chemin du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
-	local pack_not_inst_f_path="$pack_fail_d_name/$pack_not_inst_f_name"	# Chemin du fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
+	local pack_not_found_f_path="$pack_fail_d_path/$pack_not_found_f_name"	# Chemin du fichier contenant les noms des paquets non-trouvés dans la base de données du gestionnaire de paquets
+	local pack_not_inst_f_path="$pack_fail_d_path/$pack_not_inst_f_name"	# Chemin du fichier contenant les noms des paquets non-installés par gestionnaire de paquets (en cas de problèmes)
 
-	# Dossier et fichiers temporaires contenant les commandes de recherche et d'installation des paquets
+	# Dossier et fichiers temporaires contenant les commandes de recherche et d'installation des paquets selon le gestionnaire de paquets de l'utilisateur
 	local pack_tmp_d_path="$DIR_TMPPATH/$pack_tmp_d_name"			# Chemin du dossier contenant ces fichiers
-	local pack_hd_f_path="$pack_tmp_d_name/$pack_hd_f_name"			# Chemin du fichier contenant la commande de recherche sur le système
-	local pack_db_f_path="$pack_tmp_d_name/$pack_db_f_name"			# Chemin du fichier contenant la commande de recherche dans la base de données
-	local pack_inst_f_path="$pack_tmp_d_name/$pack_inst_f_name"		# Chemin du fichier contenant la commande d'installation
+	local pack_hd_f_path="$pack_tmp_d_path/$pack_hd_f_name"			# Chemin du fichier contenant la commande de recherche sur le système
+	local pack_db_f_path="$pack_tmp_d_path/$pack_db_f_name"			# Chemin du fichier contenant la commande de recherche dans la base de données
+	local pack_inst_f_path="$pack_tmp_d_path/$pack_inst_f_name"		# Chemin du fichier contenant la commande d'installation
 
 	#***** Code *****
 	# On crée le dossier contenant les fichiers temporaires contenant les commandes de recherche et d'installation des paquets
 	if test ! -d "$pack_tmp_d_path"; then
-		Makedir "$DIR_TMPPATH" "$pack_tmp_d_name"
+		Makedir "$DIR_TMPPATH" "$pack_tmp_d_name" "0" "0" >> "$FILE_LOGPATH"
 	fi
 
 	# On définit les commandes de recherche et d'installation de paquets selon le nom du gestionnaire de paquets passé en premier argument.
@@ -606,17 +606,17 @@ function PackInstall()
 			;;
 	esac
 
-	## CRÉATION D'UN DOSSIER CONTENANT DES INFORMATIONS CONCERNANT LES ÉVENTUELS PAQUETS NON-TROUVÉS DANS LA BASE DE DONNÉES
-	## DU GESTIONNAIRE DE PAQUETS OU LES ÉVENTUELS PAQUETS IMPOSSIBLES À INSTALLER SUR LE DISQUE DUR DE L'UTILISATEUR
-	EchoNewstep "Création du dossier $(DechoN "$pack_fail_d_name") dans le dossier temporaire $(DechoN "$DIR_TMPPATH")"
-	EchoNewstep "en cas d'absence du paquet dans la base de données du gestionnaire de paquets ou d'échec d'installation"
-	Newline
-
+	## Création d'un dossier contenant des informations concernant les éventuels paquets non-trouvés dans la base de données
+	## du gestionnaire de paquets ou les éventuels paquets impossibles à installer sur le disque dur de l'utilisateur
 	if test ! -d "$pack_fail_d_path"; then
-		Makedir "$DIR_TMPPATH" "$pack_fail_d_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+		EchoNewstep "Création du dossier $(DechoN "$pack_fail_d_name") dans le dossier temporaire $(DechoN "$DIR_TMPPATH")"
+		EchoNewstep "en cas d'absence du paquet dans la base de données du gestionnaire de paquets ou d'échec d'installation"
+		Newline
+
+		Makedir "$DIR_TMPPATH" "$pack_fail_d_name" "0" "0" >> "$FILE_LOGPATH"
 	fi
 
-	## VÉRIFICATION DE LA PRÉSENCE DU PAQUET SUR LE DISQUE DUR DE L'UTILISATEUR
+	## Vérification de la présence du paquet sur le disque dur de l'utilisateur
 	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")"
 	Newline
 
@@ -656,7 +656,7 @@ function PackInstall()
 
 			# S'il n'existe pas, on crée le fichier contenant les noms des paquets introuvables dans la base de données
 			if test ! -f "$pack_not_found_f_path"; then
-				Makefile "$pack_fail_d_path" "$pack_not_found_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+				Makefile "$pack_fail_d_path" "$pack_not_found_f_name" "0" "0" >> "$FILE_LOGPATH"
 
 				echo "Gestionnaire de paquets : $PACK_MAIN_PACKAGE_MANAGER" > "$pack_not_found_f_path"
 				echo "" >> "$pack_not_found_f_path"
@@ -687,7 +687,7 @@ function PackInstall()
 
 				# S'il n'existe pas, on crée le fichier contenant les noms des paquets dont l'installation a échouée
 				if test ! -f "$pack_not_inst_f_path"; then
-					Makefile "$pack_fail_d_path" "$pack_not_inst_f_name" "2" "1" 2>&1 | tee -a "$FILE_LOGPATH"
+					Makefile "$pack_fail_d_path" "$pack_not_inst_f_name" "0" "0" >> "$FILE_LOGPATH"
 
 					echo "Gestionnaire de paquets : $PACK_MAIN_PACKAGE_MANAGER" > "$pack_not_inst_f_path"
 					echo "" >> "$pack_not_inst_f_path"
@@ -1103,36 +1103,99 @@ function CheckInternetConnection()
 # SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS PRINCIPAL (PAS DE SNAP OU DE FLATPAK) !!!)
 function DistUpgrade()
 {
+	#***** Variables *****
+	# Noms du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur
+	local update_d_name="Update"		# Dossier contenant les fichiers
+	local cache_upd_f_name="cache.tmp"	# Fichier contenant la commande de mise à jour du cache
+	local pack_upg_f_name="pack.tmp"	# Fichier contenant la commande de mise à jour des paquets
+
+	# Chemins du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur
+	local update_d_path="$DIR_TMPPATH/$update_d_name"			# Chemin du dossier
+	local cache_upd_f_path="$update_d_path/$cache_upd_f_name"	# Chemin du fichier contenant la commande de mise à jour du cache
+	local pack_upg_f_path="$update_d_path/$pack_upg_f_name"		# Chemin du fichier contenant la commande de mise à jour des paquets
+
+	# Vérification du succès des mises à jour
+	local cache_updated="0"
+	local packs_updated="0"
+
+	#***** Code *****
 	ScriptHeader "MISE À JOUR DU SYSTÈME"
 
-	EchoNewstep "Mise à jour du système en cours"
-	Newline
+	# On crée le dossier contenant les commandes de mise à jour
+	if test ! -d "$update_d_path"; then
+		Makedir "$DIR_TMPPATH" "$update_d_name" "0" "0" >> "$FILE_LOGPATH"
+	fi
 
 	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER",
 	case "$PACK_MAIN_PACKAGE_MANAGER" in
 		"apt")
-			EchoNewstep "Mise à jour du cache d'APT"
-			apt-get -y update 2>&1 | tee -a "$SCRIPT_LOGPATH" \
-				|| EchoError "Impossible de mettre à jour le cache d'APT correctement" \
-				&& EchoSuccess "Le cache d'APT a été mis à jour avec succès"
-			Newline
-
-			EchoNewstep "Mise à jour des paquets"
-			apt-get -y upgrade 2>&1 | tee -a "$FILE_LOGPATH" \
-				|| EchoError "La mise à jour des paquets installés a échouée" \
-				&& EchoSuccess "La mise à jour des paquets installés s'est effectuée avec succès"
+			echo apt-get -y update > "$cache_upd_f_path"
+			echo apt-get -y upgrade > "$pack_upg_f_path"
 			;;
 		"dnf")
-			dnf -y update | tee -a "$FILE_LOGPATH"
+			echo dnf -y update > "$pack_upg_f_path"
 			;;
 		"pacman")
-			pacman --noconfirm -Syu | tee -a "$FILE_LOGPATH"
+			echo pacman --noconfirm -Syu > "$pack_upg_f_path"
 			;;
 	esac
 
+	# On met à jour le cache en premier
+	EchoNewstep "Mise à jour du cache du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
 	Newline
 
-	EchoSuccess "Mise à jour du système effectuée avec succès"
+	bash "$cache_upd_f_path" # | tee -a "$FILE_LOGPATH"
+
+	if test "$?" -eq 0; then
+		cache_updated="1"
+		EchoSuccess "La mise à jour du cache du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER") s'est faite avec succès"
+		Newline
+
+	else
+		EchoError "Une ou plusieurs erreurs ont eu lieu lors de la mise à jour du cache du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
+		Newline
+
+	fi
+
+	# On met à jour les paquets
+	EchoNewstep "Mise à jour des paquets"
+	Newline
+
+	bash "$pack_upg_f_path" # | tee -a "$FILE_LOGPATH"
+
+	if test "$?" -eq 0; then
+		packs_updated="1"
+		EchoSuccess "Tous les paquets ont été mis à jour"
+		Newline
+
+	else
+		EchoError "Une ou plusieurs erreurs ont eu lieu lors de la mise à jour des paquets"
+		Newline
+	fi
+
+	# On vérifie maintenant si le cache et les paquets ont bien été mis à jour
+	# Si le cache ET les paquets ont été mis à jour avec succès
+	if test $cache_updated = "1" && test $packs_updated = "1"; then
+		EchoSuccess "Le cache ET les paquets ont été mis à jour avec succès"
+		Newline
+
+	# Sinon, si le cache a été mis à jour MAIS que les paquets ne l'ont pas été
+	elif test $cache_updated = "1" && test $packs_updated = "0"; then
+		EchoSuccess "Le cache a été mis à jour avec succès"
+		EchoError "Les paquets n'ont pas été correctement mis à jour"
+		Newline
+
+	# Sinon, si le cache n'a pas été mis à jour MAIS que les paquets l'ont été
+	elif test $cache_updated = "0" && test $packs_updated = "1"; then
+		EchoError "Le cache n'a pas été mis à jour avec succès"
+		EchoSuccess "Les paquets ont été mis à jour avec succès"
+		Newline
+
+	# Sinon, si rien n'a été mis à jour
+	else
+		EchoError "La mise à jour du cache ET des paquets a échouée"
+		Newline
+	fi
 
 	return
 }
