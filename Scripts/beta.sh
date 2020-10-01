@@ -610,9 +610,9 @@ function OptimizeInstallation()
 	#***** Paramètres *****
 	opt_file_path=$1	# Chemin du fichier script à exécuter
 	opt_cmd=$2			# Commande principale
-	opt_pack_name=$3	# Nom du paquet
-	opt_pipe=$4			# Redirections
-	opt_type=$5			# Type de commande envoyée ()
+	opt_type=$3			# Type de commande envoyée ()
+	opt_pack_name=$4	# Nom du paquet
+	opt_pipe=$5			# Redirections
 
 	#**** Code *****
 	# On vérifie si tous les arguments sont bien appelés (IMPORTANT POUR UNE INSTALLATION SANS PROBLÈMES)
@@ -621,9 +621,19 @@ function OptimizeInstallation()
 			"Vérifiez quels arguments manquent à la fonction"
 	fi
 
-	# On vérifie si la valeur de l'argument
+	# On vérifie si la valeur de l'argument correspond à un type de commande
 	case "${opt_type,,}" in
-		"HD" | "DB" | "INST")
+		"HD")
+			## Vérification de la présence du paquet sur le disque dur de l'utilisateur
+			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") sur votre système"
+			Newline
+			;;
+		"DB")
+			## Vérification de la présence du paquet dans la base de données du gestionnaire de paquets de l'utilisateur
+			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
+			Newline
+			;;
+		"INST")
 			true > /dev/null
 			;;
 		*)
@@ -640,9 +650,16 @@ function OptimizeInstallation()
 
 	case "$?" in
 		"1")
-			if test "$opt_type" == "INST"; then
-				EchoError "Le paquet $(DechoE "$opt_cmd") n'a pas pu être installé sur votre système"
-			fi
+			case "$opt_type" in
+				"HD")
+					EchoNewstep "Le paquet $(DechoN "$opt_pack_name") n'est pas installé sur votre système"
+					;;
+				"DB")
+					;;
+				"INST")
+					EchoError "Le paquet $(DechoE "$opt_cmd") n'a pas pu être installé sur votre système"
+					;;
+			esac
 			;;
 		"2")
 			HandleErrors "LE CHEMIN VERS LE FICHIER DE LOGS N'EST PAS SPÉCIFIÉ OU EST INCORRECT" \
@@ -663,7 +680,8 @@ function OptimizeInstallation()
 		"0")
 			case "$opt_type" in
 				"HD")
-					EchoSuccess "Le paquet $(DechoS "$opt_pack_name") a été trouvé dans votre système"
+					EchoSuccess "Le paquet $(DechoS "$package_name") est déjà installé sur votre système"
+					Newline
 					;;
 				"DB")
 					EchoSuccess "Le paquet $(DechoS "$opt_pack_name") a été trouvé dans la base de données du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")"
@@ -742,7 +760,7 @@ function PackInstall()
 			;;
 	esac
 
-	## Création d'un dossier contenant des informations concernant les éventuels paquets non-trouvés dans la base de données
+	## S'il n'existe pas, on crée le dossier contenant des informations concernant les éventuels paquets non-trouvés dans la base de données
 	## du gestionnaire de paquets ou les éventuels paquets impossibles à installer sur le disque dur de l'utilisateur
 	if test ! -d "$DIR_PACKAGES_PATH"; then
 		EchoNewstep "Création du dossier $(DechoN "$DIR_PACKAGES_NAME") dans le dossier temporaire $(DechoN "$DIR_TMP_PATH")"
@@ -752,21 +770,18 @@ function PackInstall()
 		Makedir "$DIR_TMP_PATH" "$DIR_PACKAGES_NAME" "0" "0" >> "$FILE_LOG_PATH"
 	fi
 
-	## Vérification de la présence du paquet sur le disque dur de l'utilisateur
-	EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name")"
-	Newline
+	var_file_content=$(cat "$pack_hd_f_path")	# On récupère la commande stockée dans le fichier contenant la commande de recherche sur le système, puis on assigne son contenu en tant que valeur d'une variable à passer en argument lors de l'appel de la fonction "OptimizeInstallation"
+	var_opt_type="HD"	# On enregistre la valeur du troisième paramètre de la fonction "OptimizeInstallation" pour mieux le récupérer lors du test
 
-	# On appelle la commande de recherche de paquets installés sur le système de l'utilisateur en exécutant le fichier
-	# Pour plus d'informations, veuillez vous référer à cette réponse sur Stack Overflow --> https://stackoverflow.com/a/13568021
-	bash "$pack_hd_f_path" | tee -a "$FILE_LOG_PATH"
+	# On appelle en premeir la commande de recherche de paquets installés sur le système de l'utilisateur
+	OptimizeInstallation "$FILE_SCRIPT_PATH" "$var_file_content" "$var_opt_type" "$package_name"
 
-	# Si le paquet à installer est déjà installé
-	if test "$?" -eq 0; then
-		EchoSuccess "Le paquet $(DechoS "$package_name") est déjà installé sur votre système"
-		Newline
-		Newline
-
+	# On quitte la fonction "PackInstall" si le paquet est déjà installé sur le disque dur de l'utilisateur
+	if test "$opt_type" == "HD" && "$?" == "1"; then
 		return
+	fi
+
+
 	# Sinon, si le paquet à installer n'est pas déjà installé sur le disque dur de l'utilisateur
 	else
 		EchoNewstep "Le paquet $(DechoN "$package_name") n'est pas installé sur votre système"
@@ -787,7 +802,7 @@ function PackInstall()
 		# Si le paquet est introuvable dans la base de données du gestionnaire de paquets
 		if test "$?" -ne 0; then
 			EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
-			EchoError "Écriture du nom du paquet $(DechoE "$package_name") dans le fichier $(DechoE "$pack_not_found_f_path")"
+			EchoError "Écriture du nom du paquet $(DechoE "$package_name") dans le fichier $(DechoE "$DIR_PACKAGES_PATH")"
 			Newline
 
 			# S'il n'existe pas, on crée le fichier contenant les noms des paquets introuvables dans la base de données
@@ -1037,8 +1052,19 @@ function CheckArgs()
 		Newline
 
 		EchoNewstep "Test de la fonction d'installation"
-		PackInstall
+		Newline
 
+		CreateLogFile			# Puis la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
+		Mktmpdir 				# Puis la fonction de création du dossier temporaire
+		GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur
+		WritePackScript		# Puis la fonction de création de scripts d'installation
+
+		PackInstall "$main" "nano"
+		PackInstall "$main" "emacs"
+
+		exit 0
+
+	# Si l'argument
 	elif test ! "debug" = "${ARG_DEBUG}" && test ! -z "${ARG_DEBUG}"; then
 		EchoError "La chaîne de caractères passée en deuxième argument ne correspond pas à la valeur attendue ($(DechoE "debug"))"
 		EchoError "Poursuite de l'exécution du script"
@@ -1126,21 +1152,27 @@ function GetMainPackageManager()
 }
 
 # Création du script de traitement de paquets à installer
-function MakeInstallScripts()
+function WritePackScript()
 {
-	HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "DÉTECTION DU GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION" >> "$FILE_LOG_PATH"
+	HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "ÉCRITURE DU SCRIPT DE TRAITEMENT DE PAQUETS" >> "$FILE_LOG_PATH"
 
 	Makedir "$DIR_TMP_PATH" "$DIR_INSTALL_NAME" "0" "0" >> "$FILE_LOG_PATH" 			# On crée le dossier contenant les fichiers temporaires contenant les commandes de recherche et d'installation des paquets
 	Makefile "$DIR_TMP_PATH/$DIR_INSTALL_NAME" "$FILE_SCRIPT_NAME" "0" "0" >> "$FILE_LOG_PATH"	# On crée le fichier de script
 
 	# On écrit le contenu du script dans le fichier de script
+	# Écriture du shebang
+	printf '#!/usr/bin/env bash\n\n' > "$FILE_SCRIPT_PATH"
+
 	# Déclaration des variables
-	printf "LOG=\"$1\"\nCMD=\"$2\"\nNAME=\"$3\"\nPIPE=\"$4\"\n\n" > "$FILE_SCRIPT_PATH"
+	printf "LOG=\"$1\"\nCMD=\"$2\"\nNAME=\"$3\"\nPIPE=\"$4\"\n\n" >> "$FILE_SCRIPT_PATH"
 
 	# Conditions de vérification de passage des arguments (les deux premières conditions)
 	printf "if test -z \"\${LOG}\"; then\n\texit 2\nelif test -z \"\${CMD}\"; then\n\t exit 3\n" >> "$FILE_SCRIPT_PATH"
 
-	"elif test -s \"\${CMD}\" && test -s \"\${NAME}\"; then\n\t\"\$CMD\" \"\$NAME\" || exit 1\n\texit 0\nelif test -s \"\${REDIRECT}\"; then\n\t\"\$CMD\" \"\$NAME\" \"\$PIPE\" || exit 1\n\texit0\nelse\n\texit 5\nfi" > test
+	#
+	printf "elif test -s \"\${CMD}\" && test -s \"\${NAME}\"; then\n\t\"\$CMD\" \"\$NAME\" || exit 1\n\texit 0\n" >> "$FILE_SCRIPT_PATH"
+
+	printf "elif test -s \"\${REDIRECT}\"; then\n\t\"\$CMD\" \"\$NAME\" \"\$PIPE\" || exit 1\n\texit0\nelse\n\texit 5\nfi" >> "$FILE_SCRIPT_PATH"
 }
 
 # Initialisation du script
@@ -1150,7 +1182,7 @@ function ScriptInit()
 	CreateLogFile			# Puis la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
 	Mktmpdir 				# Puis la fonction de création du dossier temporaire
 	GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur
-	MakeInstallScripts		# Puis la fonction de création de scripts d'installation
+	WritePackScript		# Puis la fonction de création de scripts d'installation
 
 	# On écrit dans le fichier de logs que l'on passe à la première étape "visible dans le terminal", à savoir l'étape d'initialisation du script
 	{
