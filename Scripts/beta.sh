@@ -248,13 +248,13 @@ function HeaderBase()
 
 	# Ne pas appeler la fonction "Newline" ici, car cette dernière est automatiquement réappelée lors de la redirection de cette fonction (HeaderBase)
 	# vers le terminal et le fichier de logs (lors de l'appel en brut dans les fonctions "Mktmpdir" et "ScriptInit"), puis une troisième fois dans les
-	# fonctions "ScriptHeader" et "HeaderInstall" (dans le cas où on appelle la fonction "Newline" ici, puis une seule et unique fois dans une des deux fonctions suivantes)
+	# fonctions "HeaderScript" et "HeaderInstall" (dans le cas où on appelle la fonction "Newline" ici, puis une seule et unique fois dans une des deux fonctions suivantes)
 
 	return
 }
 
 # Fonction d'affichage des headers lors d'un changement d'étape
-function ScriptHeader()
+function HeaderScript()
 {
 	#***** Paramètre *****
 	# Chaîne de caractères contenant la phrase à afficher
@@ -1158,7 +1158,7 @@ function ScriptInit()
 	CreateLogFile			# Puis la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
 	Mktmpdir 				# Puis la fonction de création du dossier temporaire
 	GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur
-	WritePackScript		# Puis la fonction de création de scripts d'installation
+	WritePackScript			# Puis la fonction de création de scripts d'installation
 
 	# On écrit dans le fichier de logs que l'on passe à la première étape "visible dans le terminal", à savoir l'étape d'initialisation du script
 	{
@@ -1210,7 +1210,7 @@ function ScriptInit()
 # Demande à l'utilisateur s'il souhaite vraiment lancer le script, puis connecte l'utilisateur en mode super-utilisateur
 function LaunchScript()
 {
-	ScriptHeader "LANCEMENT DU SCRIPT"
+	HeaderScript "LANCEMENT DU SCRIPT"
 
 	EchoNewstep "Assurez-vous d'avoir lu au moins le mode d'emploi $(DechoN "(Mode d'emploi.odt)") avant de lancer l'installation."
     EchoNewstep "Êtes-vous sûr de bien vouloir lancer l'installation ? (oui/non)"
@@ -1260,7 +1260,7 @@ function LaunchScript()
 # Vérification de la connexion à Internet
 function CheckInternetConnection()
 {
-	ScriptHeader "VÉRIFICATION DE LA CONNEXION À INTERNET"
+	HeaderScript "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
 	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
 	if ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"; then
@@ -1294,7 +1294,7 @@ function DistUpgrade()
 	local packs_updated="0"
 
 	#***** Code *****
-	ScriptHeader "MISE À JOUR DU SYSTÈME"
+	HeaderScript "MISE À JOUR DU SYSTÈME"
 
 	# On crée le dossier contenant les commandes de mise à jour
 	if test ! -d "$update_d_path"; then
@@ -1380,7 +1380,7 @@ function DistUpgrade()
 # Détection et installation de Sudo
 function SetSudo()
 {
-	ScriptHeader "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
+	HeaderScript "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
 	# On crée une backup du fichier de configuration "sudoers" au cas où l'utilisateur souhaite revenir à son ancienne configuration
 	local sudoers_old="/etc/sudoers - $DATE_TIME.old"
@@ -1476,7 +1476,7 @@ function SetSudo()
 # Suppression des paquets obsolètes
 function Autoremove()
 {
-	ScriptHeader "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
+	HeaderScript "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 
 	EchoNewstep "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
 	Newline
@@ -1536,7 +1536,7 @@ function Autoremove()
 # Fin de l'installation
 function IsInstallationDone()
 {
-	ScriptHeader "INSTALLATION TERMINÉE"
+	HeaderScript "INSTALLATION TERMINÉE"
 
 	EchoNewstep "Souhaitez-vous supprimer le dossier temporaire $(DechoN "$DIR_TMP_PATH") ? (oui/non)"
 	Newline
@@ -1592,7 +1592,7 @@ function IsInstallationDone()
 ScriptInit
 
 # Affichage du header de bienvenue
-ScriptHeader "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $VER_SCRIPT !!!!!"
+HeaderScript "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $VER_SCRIPT !!!!!"
 EchoSuccess "Début de l'installation"
 
 LaunchScript			# Assurance que l'utilisateur soit sûr de lancer le script
@@ -1603,7 +1603,7 @@ DistUpgrade				# Mise à jour des paquets actuels
 # On déclare une variable "main" et on lui assigne en valeur le nom du gestionnaire de paquet principal stocké dans la variable "$PACK_MAIN_PACKAGE_MANAGER"
 main="$PACK_MAIN_PACKAGE_MANAGER"
 
-ScriptHeader "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
+HeaderScript "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 PackInstall "$main" curl
 PackInstall "$main" snapd
 PackInstall "$main" wget
@@ -1617,7 +1617,7 @@ SetSudo
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS
-ScriptHeader "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS"
+HeaderScript "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS"
 
 EchoSuccess "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 EchoSuccess "La partie d'installation de vos programmes commence véritablement"
@@ -1692,7 +1692,7 @@ EchoSuccess "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS DEPUIS LES  GEST
 
 
 ## INSTALLATION DES LOGICIELS ABSENTS DES GESTIONNAIRES DE PAQUETS
-ScriptHeader "INSTALLATION DES LOGICIELS INDISPONIBLES DANS LES BASES DE DONNÉES DES GESTIONNAIRES DE PAQUETS"
+HeaderScript "INSTALLATION DES LOGICIELS INDISPONIBLES DANS LES BASES DE DONNÉES DES GESTIONNAIRES DE PAQUETS"
 
 EchoNewstep "Les logiciels téléchargés via la commande $(DechoN "wget") sont déplacés vers le nouveau dossier $(DechoN "$DIR_SOFTWARE_NAME"), localisé dans votre dossier personnel"
 sleep 1
