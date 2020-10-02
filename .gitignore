@@ -1,16 +1,19 @@
-# Dossiers
+## DOSSIERS
 
 .divers/
 .vscode/
-build-GUI-EXT4-Debug/
 Parser/obj/
-
-# Fichiers
-
-.directory
-Beta/beta_gui.sh
-Parser/parser
-Parser/test.sh
-Scripts/.~lock.Documentation.odt#
-Scripts/.~lock.Mode d'emploi.odt#
 tests/
+
+## FICHIERS
+# Fichier généré par KDE
+.directory
+
+# Fichiers temporaires créés par Nano lors de l'édition d'un fichier
+*.swp
+
+# Fichiers temporaires générés par Libre Office Writer
+Scripts/.~lock.Documentation EN.odt#
+Scripts/.~lock.Documentation FR.odt#
+Scripts/.~lock.Manual.odt#
+Scripts/.~lock.Mode d'emploi.odt#
