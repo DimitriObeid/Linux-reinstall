@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Code
-echo "$$"
+echo "PID débug : $$"
 echo ""
 
 sudo ./beta.sh dimob debug

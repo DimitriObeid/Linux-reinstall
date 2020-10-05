@@ -248,13 +248,13 @@ function HeaderBase()
 
 	# Ne pas appeler la fonction "Newline" ici, car cette dernière est automatiquement réappelée lors de la redirection de cette fonction (HeaderBase)
 	# vers le terminal et le fichier de logs (lors de l'appel en brut dans les fonctions "Mktmpdir" et "ScriptInit"), puis une troisième fois dans les
-	# fonctions "HeaderScript" et "HeaderInstall" (dans le cas où on appelle la fonction "Newline" ici, puis une seule et unique fois dans une des deux fonctions suivantes)
+	# fonctions "HeaderStep" et "HeaderInstall" (dans le cas où on appelle la fonction "Newline" ici, puis une seule et unique fois dans une des deux fonctions suivantes)
 
 	return
 }
 
 # Fonction d'affichage des headers lors d'un changement d'étape
-function HeaderScript()
+function HeaderStep()
 {
 	#***** Paramètre *****
 	# Chaîne de caractères contenant la phrase à afficher
@@ -351,7 +351,7 @@ function Makedir()
 	DrawLine "$COL_RESET" "$dir_block_char"
 	echo ""
 
-	EchoNewstepCustomTimer "Traitement du dossier $(Decho "$dir_path")" "$dir_sleep_txt"
+	EchoNewstepCustomTimer "Traitement du dossier $(DechoN "$dir_name") dans le dossier parent $(DechoN "$dir_parent")" "$dir_sleep_txt"
 	echo ""
 
 	# Si le dossier à traiter n'existe pas
@@ -629,11 +629,11 @@ function OptimizeInstallation()
 			sleep 1
 			;;
 		*)
-			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN CINQUIÈME ARGUMENT $(DechoE "\$opt_type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
+			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN QUATRIÈME ARGUMENT $(DechoE "\$opt_type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
 				"Les trois chaînes de caractères attendues sont :
 				 $(DechoE "HD") pour la recherche de paquets sur le système,
 				 $(DechoE "DB") pour la recherche de paquets dans la base de données du gestionnaire de paquets
-				 ou $(DechoE "INST") pour l'installation de paquets
+				 $(DechoE "INST") pour l'installation de paquets
 				 "
 	esac
 
@@ -728,9 +728,6 @@ function OptimizeInstallation()
 				"INST")
 					EchoSuccess "Le paquet $(DechoS "$opt_pack_name") a bien été installé"
 					;;
-				*)
-					HandleErrors "LE TYPE DE COMMANDE N'EST PAS PRÉCISÉ"
-					;;
 			esac
 			;;
 	esac
@@ -746,9 +743,9 @@ function PackInstall()
 
 	#***** Autres variables *****
 	# Chemins des fichiers temporaires contenant les commandes de recherche et d'installation des paquets selon le gestionnaire de paquets de l'utilisateur
-	local pack_hd_f_path="$DIR_INSTALL_NAME/hd_search.tmp"	# Chemin du fichier contenant la commande de recherche sur le système
-	local pack_db_f_path="$DIR_INSTALL_NAME/db_search.tmp"	# Chemin du fichier contenant la commande de recherche dans la base de données
-	local pack_inst_f_path="$DIR_INSTALL_NAME/inst.tmp"		# Chemin du fichier contenant la commande d'installation
+	local pack_hd_f_path="$DIR_INSTALL_PATH/hd_search.tmp"	# Chemin du fichier contenant la commande de recherche sur le système
+	local pack_db_f_path="$DIR_INSTALL_PATH/db_search.tmp"	# Chemin du fichier contenant la commande de recherche dans la base de données
+	local pack_inst_f_path="$DIR_INSTALL_PATH/inst.tmp"		# Chemin du fichier contenant la commande d'installation
 
 	# Caractère composant la ligne
 	local pack_block_char="="
@@ -1210,7 +1207,7 @@ function ScriptInit()
 # Demande à l'utilisateur s'il souhaite vraiment lancer le script, puis connecte l'utilisateur en mode super-utilisateur
 function LaunchScript()
 {
-	HeaderScript "LANCEMENT DU SCRIPT"
+	HeaderStep "LANCEMENT DU SCRIPT"
 
 	EchoNewstep "Assurez-vous d'avoir lu au moins le mode d'emploi $(DechoN "(Mode d'emploi.odt)") avant de lancer l'installation."
     EchoNewstep "Êtes-vous sûr de bien vouloir lancer l'installation ? (oui/non)"
@@ -1260,7 +1257,7 @@ function LaunchScript()
 # Vérification de la connexion à Internet
 function CheckInternetConnection()
 {
-	HeaderScript "VÉRIFICATION DE LA CONNEXION À INTERNET"
+	HeaderStep "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
 	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
 	if ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"; then
@@ -1294,7 +1291,7 @@ function DistUpgrade()
 	local packs_updated="0"
 
 	#***** Code *****
-	HeaderScript "MISE À JOUR DU SYSTÈME"
+	HeaderStep "MISE À JOUR DU SYSTÈME"
 
 	# On crée le dossier contenant les commandes de mise à jour
 	if test ! -d "$update_d_path"; then
@@ -1380,7 +1377,7 @@ function DistUpgrade()
 # Détection et installation de Sudo
 function SetSudo()
 {
-	HeaderScript "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
+	HeaderStep "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
 	# On crée une backup du fichier de configuration "sudoers" au cas où l'utilisateur souhaite revenir à son ancienne configuration
 	local sudoers_old="/etc/sudoers - $DATE_TIME.old"
@@ -1476,7 +1473,7 @@ function SetSudo()
 # Suppression des paquets obsolètes
 function Autoremove()
 {
-	HeaderScript "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
+	HeaderStep "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
 
 	EchoNewstep "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
 	Newline
@@ -1536,7 +1533,7 @@ function Autoremove()
 # Fin de l'installation
 function IsInstallationDone()
 {
-	HeaderScript "INSTALLATION TERMINÉE"
+	HeaderStep "INSTALLATION TERMINÉE"
 
 	EchoNewstep "Souhaitez-vous supprimer le dossier temporaire $(DechoN "$DIR_TMP_PATH") ? (oui/non)"
 	Newline
@@ -1592,7 +1589,7 @@ function IsInstallationDone()
 ScriptInit
 
 # Affichage du header de bienvenue
-HeaderScript "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $VER_SCRIPT !!!!!"
+HeaderStep "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $VER_SCRIPT !!!!!"
 EchoSuccess "Début de l'installation"
 
 LaunchScript			# Assurance que l'utilisateur soit sûr de lancer le script
@@ -1603,7 +1600,7 @@ DistUpgrade				# Mise à jour des paquets actuels
 # On déclare une variable "main" et on lui assigne en valeur le nom du gestionnaire de paquet principal stocké dans la variable "$PACK_MAIN_PACKAGE_MANAGER"
 main="$PACK_MAIN_PACKAGE_MANAGER"
 
-HeaderScript "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
+HeaderStep "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
 PackInstall "$main" curl
 PackInstall "$main" snapd
 PackInstall "$main" wget
@@ -1617,7 +1614,7 @@ SetSudo
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS
-HeaderScript "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS"
+HeaderStep "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS"
 
 EchoSuccess "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
 EchoSuccess "La partie d'installation de vos programmes commence véritablement"
@@ -1692,7 +1689,7 @@ EchoSuccess "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS DEPUIS LES  GEST
 
 
 ## INSTALLATION DES LOGICIELS ABSENTS DES GESTIONNAIRES DE PAQUETS
-HeaderScript "INSTALLATION DES LOGICIELS INDISPONIBLES DANS LES BASES DE DONNÉES DES GESTIONNAIRES DE PAQUETS"
+HeaderStep "INSTALLATION DES LOGICIELS INDISPONIBLES DANS LES BASES DE DONNÉES DES GESTIONNAIRES DE PAQUETS"
 
 EchoNewstep "Les logiciels téléchargés via la commande $(DechoN "wget") sont déplacés vers le nouveau dossier $(DechoN "$DIR_SOFTWARE_NAME"), localisé dans votre dossier personnel"
 sleep 1
