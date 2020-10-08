@@ -74,7 +74,7 @@ FILE_LOG_PATH="$PWD/$FILE_LOG_NAME"					# Chemin du fichier de logs depuis la ra
 
 # Définition du nom et du chemin du fichier de script de traitement des paquets à installer
 FILE_SCRIPT_NAME="Packs.sh"
-FILE_SCRIPT_PATH="$DIR_TMP_PATH/$FILE_INSTALL_NAME"
+FILE_SCRIPT_PATH="$DIR_INSTALL_PATH/$FILE_INSTALL_NAME"
 
 # Définition des noms et des chemins des fichiers listant les paquets absents de la base de données du gestionnaire de paquets ou dont l'installation a échouée
 FILE_PACKAGES_DB_NAME="Packages not found.txt"
@@ -132,56 +132,53 @@ VER_SCRIPT="2.0"
 
 #### DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
 # Fonction servant à colorer d'une autre couleur une partie du texte de changement de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou cuccès)
-function DechoN() { string=$1; echo "$COL_CYAN$string$COL_YELLOW"; }
+function DechoN() { local string=$1; echo "$COL_CYAN$string$COL_YELLOW"; }
 
 # Affichage d'un message de changement de sous-étape en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs, en jaune, avec des chevrons et sans avoir à encoder la couleur au début et la fin de la chaîne de caractères
-function EchoNewstep() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }
+function EchoNewstep() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }
 
 # Affichage d'un message de changement de sous-étape dont le temps de pause du script peut être choisi en argument
-function EchoNewstepCustomTimer() { string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET"; sleep "$timer"; }
+function EchoNewstepCustomTimer() { local string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET"; sleep "$timer"; }
 
 # Affichage d'un message de changement de sous-étape sans redirections vers le fichier de logs
-function EchoNewstepNoLog() { string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; }
+function EchoNewstepNoLog() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; }
 
 
 # Fonction servant à colorer d'une autre couleur une partie du message d'échec de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou succès)
-function DechoE() { string=$1; echo "$COL_CYAN$string$COL_RED"; }
+function DechoE() { local string=$1; echo "$COL_CYAN$string$COL_RED"; }
 
 # Appel de la fonction "EchoErrorNoLog" en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoError() { string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }
+function EchoError() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }
 
 # Affichage d'un message d'échec de sous-étape dont le temps de pause du script peut être choisi en argument
-function EchoErrorCustomTimer() { string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET"; sleep "$timer"; }
+function EchoErrorCustomTimer() { local string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET"; sleep "$timer"; }
 
 # Affichage d'un message d'échec de sous-étape sans redirections vers le fichier de logs
-function EchoErrorNoLog() { string=$1; echo "$TXT_R_TAB $string$COL_RESET"; }
+function EchoErrorNoLog() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET"; }
 
 
 # Fonction servant à colorer d'une autre couleur une partie du texte de réussite de sous-étape (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou succès)
-function DechoS() { string=$1; echo "$COL_CYAN$string$COL_GREEN"; }
+function DechoS() { local string=$1; echo "$COL_CYAN$string$COL_GREEN"; }
 
 # Appel de la fonction "EchoSuccessNoLog" en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs
-function EchoSuccess() { string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }
+function EchoSuccess() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }
 
 # Affichage d'un message de succès de sous-étape dont le temps de pause du script peut être choisi en argument
-function EchoSuccessCustomTimer() { string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET"; sleep "$timer"; }
+function EchoSuccessCustomTimer() { local string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET"; sleep "$timer"; }
 
 # Affichage d'un message de succès sans redirections vers le fichier de logs
-function EchoSuccessNoLog() { string=$1; echo "$TXT_G_TAB $string$COL_RESET"; }
+function EchoSuccessNoLog() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET"; }
 
 
 # Fonction de saut de ligne pour la zone de texte du terminal et pour le fichier de logs
 function Newline() { echo "" | tee -a "$FILE_LOG_PATH"; }
 
-# Fonction de saut de ligne pour le fichier de logs uniquement (utiliser la fonction "Newline" en redirigeant sa sortie vers le fichier de logs provoque un saut de deux lignes au lieu d'une)
-function NewlineLog() { echo "" >> "$FILE_LOG_PATH"; }
-
 
 # Fonction servant à colorer d'une autre couleur une partie de texte simple, coloré selon la couleur d'affichage de texte par défaut du terminal (jeu de mots entre "déco(ration)" et "echo")
-function Decho() { string=$1; echo "$COL_CYAN$string$COL_RESET"; }
+function Decho() { local string=$1; echo "$COL_CYAN$string$COL_RESET"; }
 
 # Fonction servant à colorer d'une autre couleur une partie du texte d'un header (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du mot "header"
-function DechoH() { string=$1; echo "$COL_BLUE$string$COL_CYAN"; }
+function DechoH() { local string=$1; echo "$COL_BLUE$string$COL_CYAN"; }
 
 
 ## DÉFINITION DES FONCTIONS DE CRÉATION DE HEADERS
@@ -189,12 +186,12 @@ function DechoH() { string=$1; echo "$COL_BLUE$string$COL_CYAN"; }
 function DrawLine()
 {
 	#***** Paramètres *****
-	line_color=$1			# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
-	line_char=$2			# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
+	local line_color=$1			# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
+	local line_char=$2			# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
 
 	#***** Code *****
 	# Définition de la couleur du caractère souhaité sur toute la ligne avant l'affichage du tout premier caractère
-	# Si la chaîne de caractère de la variable $line_color (qui contient l'encodage de la couleur du texte) n'est pas vide,
+	# Si la chaîne de caractère du paramètre $line_color (qui contient l'encodage de la couleur du texte) n'est pas vide,
 	# alors on écrit l'encodage de la couleur dans le terminal, qui affiche la couleur, et non son encodage en texte.
 
 	# L'encodage de la couleur peut être écrit via la commande "tput cols $encodage_de_la_couleur"
@@ -214,7 +211,7 @@ function DrawLine()
 	# de la première colonne (1), puis, on parcourt toute la ligne jusqu'à la fin de la zone de texte du terminal. À chaque appel
 	# de la commande "echo", un caractère est affiché et coloré selon l'encodage défini et écrit ci-dessus.
 
-	# La variable 'i' de la boucle "for i in" a été remplacé par un underscore '_' pour que Shellcheck arrête d'envoyer un message d'avertissement
+	# La variable 'i' de la boucle "for i in" a été remplacée par un underscore '_' pour que Shellcheck arrête d'envoyer un message d'avertissement
 	# ("warning") en raison de la non-déclaration de la variable 'i', bien que cela ne change strictement rien lors de l'exécution du script.
 	for _ in $(eval echo "{1..$TXT_COLS}"); do
 		echo -n "$line_char"
@@ -240,19 +237,19 @@ function DrawLine()
 function HeaderBase()
 {
 	#***** Paramètres *****
-	line_color=$1		# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
-	line_char=$2		# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
-	string_color=$3		# Définition de la couleur de la chaîne de caractères du header
-	string=$4			# Chaîne de caractères affichée dans chaque header
-	wait_t=$5			# Temps de pause après l'affichage du header
+	local line_color=$1		# Deuxième paramètre servant à définir la couleur souhaitée du caractère lors de l'appel de la fonction
+	local line_char=$2		# Premier paramètre servant à définir le caractère souhaité lors de l'appel de la fonction
+	local string_color=$3		# Définition de la couleur de la chaîne de caractères du header
+	local string=$4			# Chaîne de caractères affichée dans chaque header
+	local wait_t=$5			# Temps de pause après l'affichage du header
 
 	#***** Code *****
 	# Définition de la couleur de la ligne du caractère souhaité.
 	# Ce code produit le même résultat que la première condition de la fonction "DrawLine", mais il a été
 	# réécrit ici car aucune partie d'une fonction ne peut être utilisée individuellement depuis une autre fonction
-	if test "$line_color" == ""; then
-		echo -ne "$line_color"
-	fi
+#	if test "$line_color" == ""; then
+#		echo -ne "$line_color"
+#	fi
 
 	DrawLine "$line_color" "$line_char"
 	echo "$string_color" "##>" "$string$COL_RESET"
@@ -270,7 +267,7 @@ function HeaderStep()
 {
 	#***** Paramètre *****
 	# Chaîne de caractères contenant la phrase à afficher
-	string=$1
+	local string=$1
 
 	# ***** Code *****
 	HeaderBase "$COL_CYAN" "$TXT_HEADER_LINE_CHAR" "$COL_CYAN" "$string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
@@ -283,7 +280,7 @@ function HeaderInstall()
 {
 	#***** Paramètre *****
 	# Chaîne de caractères contenant la phrase à afficher
-	string=$1
+	local string=$1
 
 	# ***** Code *****
 	HeaderBase "$COL_YELLOW" "$TXT_HEADER_LINE_CHAR" "$COL_GREEN" "$string" "1.5"  2>&1 | tee -a "$FILE_LOG_PATH"
@@ -295,11 +292,11 @@ function HeaderInstall()
 function HandleErrors()
 {
 	#***** Paramètre *****
-	error_string=$1		# Chaîne de caractères du type d'erreur à afficher
-	advise_string=$2	# Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème
+	local error_string=$1		# Chaîne de caractères du type d'erreur à afficher
+	local advise_string=$2	# Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème
 
 	# ***** Code *****
-	HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
+	HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $error_string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
 
 	EchoErrorNoLog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$FILE_LOG_PATH"
 	EchoError "$error_string"
@@ -330,32 +327,32 @@ function HandleErrors()
 function Makedir()
 {
 	#***** Paramètres *****
-	dir_parent=$1		# Emplacement depuis la racine du dossier parent du dossier à traiter
-	dir_name=$2			# Nom du dossier à traiter (dans son dossier parent)
-	dir_sleep_blk=$3	# Temps de pause du script avant et après la création d'une ligne d'un bloc d'informations sur le traitement du dossier
-	dir_sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès lors du traitement du dossier
+	local parent=$1		# Emplacement depuis la racine du dossier parent du dossier à traiter
+	local name=$2			# Nom du dossier à traiter (dans son dossier parent)
+	local sleep_blk=$3	# Temps de pause du script avant et après la création d'une ligne d'un bloc d'informations sur le traitement du dossier
+	local sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès lors du traitement du dossier
 
 	#***** Autres variables *****
-	local dir_path="$dir_parent/$dir_name"	# Chemin du dossier à traiter
-	local dir_block_char="\""				# Caractère composant la ligne (c'est un double quote ("), cependant, pour que le script ne l'interprète pas comme un guillemet fermant, on ajoute un antislash juste devant)
+	local path="$parent/$name"	# Chemin du dossier à traiter
+	local block_char="\""		# Caractère composant la ligne (c'est un double quote ("), cependant, pour que le script ne l'interprète pas comme un guillemet fermant, on ajoute un antislash juste devant)
 
 	#***** Code *****
 	# On commence par dessiner la première ligne du bloc
-	sleep "$dir_sleep_blk"
-	DrawLine "$COL_RESET" "$dir_block_char"
+	sleep "$sleep_blk"
+	DrawLine "$COL_RESET" "$block_char"
 	echo ""	# On ne redirige aucun saut de ligne vers le fichier de logs, pour éviter de les afficher en double en cas d'appel de la fonction avec redirections
 
-	EchoNewstepCustomTimer "Traitement du dossier $(DechoN "$dir_name") dans le dossier parent $(DechoN "$dir_parent/")" "$dir_sleep_txt"
+	EchoNewstepCustomTimer "Traitement du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")" "$sleep_txt"
 	echo ""
 
 	# Si le dossier à traiter n'existe pas
-	if test ! -d "$dir_path"; then
-		EchoNewstepCustomTimer "Création du dossier $(DechoN "$dir_name") dans le dossier parent $(DechoN "$dir_parent/")" "$dir_sleep_txt"
+	if test ! -d "$path"; then
+		EchoNewstepCustomTimer "Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")" "$sleep_txt"
 		echo ""
 
-		mkdir -v "$dir_path" \
-			|| HandleErrors "LE DOSSIER $(DechoE "$dir_name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$dir_parent/")" "Essayez de le créer manuellement" \
-			&& { echo ""; EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_name") a été créé avec succès dans le dossier $(DechoS "$dir_parent/")" "$dir_sleep_txt"; }
+		mkdir -v "$path" \
+			|| HandleErrors "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")" "Essayez de le créer manuellement" \
+			&& { echo ""; EchoSuccessCustomTimer "Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")" "$sleep_txt"; }
 		echo ""
 
 		# On change les droits du dossier nouvellement créé par le script
@@ -364,33 +361,33 @@ function Makedir()
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 
-		EchoNewstepCustomTimer "Changement récursif des droits du nouveau dossier $(DechoN "$dir_path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$dir_sleep_txt"
+		EchoNewstepCustomTimer "Changement récursif des droits du nouveau dossier $(DechoN "$path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$sleep_txt"
 		echo ""
 
 		# On vérifie si l'utilisateur possède déjà le dossier à créer (dans le cas où le dossier est créé dans un dossier n'appartenant pas à l'utilisateur (par exemple, quand il est créé dans le dossier "/tmp"))
-		if test "$(stat -c '%U' "$dir_path")" == "$ARG_USERNAME"; then
-			EchoSuccessCustomTimer "Vous possédez déjà le dossier $(DechoS "$dir_path/")" "$dir_sleep_txt"
+		if test "$(stat -c '%U' "$path")" == "$ARG_USERNAME"; then
+			EchoSuccessCustomTimer "Vous possédez déjà le dossier $(DechoS "$path/")" "$sleep_txt"
 			echo ""
 
-			DrawLine "$COL_RESET" "$dir_block_char"
-			sleep "$dir_sleep_blk"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
 			echo ""
 
 			return
 		else
-			chown -Rv "${ARG_USERNAME}" "$dir_path" \
+			chown -Rv "${ARG_USERNAME}" "$path" \
 				|| {
 					echo ""
 
-					EchoErrorCustomTimer "Impossible de changer les droits du dossier $(DechoE "$dir_path/")" "$dir_sleep_txt"
-					EchoErrorCustomTimer "Pour changer les droits du dossier $(DechoE "$dir_path/") de manière récursive," "$dir_sleep_txt"
-					EchoErrorCustomTimer "utilisez la commande :" "$dir_sleep_txt"
-					echo "	chown -R ${ARG_USERNAME} $dir_path"
+					EchoErrorCustomTimer "Impossible de changer les droits du dossier $(DechoE "$path/")" "$sleep_txt"
+					EchoErrorCustomTimer "Pour changer les droits du dossier $(DechoE "$path/") de manière récursive," "$sleep_txt"
+					EchoErrorCustomTimer "utilisez la commande :" "$sleep_txt"
+					echo "	chown -R ${ARG_USERNAME} $path"
 					echo ""
 
-					EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path/")" "$dir_sleep_txt"
-					DrawLine "$COL_RESET" "$dir_block_char"		# On dessine la deuxième et dernière ligne du bloc
-					sleep "$dir_sleep_blk"
+					EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$path/")" "$sleep_txt"
+					DrawLine "$COL_RESET" "$block_char"		# On dessine la deuxième et dernière ligne du bloc
+					sleep "$sleep_blk"
 					echo ""
 					echo ""
 
@@ -398,12 +395,12 @@ function Makedir()
 				} && {
 					echo ""
 
-					EchoSuccessCustomTimer "Les droits du dossier $(DechoS "$dir_name") ont été changés avec succès" "$dir_sleep_txt"
+					EchoSuccessCustomTimer "Les droits du dossier $(DechoS "$name") ont été changés avec succès" "$sleep_txt"
 					echo ""
 
-					EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path/")" "$dir_sleep_txt"
-					DrawLine "$COL_RESET" "$dir_block_char"
-					sleep "$dir_sleep_blk"
+					EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$path/")" "$sleep_txt"
+					DrawLine "$COL_RESET" "$block_char"
+					sleep "$sleep_blk"
 					echo ""
 					echo ""
 
@@ -412,24 +409,24 @@ function Makedir()
 		fi
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier contient AU MOINS un fichier ou dossier
-	elif test -d "$dir_path" && test "$(ls -A "$dir_path")"; then
-		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom $(DechoN "$dir_name") se trouve déjà dans le dossier cible $(DechoN "$dir_parent/")" "$dir_sleep_txt"
-		EchoNewstepCustomTimer "Suppression du contenu du dossier $(DechoN "$dir_path/")" "$dir_sleep_txt"
+	elif test -d "$path" && test "$(ls -A "$path")"; then
+		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom $(DechoN "$name") se trouve déjà dans le dossier cible $(DechoN "$parent/")" "$sleep_txt"
+		EchoNewstepCustomTimer "Suppression du contenu du dossier $(DechoN "$path/")" "$sleep_txt"
 		echo ""
 
 		# ATTENTION À NE PAS MODIFIER LA COMMANDE SUIVANTE", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
 		# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
-		rm -rfv "${dir_path/:?}/"* \
+		rm -rfv "${path/:?}/"* \
 			|| {
 				echo ""
 
-				EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $(DechoE "$dir_path/")" "$dir_sleep_txt";
-				EchoErrorCustomTimer "Le contenu de tout fichier du dossier $(DechoE "$dir_path/") portant le même nom qu'un des fichiers téléchargés sera écrasé" "$dir_sleep_txt"
+				EchoErrorCustomTimer "Impossible de supprimer le contenu du dossier $(DechoE "$path/")" "$sleep_txt";
+				EchoErrorCustomTimer "Le contenu de tout fichier du dossier $(DechoE "$path/") portant le même nom qu'un des fichiers téléchargés sera écrasé" "$sleep_txt"
 				echo ""
 
-				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$dir_path/")" "$dir_sleep_txt"
-				DrawLine "$COL_RESET" "$dir_block_char"
-				sleep "$dir_sleep_blk"
+				EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$path/")" "$sleep_txt"
+				DrawLine "$COL_RESET" "$block_char"
+				sleep "$sleep_blk"
 				echo ""
 				echo ""
 
@@ -437,12 +434,12 @@ function Makedir()
 			} && {
 				echo ""
 
-				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$dir_path/") effectuée avec succès" "$dir_sleep_txt"
+				EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$path/") effectuée avec succès" "$sleep_txt"
 				echo ""
 
-				EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path/")" "$dir_sleep_txt"
-				DrawLine "$COL_RESET" "$dir_block_char"
-				sleep "$dir_sleep_blk"
+				EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$path/")" "$sleep_txt"
+				DrawLine "$COL_RESET" "$block_char"
+				sleep "$sleep_blk"
 				echo ""
 				echo ""
 			}
@@ -450,13 +447,13 @@ function Makedir()
 		return
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier est vide
-	elif test -d "$dir_path"; then
-		EchoSuccessCustomTimer "Le dossier $(DechoS "$dir_path/") existe déjà et est vide" "$dir_sleep_txt"
+	elif test -d "$path"; then
+		EchoSuccessCustomTimer "Le dossier $(DechoS "$path/") existe déjà et est vide" "$sleep_txt"
 		echo ""
 
-		EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$dir_path/")" "$dir_sleep_txt"
-		DrawLine "$COL_RESET" "$dir_block_char"
-		sleep "$dir_sleep_blk"
+		EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$path/")" "$sleep_txt"
+		DrawLine "$COL_RESET" "$block_char"
+		sleep "$sleep_blk"
 		echo ""
 
 		return
@@ -468,29 +465,29 @@ function Makedir()
 function Makefile()
 {
 	#***** Paramètres *****
-	file_parent=$1		# Emplacement depuis la racine du dossier parent du fichier à traiter
-	file_name=$2		# Nom du fichier à traiter (dans son dossier parent)
-	file_sleep_blk=$3	# Temps de pause du script avant et après la création d'un bloc d'informations sur le traitement du fichier
-	file_sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
+	local parent=$1		# Emplacement depuis la racine du dossier parent du fichier à traiter
+	local name=$2			# Nom du fichier à traiter (dans son dossier parent)
+	local sleep_blk=$3	# Temps de pause du script avant et après la création d'un bloc d'informations sur le traitement du fichier
+	local sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès
 
 	#***** Autres variables *****
-	local file_path="$file_parent/$file_name"		# Chemin du fichier à traiter
-	local file_block_char="'"						# Caractère composant la ligne
+	local path="$parent/$name"		# Chemin du fichier à traiter
+	local block_char="'"						# Caractère composant la ligne
 
 	#***** Code *****
 	# On commence par dessiner la première ligne du bloc
-	sleep "$file_sleep_blk"
-	DrawLine "$COL_RESET" "$file_block_char"
+	sleep "$sleep_blk"
+	DrawLine "$COL_RESET" "$block_char"
 	echo ""
 
-	EchoNewstepCustomTimer "Traitement du fichier $(DechoN "$file_name")" "$file_sleep_txt"
+	EchoNewstepCustomTimer "Traitement du fichier $(DechoN "$name")" "$sleep_txt"
 	echo ""
 
 	# Si le fichier à traiter n'existe pas
-	if test ! -s "$file_path"; then
-		touch "$file_path" \
-			|| HandleErrors "LE FICHIER $(DechoE "$file_name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$file_parent/")" "Essayez de le créer manuellement" \
-			&& { EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") a été créé avec succès dans le dossier $(DechoS "$file_parent/")" "$file_sleep_txt"; }
+	if test ! -s "$path"; then
+		touch "$path" \
+			|| HandleErrors "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement" \
+			&& { EchoSuccessCustomTimer "Le fichier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")" "$sleep_txt"; }
 		echo ""
 
 		# On change les droits du fichier créé par le script
@@ -500,49 +497,49 @@ function Makefile()
 		#		- Le nom de l'utilisateur à qui donner les droits
 		#		- Le chemin du dossier cible
 
-		EchoNewstepCustomTimer "Changement des droits du nouveau fichier $(DechoN "$file_path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$file_sleep_txt"
+		EchoNewstepCustomTimer "Changement des droits du nouveau fichier $(DechoN "$path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")" "$sleep_txt"
 		echo ""
 
 		# On vérifie si l'utilisateur possède déjà le dossier à créer (dans le cas où le dossier est créé dans un dossier n'appartenant pas à l'utilisateur (par exemple, quand il est créé dans le dossier "/tmp"))
-		if test "$(stat -c '%U' "$file_path")" == "$ARG_USERNAME"; then
-			EchoSuccessCustomTimer "Vous possédez déjà le fichier $(DechoS "$file_path")" "$dir_sleep_txt"
+		if test "$(stat -c '%U' "$path")" == "$ARG_USERNAME"; then
+			EchoSuccessCustomTimer "Vous possédez déjà le fichier $(DechoS "$path")" "$sleep_txt"
 			echo ""
 
 			# On dessine la deuxième et dernière ligne du bloc
-			EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
-			DrawLine "$COL_RESET" "$dir_block_char"
-			sleep "$file_sleep_blk"
+			EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")" "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
 			echo ""
 			echo ""
 
 			return
 
 		else
-			chown -v "${ARG_USERNAME}" "$file_path" \
+			chown -v "${ARG_USERNAME}" "$path" \
 			|| {
 				echo ""
 
-				EchoErrorCustomTimer "Impossible de changer les droits du fichier $(DechoE "$file_path")" "$file_sleep_txt"
-				EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$file_path")," "$file_sleep_txt"
-				EchoErrorCustomTimer "utilisez la commande :" "$file_sleep_txt"
-				echo "	chown ${ARG_USERNAME} $file_path"
+				EchoErrorCustomTimer "Impossible de changer les droits du fichier $(DechoE "$path")" "$sleep_txt"
+				EchoErrorCustomTimer "Pour changer les droits du fichier $(DechoE "$path")," "$sleep_txt"
+				EchoErrorCustomTimer "utilisez la commande :" "$sleep_txt"
+				echo "	chown ${ARG_USERNAME} $path"
 				echo ""
 
-				EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$file_path")" "$file_sleep_txt"
-				DrawLine "$COL_RESET" "$file_block_char"
-				sleep "$file_sleep_blk"
+				EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$path")" "$sleep_txt"
+				DrawLine "$COL_RESET" "$block_char"
+				sleep "$sleep_blk"
 				echo ""
 				echo ""
 
 				return
 			} && {
 				echo ""
-				EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$file_parent") ont été changés avec succès" "$file_sleep_txt"
+				EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$parent") ont été changés avec succès" "$sleep_txt"
 				echo ""
 
-				EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
-				DrawLine "$COL_RESET" "$file_block_char"
-				sleep "$file_sleep_blk"
+				EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")" "$sleep_txt"
+				DrawLine "$COL_RESET" "$block_char"
+				sleep "$sleep_blk"
 				echo ""
 				echo ""
 
@@ -551,36 +548,36 @@ function Makefile()
 		fi
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il est vide
-	elif test -f "$file_path" && test -s "$file_path"; then
-		EchoSuccessCustomTimer "Le fichier $(DechoS "$file_name") existe déjà dans le dossier $(DechoS "$file_parent/")" "$file_sleep_txt"
+	elif test -f "$path" && test -s "$path"; then
+		EchoSuccessCustomTimer "Le fichier $(DechoS "$name") existe déjà dans le dossier $(DechoS "$parent/")" "$sleep_txt"
 		echo ""
 
-		EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
-		DrawLine "$COL_RESET" "$file_block_char"
+		EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")" "$sleep_txt"
+		DrawLine "$COL_RESET" "$block_char"
 		echo ""
 
 		return
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il n'est pas vide
-	elif test -f "$file_path" && test ! -s "$file_path"; then
-		true > "$file_path" \
+	elif test -f "$path" && test ! -s "$path"; then
+		true > "$path" \
 			|| {
-				EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$file_path") n'a pas été écrasé" "$file_sleep_txt"
+				EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$path") n'a pas été écrasé" "$sleep_txt"
 				echo ""
 
-				EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$file_path")" "$file_sleep_txt"
-				DrawLine "$COL_RESET" "$file_block_char"
-				sleep "$file_sleep_blk"
+				EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$path")" "$sleep_txt"
+				DrawLine "$COL_RESET" "$block_char"
+				sleep "$sleep_blk"
 				echo ""
 				echo ""
 
 			} && {
-				EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$file_path") a été écrasé avec succès" "$file_sleep_txt"
+				EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$path") a été écrasé avec succès" "$sleep_txt"
 				echo ""
 
-				EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$file_path")" "$file_sleep_txt"
-				DrawLine "$COL_RESET" "$file_block_char"
-				sleep "$file_sleep_blk"
+				EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")" "$sleep_txt"
+				DrawLine "$COL_RESET" "$block_char"
+				sleep "$sleep_blk"
 				echo ""
 				echo ""
 			}
@@ -594,17 +591,19 @@ function Makefile()
 function OptimizeInstallation()
 {
 	#***** Paramètres *****
-	file_path=$1	# Chemin du fichier script à exécuter
-	cmd=$2			# Commande du gestionnaire de paquets à exécuter
-	package_name=$3	# Nom du paquet
-	type=$4			# Type de commande envoyée (recherche sur le disque dur, dans la base de données ou installation de paquets)
+	local parent=$1		# Dossier parent du fichier script à exécuter
+	local file=$2		# Nom du fichier script à exécuter
+	local cmd=$3		# Commande du gestionnaire de paquets à exécuter
+	local package=$4	# Nom du paquet
+	local type=$5		# Type de commande envoyée (recherche sur le disque dur, dans la base de données ou installation de paquets)
 
 	#***** Autres variables *****
+	local parent="$DIR_INSTALL_PATH"
 	local block_char="="
 
 	#**** Code *****
 	# On vérifie si tous les arguments sont bien appelés (IMPORTANT POUR UNE INSTALLATION SANS PROBLÈMES)
-	if test -z "$file_path" || test -z "$cmd" || test -z "$package_name" || test -z "$type"; then
+	if test -z "$parent" || test -z "$file" || test -z "$cmd" || test -z "$package" || test -z "$type"; then
 		HandleErrors "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")" \
 			"Vérifiez quels arguments manquent à la fonction"
 	fi
@@ -612,21 +611,19 @@ function OptimizeInstallation()
 	# On vérifie si la valeur de l'argument correspond à un type de commande
 	case "$type" in
 		"HD")
-			## Vérification de la présence du paquet sur le disque dur de l'utilisateur
-			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") sur votre système"
+			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package") sur votre système"
 			Newline
 			;;
 		"DB")
-			## Vérification de la présence du paquet dans la base de données du gestionnaire de paquets de l'utilisateur
-			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package_name") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
+			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package") dans la base de données du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
 			Newline
 			;;
 		"INST")
-			EchoNewstep "Installation du paquet $(DechoN "$package_name")"
+			EchoNewstep "Installation du paquet $(DechoN "$package")"
 			sleep 1
 			;;
 		*)
-			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN QUATRIÈME ARGUMENT $(DechoE "$type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
+			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN CINQUIÈME ARGUMENT $(DechoE "$type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
 				"Les trois chaînes de caractères attendues sont :
 				 $(DechoE "HD") pour la recherche de paquets sur le système,
 				 $(DechoE "DB") pour la recherche de paquets dans la base de données du gestionnaire de paquets
@@ -635,22 +632,22 @@ function OptimizeInstallation()
 	esac
 
 	# Exécution du script
-	./"$file_path" "$FILE_LOG_PATH" "$cmd"
+	(cd "$parent" && sudo ./"$file" "$FILE_LOG_PATH" "$cmd"
 
 	case "$?" in
 		"1")
 			case "$type" in
 				"HD")
-					EchoNewstep "Le paquet $(DechoN "$package_name") n'est pas installé sur votre système"
+					EchoNewstep "Le paquet $(DechoN "$package") n'est pas installé sur votre système"
 					Newline
 
-					EchoNewstep "Préparation de l'installation du paquet $(DechoN "$package_name")"
+					EchoNewstep "Préparation de l'installation du paquet $(DechoN "$package")"
 					Newline
 					sleep 1
 					;;
 				"DB")
-					EchoError "Le paquet $(DechoE "$package_name") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
-					EchoError "Écriture du nom du paquet $(DechoE "$package_name") dans le fichier $(DechoE "$DIR_PACKAGES_PATH")"
+					EchoError "Le paquet $(DechoE "$package") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
+					EchoError "Écriture du nom du paquet $(DechoE "$package") dans le fichier $(DechoE "$DIR_PACKAGES_PATH")"
 					Newline
 
 					# S'il n'existe pas, on crée le fichier contenant les noms des paquets introuvables dans la base de données
@@ -662,7 +659,7 @@ function OptimizeInstallation()
 
 					echo "$package_name" >> "$FILE_PACKAGES_DB_PATH"
 
-					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+					EchoError "Abandon de l'installation du paquet $(DechoE "$package")"
 					Newline
 
 					Drawline "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
@@ -670,7 +667,7 @@ function OptimizeInstallation()
 					Newline
 					;;
 				"INST")
-					EchoError "Impossible d'installer le paquet $(DechoE "$package_name")"
+					EchoError "Impossible d'installer le paquet $(DechoE "$package")"
 					Newline
 
 					# S'il n'existe pas, on crée le fichier contenant les noms des paquets dont l'installation a échouée
@@ -681,9 +678,9 @@ function OptimizeInstallation()
 						echo "" >> "$FILE_PACKAGES_INST_PATH"
 					fi
 
-					echo "$package_name" >> "$FILE_PACKAGES_INST_PATH"
+					echo "$package" >> "$FILE_PACKAGES_INST_PATH"
 
-					EchoError "Abandon de l'installation du paquet $(DechoE "$package_name")"
+					EchoError "Abandon de l'installation du paquet $(DechoE "$package")"
 					Newline
 
 					Drawline "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
@@ -711,7 +708,7 @@ function OptimizeInstallation()
 		"0")
 			case "$type" in
 				"HD")
-					EchoSuccess "Le paquet $(DechoS "$package_name") est déjà installé sur votre système"
+					EchoSuccess "Le paquet $(DechoS "$package") est déjà installé sur votre système"
 					Newline
 
 					Drawline "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
@@ -719,18 +716,19 @@ function OptimizeInstallation()
 					Newline
 					;;
 				"DB")
-					EchoSuccess "Le paquet $(DechoS "$package_name") a été trouvé dans la base de données du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")"
+					EchoSuccess "Le paquet $(DechoS "$package") a été trouvé dans la base de données du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")"
 					;;
 				"INST")
-					EchoSuccess "Le paquet $(DechoS "$package_name") a bien été installé"
+					EchoSuccess "Le paquet $(DechoS "$package") a bien été installé"
 					;;
 			esac
 			;;
-		*)
-			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
-				"Vérifiez ce qui a causé cette erreur"
-			;;
+		#*)
+		#	HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
+		#		"Vérifiez ce qui a causé cette erreur"
+		#	;;
 	esac
+	)
 }
 
 # Installation d'un paquet selon le gestionnaire de paquets, ainsi que sa commande de recherche de paquets dans le système de l'utilisateur,
@@ -738,11 +736,11 @@ function OptimizeInstallation()
 function PackInstall()
 {
 	#***** Paramètres *****
-	package_manager_name=$1		# Nom du gestionnaire de paquets
-	package_name=$2				# Nom du paquet à installer
+	local package_manager_name=$1		# Nom du gestionnaire de paquets
+	local package_name=$2				# Nom du paquet à installer
 
 	#***** Autres variables *****
-	local pack_block_char="="	# Caractère composant la ligne
+	local block_char="="		# Caractère composant la ligne
 
 	#***** Code *****
 	# S'il n'existe pas, on crée le dossier contenant des informations concernant les éventuels paquets non-trouvés dans la base de données
@@ -766,9 +764,8 @@ function PackInstall()
 		Makefile "$DIR_INSTALL_PATH" "$FILE_INSTALL_INST_NAME" "0" "0" >> "$FILE_LOG_PATH"
 	fi
 
-	DrawLine "$COL_RESET" "$pack_block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
+	DrawLine "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
 	sleep 1
-	Newline
 	Newline
 
 	EchoNewstep "Traitement du paquet $(DechoN "$package_name")"
@@ -820,7 +817,7 @@ function PackInstall()
 	var_type="HD"	# On enregistre la valeur du troisième paramètre de la fonction "OptimizeInstallation" pour mieux le récupérer lors du test
 
 	# On appelle en premier lieu la commande de recherche de paquets installés sur le système de l'utilisateur, puis on quitte la fonction "PackInstall" si le paquet recherché est déjà installé sur le disque dur de l'utilisateur
-	OptimizeInstallation "$FILE_SCRIPT_PATH" "$var_file_content" "$package_name" "$var_type"
+	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
 
 	if test "$var_type" == "HD" && "$?" == "1"; then
 		return
@@ -831,7 +828,7 @@ function PackInstall()
 	var_type="DB"
 
 	# On appelle en deuxième lieu la commande de recherche de paquets dans la base de données du gestionnaire de paquets de l'utilisateur, puis on quitte la fonction "PackInstall" si le paquet recherché est absent de la base de données
-	OptimizeInstallation "$FILE_SCRIPT_PATH" "$var_file_content" "$package_name" "$var_type"
+	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
 
 	if test "$var_type" == "DB" && "$?" == "1"; then
 		return
@@ -842,7 +839,7 @@ function PackInstall()
 	var_type="INST"
 
 	# On appelle en troisième et dernier lieu la commande d'installation de paquets, puis on quitte la fonction "PackInstall" si le paquet n'a pas pu être installé
-	OptimizeInstallation "$FILE_SCRIPT_PATH" "$var_file_content" "$package_name" "$var_type"
+	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
 
 	if test "$var_type" == "INST" && "$?" == "1"; then
 		return
@@ -1013,13 +1010,17 @@ function CheckArgs()
 		echo "PID : $$"
 		Newline
 
-		EchoNewstepNoLog "Test de la fonction d'installation"
-		Newline
-
+		## APPEL DES FONCTIONS D'INITIALISATION
 		CreateLogFile			# On appelle la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
+		Mktmpdir				# Puis la fonction de création du dossier temporaire
 		GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur
 		WritePackScript			# Puis la fonction de création de scripts d'installation
 
+		# APPEL DES FONCTIONS À TESTER
+		EchoNewstepNoLog "Test de la fonction d'installation"
+		Newline
+
+		HeaderStep "TEST D'INSTALLATION DE PAQUETS"
 		PackInstall "apt" "nano"
 		PackInstall "apt" "emacs"
 
@@ -1037,18 +1038,18 @@ function CheckArgs()
 # Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard (STDOUT) ou sortie d'erreurs (STDERR))
 function CreateLogFile()
 {
-	# Si le fichier de logs n'existe pas, le script le crée dans le dossier actuel (pour cela, on utilise la variable d'environnement $PWD) via la fonction "Makefile"
-	Makefile "$PWD" "$FILE_LOG_NAME" "0" "0" >> "$FILE_LOG_PATH"
-	NewlineLog
-
-	# On évite d'appeler les fonctions d'affichage propre "EchoSuccess" ou "EchoError" (sans le "NoLog") pour éviter
-	# d'écrire deux fois le même texte, vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
-	EchoSuccessNoLog "Fichier de logs créé avec succès" >> "$FILE_LOG_PATH"
-	NewlineLog
-
 	# Récupération des informations sur le système d'exploitation de l'utilisateur, me permettant de corriger tout bug pouvant survenir sur une distribution Linux précise
 	# Tout ce qui se trouve entre les accolades suivantes est envoyé dans le fichier de logs
 	{
+		# Le script crée d'abord le fichier de logs dans le dossier actuel (pour cela, on passe la valeur de la variable d'environnement $PWD en premier argument de la fonction "Makefile")
+		Makefile "$PWD" "$FILE_LOG_NAME" "0" "0"
+		echo ""
+
+		# On évite d'appeler les fonctions d'affichage propre "EchoSuccess" ou "EchoError" (sans le "NoLog") pour éviter
+		# d'écrire deux fois le même texte, vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs
+		EchoSuccessNoLog "Fichier de logs créé avec succès"
+		echo ""
+
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "RÉCUPÉRATION DES INFORMATIONS SUR LE SYSTÈME DE L'UTILISATEUR" "0"
 
 		# Étant donné que chaque ligne du header est écrite avec la commande "echo -n" interdisant un saut de ligne, il faut appeler deux fois la commande "echo "" " pour ainsi faire un saut de ligne
@@ -1056,18 +1057,16 @@ function CreateLogFile()
 		# Récupération des informations sur le système d'exploitation de l'utilisateur contenues dans le fichier "/etc/os-release"
 		EchoNewstepNoLog "Informations sur le système d'exploitation de l'utilisateur $(DechoN "${ARG_USERNAME}") :"
 		cat "/etc/os-release"
-		NewlineLog
+		echo ""
 
 		EchoSuccessNoLog "Fin de la récupération d'informations sur le système d'exploitation"
 		echo ""
-	} >> "$FILE_LOG_PATH"	# Au moment de la création du fichier de logs, la variable "$FILE_LOG_PATH" correspond au dossier actuel de l'utilisateur
+	} > "$FILE_LOG_PATH"	# Au moment de la création du fichier de logs, la variable "$FILE_LOG_PATH" correspond au dossier actuel de l'utilisateur
 }
 
 # Création du dossier temporaire où sont stockés les fichiers et dossiers temporaires
 function Mktmpdir()
 {
-	NewlineLog
-
 	{
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" \
 			"CRÉATION DU DOSSIER TEMPORAIRE $COL_JAUNE\"$DIR_TMP$COL_BLUE\" DANS LE DOSSIER $COL_JAUNE\"$DIR_TMP_PARENT\"$COL_RESET" "0"
@@ -1115,6 +1114,7 @@ function GetMainPackageManager()
 # Création du script de traitement de paquets à installer
 function WritePackScript()
 {
+	# Création du dossier contenant le script de traitement de paquets et les fichiers contenant les commandes de recherche et d'installation de paquets
 	{
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "ÉCRITURE DU SCRIPT DE TRAITEMENT DE PAQUETS" "0"
 
@@ -1136,6 +1136,16 @@ function WritePackScript()
 		# Exécution de la commande passée en argument et test d'erreurs inconnues
 		printf "elif test -s \"\${CMD}\"; then\n\t\"\$CMD\" || exit 1\n\texit 0\nelse\n\texit 4\nfi\n"
 	} > "$FILE_SCRIPT_PATH"
+
+	# On rend le fichier script exécutable
+	{
+		EchoNewstepNoLog "Attribution des droits d'exécution sur le fichier script $(DechoN "$FILE_SCRIPT_PATH")"
+		echo ""
+	} >> "$FILE_LOG_PATH"
+
+	chmod +x -v "$FILE_SCRIPT_PATH" 2>&1 | tee -a "$FILE_LOG_PATH" \
+		|| { echo ""; HandleErrors "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" ""; } \
+		&& { echo ""; EchoSuccessNoLog "Les droits d'exécution ont été attribués avec succès sur le fichier script de traitement de paquets"; } >> $FILE_LOG_PATH
 }
 
 # Initialisation du script
@@ -1267,16 +1277,13 @@ function DistUpgrade()
 	#***** Variables *****
 	# Noms du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur
 	local update_d_name="Update"		# Dossier contenant les fichiers
-	local cache_upd_f_name="cache.tmp"	# Fichier contenant la commande de mise à jour du cache
 	local pack_upg_f_name="pack.tmp"	# Fichier contenant la commande de mise à jour des paquets
 
 	# Chemins du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur
 	local update_d_path="$DIR_TMP_PATH/$update_d_name"			# Chemin du dossier
-	local cache_upd_f_path="$update_d_path/$cache_upd_f_name"	# Chemin du fichier contenant la commande de mise à jour du cache
 	local pack_upg_f_path="$update_d_path/$pack_upg_f_name"		# Chemin du fichier contenant la commande de mise à jour des paquets
 
 	# Vérification du succès des mises à jour
-	local cache_updated="0"
 	local packs_updated="0"
 
 	#***** Code *****
@@ -1290,7 +1297,6 @@ function DistUpgrade()
 	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER",
 	case "$PACK_MAIN_PACKAGE_MANAGER" in
 		"apt")
-			echo apt-get -y update > "$cache_upd_f_path"
 			echo apt-get -y upgrade > "$pack_upg_f_path"
 			;;
 		"dnf")
@@ -1300,23 +1306,6 @@ function DistUpgrade()
 			echo pacman --noconfirm -Syu > "$pack_upg_f_path"
 			;;
 	esac
-
-	# On met à jour le cache en premier
-	EchoNewstep "Mise à jour du cache du gestionnaire $(DechoN "$PACK_MAIN_PACKAGE_MANAGER")"
-	Newline
-
-	bash "$cache_upd_f_path" # | tee -a "$FILE_LOG_PATH"
-
-	if test "$?" -eq 0; then
-		cache_updated="1"
-		EchoSuccess "La mise à jour du cache du gestionnaire $(DechoS "$PACK_MAIN_PACKAGE_MANAGER") s'est faite avec succès"
-		Newline
-
-	else
-		EchoError "Une ou plusieurs erreurs ont eu lieu lors de la mise à jour du cache du gestionnaire $(DechoE "$PACK_MAIN_PACKAGE_MANAGER")"
-		Newline
-
-	fi
 
 	# On met à jour les paquets
 	EchoNewstep "Mise à jour des paquets"
@@ -1335,26 +1324,14 @@ function DistUpgrade()
 	fi
 
 	# On vérifie maintenant si le cache et les paquets ont bien été mis à jour
-	# Si le cache ET les paquets ont été mis à jour avec succès
-	if test $cache_updated = "1" && test $packs_updated = "1"; then
-		EchoSuccess "Le cache ET les paquets ont été mis à jour avec succès"
-		Newline
-
-	# Sinon, si le cache a été mis à jour MAIS que les paquets ne l'ont pas été
-	elif test $cache_updated = "1" && test $packs_updated = "0"; then
-		EchoSuccess "Le cache a été mis à jour avec succès"
-		EchoError "Les paquets n'ont pas été correctement mis à jour"
-		Newline
-
-	# Sinon, si le cache n'a pas été mis à jour MAIS que les paquets l'ont été
-	elif test $cache_updated = "0" && test $packs_updated = "1"; then
-		EchoError "Le cache n'a pas été mis à jour avec succès"
+	# Si les paquets ont été mis à jour avec succès
+	if test $packs_updated = "1"; then
 		EchoSuccess "Les paquets ont été mis à jour avec succès"
 		Newline
 
 	# Sinon, si rien n'a été mis à jour
 	else
-		EchoError "La mise à jour du cache ET des paquets a échouée"
+		EchoError "La mise à jour des paquets a échouée"
 		Newline
 	fi
 
