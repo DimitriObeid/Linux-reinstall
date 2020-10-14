@@ -359,7 +359,7 @@ function Makedir()
 		else
             echo ""
 
-			HandleErrors "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")." "Essayez de le créer manuellement."
+			HandleErrors "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")" "Essayez de le créer manuellement."
 		fi
 
 		# On change les droits du dossier nouvellement créé par le script
@@ -490,7 +490,7 @@ function Makefile()
 			echo ""
 
         else
-            HandleErrors "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")." "Essayez de le créer manuellement."
+            HandleErrors "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement."
 		fi
 
 		# On change les droits du fichier créé par le script.
@@ -595,7 +595,7 @@ function OptimizeInstallation()
 	#**** Code *****
 	# On vérifie si tous les arguments sont bien appelés (IMPORTANT POUR UNE INSTALLATION SANS PROBLÈMES)
 	if test "$#" != 5; then
-		HandleErrors "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")." \
+		HandleErrors "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")" \
 			"Vérifiez quels arguments manquent à la fonction."
 	fi
 
@@ -614,7 +614,7 @@ function OptimizeInstallation()
 			Newline
 			;;
 		*)
-			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN CINQUIÈME ARGUMENT $(DechoE "$type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES." \
+			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN CINQUIÈME ARGUMENT $(DechoE "$type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
 				"Les trois chaînes de caractères attendues sont :
 				 $(DechoE "HD") pour la recherche de paquets sur le système,
 				 $(DechoE "DB") pour la recherche de paquets dans la base de données du gestionnaire de paquets,
@@ -683,15 +683,19 @@ function OptimizeInstallation()
 			esac
 			;;
 		"2")
-			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")." \
+			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
 				"Veuillez passer le chemin vers le fichier de logs en premier argument, PUIS la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument."
 			;;
 		"3")
-			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN DEUXIÈME ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")." \
+			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN DEUXIÈME ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
 				"Veuillez passer le nom de la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument."
 			;;
-		"4")
-			HandleErrors "UNE ERREUR INCONNUE S'EST PRODUITE PENDANT L'EXÉCUTION DU SCRIPT." \
+        "4")
+            HandleErrors "TROP D'ARGUMENTS ONT ÉTÉ PASSÉS LORS DE L'APPEL DU SCRIPT" \
+                "Pour rappel, le script ne prend que deux arguments : le chemin du fichier de logs et la commande à exécuter."
+            ;;
+		"5")
+			HandleErrors "UNE ERREUR INCONNUE S'EST PRODUITE PENDANT L'EXÉCUTION DU SCRIPT" \
 				""
 			;;
 		"0")
@@ -713,7 +717,7 @@ function OptimizeInstallation()
 			esac
 			;;
 		*)
-			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")." \
+			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
 				"Vérifiez ce qui a causé cette erreur en commentant la condition contenant le message d'erreur suivant : $(DechoE "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE \$(DechoE \"\$cmd\")")."
 			;;
 	esac
@@ -785,7 +789,7 @@ function PackInstall()
 			snap install "$*" > "$FILE_INSTALL_INST_PATH"
 			;;
 		"")
-			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT." \
+			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
 				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)."
 				;;
 			*)
@@ -793,7 +797,7 @@ function PackInstall()
 			EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande."
 			Newline
 
-			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME." \
+			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
 				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯"
 			;;
 	esac
@@ -1113,7 +1117,7 @@ function Mktmpdir()
 			echo "" >> "$FILE_LOG_PATH"
 
 			# Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")." ""
+			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" ""
 		fi
     elif test "$#" == 2; then
     {        
@@ -1140,7 +1144,7 @@ function GetMainPackageManager()
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée).
 	if test "$PACK_MAIN_PACKAGE_MANAGER" = ""; then
         # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ." "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")."
+		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ" "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")."
 	else
 		EchoSuccessNoLog "Gestionnaire de paquets principal trouvé : $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")" >> "$FILE_LOG_PATH"
 	fi
