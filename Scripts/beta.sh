@@ -838,19 +838,29 @@ function PackInstall()
 function UncompressSoftwareArchive()
 {
     #***** Paramètres *****
-    $cmd=$1     # Commande de décompression propre à une méthode de compression
-    $option=$2  # Option de la commande de décompression (si elle prend une option, dans le cas contraire, laisser une chaîne de caractères vide lors de l'appel de la fonction)
-    $path=$3    # Chemin vers l'archive
+    cmd=$1     # Commande de décompression propre à une méthode de compression.
+    option=$2  # Option de la commande de décompression (dans le cas où l'appel d'une option n'est pas obligatoire, laisser une chaîne de caractères vide lors de l'appel de la fonction).
+    path=$3    # Chemin vers l'archive à décompresser.
+    name=$4    # Nom de l'archive.
     
     #***** Code *****
-    "$cmd" "$option"
+    # On exécute la commande de décompression en passant en arguments ses options et le chemin vers l'archive.
+    "$cmd" "$option" "$path"
+    
+    if test "$?" == 0; then
+        EchoSuccessNoLog "La décompression de l'archive $(DechoS "$name") s'est faite avec brio."
+        Newline
+    else
+        EchoErrorNoLog "La décompression de l'archive $(DechoE "$name") a échouée."
+        Newline
+    fi
 }
 
 # Installation de logiciels absents de la base de données de tous les gestionnaires de paquets.
 function SoftwareInstall()
 {
 	#***** Paramètres *****
-	local software_web_link=$1		# Adresse de téléchargement du logiciel (téléchargement via la commande "wget"), SANS LE NOM DE L'ARCHIVE.
+	local web_link=$1		# Adresse de téléchargement du logiciel (téléchargement via la commande "wget"), SANS LE NOM DE L'ARCHIVE.
 	local software_archive=$2		# Nom de l'archive contenant les fichiers du logiciel.
 	local software_name=$3			# Nom du logiciel.
 	local software_comment=$4		# Affichage d'un commentaire descriptif du logiciel lorsque l'utilisateur passe le curseur de sa souris pas dessus le fichier ".desktop".
@@ -865,13 +875,14 @@ function SoftwareInstall()
 	local software_shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	   # Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés.
 
 	# Fichiers
-	local software_dl_link="$software_web_link/$software_archive"				# Lien de téléchargement de l'archive
+	local software_dl_link="$web_link/$software_archive"				# Lien de téléchargement de l'archive.
 
 	#***** Code *****
 	EchoNewstep "Téléchargement du logiciel $(DechoN "$software_name")."
 
-	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels
+	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels.
 	Makedir "$DIR_SOFTWARE_NAME" "$software_name" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
+	
 	if test wget -v "$software_dl_link" -O "$software_inst_path" >> "$FILE_LOG_PATH"; then
 		EchoSuccess "L'archive du logiciel $(DechoS "$software_name") a été téléchargé avec succès."
 		Newline
@@ -883,53 +894,55 @@ function SoftwareInstall()
 		return
 	fi
 
-	# On décompresse l'archive téléchargée selon le format de comporession
+	# On décompresse l'archive téléchargée selon le format de compression tout en redirigeant toutes les sorties vers le terminal et le fichier de logs.
 	EchoNewstep "Décompression de l'archive $(DechoN "$software_archive")."
 	{
 		case "$software_archive" in
 			"*.zip")
-				unzip "$DIR_SOFTWARE_NAME/$software_name/$software_archive" || { EchoError "La décompression de l'archive $(DechoE "$software_archive") a échouée"; return; } && EchoSuccess "La décompression de l'archive $(DechoS "$software_archive") s'est faite avec brio."
+				UncompressSoftwareArchive "unzip" "" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
 				;;
 			"*.7z")
-				7z e "$DIR_SOFTWARE_NAME/$software_name/$software_archive" || { EchoError "La décompression de l'archive $(DechoE "$software_archive") a échouée"; return; } && EchoSuccess "La décompression de l'archive $(DechoS "$software_archive") s'est faite avec brio"
+				UncompressSoftwareArchive "7z" "e" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
 				;;
 			"*.rar")
-				unrar e "$DIR_SOFTWARE_NAME/$software_name/$software_archive" || { EchoError "La décompression de l'archive $(DechoE "$software_archive") a échouée"; return; } && EchoSuccess "La décompression de l'archive $(DechoS "$software_archive") s'est faite avec brio"
+				UncompressSoftwareArchive "unrar" "e" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
 				;;
 			"*.tar.gz")
-				tar -zxvf "$DIR_SOFTWARE_NAME/$software_name/$software_archive" || { EchoError "La décompression de l'archive $(DechoE "$software_archive") a échouée"; return; } && EchoSuccess "La décompression de l'archive $(DechoS "$software_archive") s'est faite avec brio"
+				UncompressSoftwareArchive "tar" "-zxvf" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
 				;;
 			"*.tar.bz2")
-				tar -jxvf "$DIR_SOFTWARE_NAME/$software_name/$software_archive" || { EchoError "La décompression de l'archive $(DechoE "$software_archive") a échouée"; return; } && EchoSuccess "La décompression de l'archive $(DechoS "$software_archive") s'est faite avec brio"
+				UncompressSoftwareArchive "tar" "-jxvf" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
 				;;
 			*)
-				EchoError "Le format de fichier de l'archive $(DechoE "$software_archive") n'est pas supporté"
+				EchoError "Le format de fichier de l'archive $(DechoE "$software_archive") n'est pas supporté."
+				Newline
 
 				return
 				;;
 		esac
 	} 2>&1 | tee -a "$FILE_LOG_PATH"
 
-	# On vérifie que le dossier contenant les fichiers desktop (servant de raccourci) existe, pour ne pas encombrer le bureau de l'utilisateur
+	# On vérifie que le dossier contenant les fichiers desktop (servant de raccourci) existe, pour ne pas encombrer le bureau de l'utilisateur.
 	if test ! -d "$software_shortcut_dir"; then
-		EchoNewstep "Création d'un dossier contenant les raccourcis vers les logiciels téléchargés via la commande wget (pour ne pas encombrer votre bureau)"
+		EchoNewstep "Création d'un dossier contenant les raccourcis vers les logiciels téléchargés via la commande wget (pour ne pas encombrer votre bureau)."
 		Newline
 
 		Makedir "$DIR_HOMEDIR/Bureau/" "Linux-reinstall.link" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
-		EchoSuccess "Le dossier  vous pourrez déplacer les raccourcis sur votre bureau sans avoir à les modifier"
+		
+		EchoSuccess "Le dossier  vous pourrez déplacer les raccourcis sur votre bureau sans avoir à les modifier."
 	fi
 
-	EchoNewstep "Création d'un lien symbolique pointant vers le fichier exécutable du logiciel $(DechoN "$software_name")"
+	EchoNewstep "Création d'un lien symbolique pointant vers le fichier exécutable du logiciel $(DechoN "$software_name")."
 	ln -s "$software_exec" "$software_name"
 
 	if test "$?" != "0"; then
-		EchoError "Impossible de créer un lien symbolique pointant vers $(DechoE "$software_exec")"
+		EchoError "Impossible de créer un lien symbolique pointant vers $(DechoE "$software_exec")."
 	else
-		EchoSuccess "Le lien symbolique a été créé avec succès"
+		EchoSuccess "Le lien symbolique a été créé avec succès."
 		Newline
 	fi
 
-	EchoNewstep "Création du raccourci vers le fichier exécutable du logiciel $(DechoN "$software_name")"
+	EchoNewstep "Création du raccourci vers le fichier exécutable du logiciel $(DechoN "$software_name")."
 	{
 		echo "[Desktop Entry]"
 		echo "Name=$software_name"
@@ -939,19 +952,18 @@ function SoftwareInstall()
 		echo "Type=$software_type"
 		echo "Categories=$software_category;"
 	} > "$software_shortcut_dir/$software_name.desktop" \
-	&& EchoSuccess "Le fichier $(DechoS "$software_name.desktop") a été créé avec succès dans le dossier $(DechoS "$software_shortcut_dir")"
+	&& EchoSuccess "Le fichier $(DechoS "$software_name.desktop") a été créé avec succès dans le dossier $(DechoS "$software_shortcut_dir")."
 	Newline
 
-	EchoNewstep "Suppression de l'archive $(DechoN "$software_archive")"
+	EchoNewstep "Suppression de l'archive $(DechoN "$software_archive")."
 	Newline
 
-	rm -f "$software_inst_path/$software_archive"
-
-	if test "$?" != "0"; then
-		EchoError "La suppression de l'archive $(DechoE "$software_archive") a échouée"
+	# On vérifie que l'archive a bien été supprimée.
+	if test rm -f "$software_inst_path/$software_archive"; then
+        EchoSuccess "L'archive $(DechoS "$software_archive") a été correctement supprimée."
 		Newline
-	else
-		EchoSuccess "L'archive $(DechoS "$software_archive") a été correctement supprimée"
+    else
+		EchoError "La suppression de l'archive $(DechoE "$software_archive") a échouée."
 		Newline
 	fi
 }
@@ -1073,7 +1085,7 @@ function CreateLogFile()
 	} >> "$FILE_LOG_PATH"	# Au moment de la création du fichier de logs, la variable "$FILE_LOG_PATH" correspond au dossier actuel de l'utilisateur.
 }
 
-# Création du dossier temporaire où sont stockés les fichiers et dossiers temporaires
+# Création du dossier temporaire où sont stockés les fichiers et dossiers temporaires.
 function Mktmpdir()
 {
 	{
@@ -1090,20 +1102,18 @@ function Mktmpdir()
 	if test "$#" == 1; then
 		FILE_LOG_PATH="$DIR_LOG_PATH/$FILE_LOG_NAME"
 
-		mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"
-
 		# On vérifie que le fichier de logs a bien été déplacé vers le dossier temporaire en vérifiant le code de retour de la commande "mv".
-		if test "$?" != "0"; then
-			echo "" >> "$FILE_LOG_PATH"
-
-			# Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")." ""
-		else
+		if test mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"; then
         {
             echo ""
             
             EchoSuccessNoLog "Le fichier de logs a été déplacé avec succès dans le dossier $(DechoS "$DIR_LOG_PATH")."
         } >> "$FILE_LOG_PATH"
+		else
+			echo "" >> "$FILE_LOG_PATH"
+
+			# Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
+			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")." ""
 		fi
     elif test "$#" == 2; then
     {        
@@ -1113,7 +1123,7 @@ function Mktmpdir()
 	fi
 }
 
-# Détection du gestionnaire de paquets de la distribution utilisée
+# Détection du gestionnaire de paquets principal utilisée par la distribution de l'utilisateur.
 function GetMainPackageManager()
 {
 	HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "DÉTECTION DU GESTIONNAIRE DE PAQUETS DE VOTRE DISTRIBUTION" "0" >> "$FILE_LOG_PATH"
@@ -1123,11 +1133,11 @@ function GetMainPackageManager()
 	# de la commande vers /dev/null (vers rien) pour ne pas exécuter la commande.
 
 	# Pour en savoir plus sur les redirections en Shell UNIX, consultez ce lien -> https://www.tldp.org/LDP/abs/html/io-redirection.html
-	command -v apt-get &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="apt"
+	command -v apt-get &> /dev/null && command -v apt &> /dev/null && command -v apt-cache &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="apt"
 	command -v dnf &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="dnf"
 	command -v pacman &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="pacman"
 
-	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée)
+	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée).
 	if test "$PACK_MAIN_PACKAGE_MANAGER" = ""; then
         # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
 		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ." "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")."
@@ -1139,73 +1149,73 @@ function GetMainPackageManager()
 # Création du script de traitement de paquets à installer
 function WritePackScript()
 {
-	# Création du dossier contenant le script de traitement de paquets et les fichiers contenant les commandes de recherche et d'installation de paquets
+	# Création du dossier contenant le script de traitement de paquets et les fichiers contenant les commandes de recherche et d'installation de paquets.
 	{
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "ÉCRITURE DU SCRIPT DE TRAITEMENT DE PAQUETS" "0"
 
-		Makedir "$DIR_TMP_PATH" "$DIR_INSTALL_NAME" "0" "0"						# On crée le dossier contenant les fichiers temporaires contenant les commandes de recherche et d'installation des paquets
-		Makefile "$DIR_TMP_PATH/$DIR_INSTALL_NAME" "$FILE_SCRIPT_NAME" "0" "0"	# On crée le fichier de script
+		Makedir "$DIR_TMP_PATH" "$DIR_INSTALL_NAME" "0" "0"						# On crée le dossier contenant les fichiers temporaires contenant les commandes de recherche et d'installation des paquets.
+		Makefile "$DIR_TMP_PATH/$DIR_INSTALL_NAME" "$FILE_SCRIPT_NAME" "0" "0"	# On crée le fichier de script.
 	} >> "$FILE_LOG_PATH"
 
-	# On écrit le contenu du script dans le fichier de script en utilisant un here document
+	# On écrit le contenu du script dans le fichier de script en utilisant un here document.
 	(
-		cat <<-'NEWSCRIPT'
+		cat <<-'INSTALL_SCRIPT'
 		#!/usr/bin/env bash
 
 		LOG=$1
 		CMD=$2
 
-		if test -z "${LOG}" && test -z "${CMD}"; then
+		if test "$#" -eq 0; then
 			exit 2
 		elif test -z "${CMD}"; then
 			exit 3
 		elif test -s "${LOG}" && test -s "${CMD}"; then
 			"$CMD" || exit 1
 			exit 0
+        elif test "$#" -gt 2; then
+            exit 4
 		else
-			exit 4
+			exit 5
 		fi
-		NEWSCRIPT
+		INSTALL_SCRIPT
 	) > "$FILE_SCRIPT_PATH"
 
-	# On rend le fichier script exécutable
+	# On rend le fichier script exécutable via la commande "chmod".
 	{
-		EchoNewstepNoLog "Attribution des droits d'exécution sur le fichier script $(DechoN "$FILE_SCRIPT_PATH")"
+		EchoNewstepNoLog "Attribution des droits d'exécution sur le fichier script $(DechoN "$FILE_SCRIPT_PATH")."
 		echo ""
 	} >> "$FILE_LOG_PATH"
 
-	chmod +x -v "$FILE_SCRIPT_PATH" >> "$FILE_LOG_PATH" 2>&1
+	if test chmod +x -v "$FILE_SCRIPT_PATH" >> "$FILE_LOG_PATH" 2>&1; then
+	{
+		echo ""
 
-	if test "$?" != "0"; then
-		echo "" >> "$FILE_LOG_PATH"
+		EchoSuccessNoLog "Les droits d'exécution ont été attribués avec succès sur le fichier script de traitement de paquets."
+	} >> "$FILE_LOG_PATH"
+    else
+    	echo "" >> "$FILE_LOG_PATH"
 
-		HandleErrors "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" ""
-	else
-		{
-			echo ""
-
-			EchoSuccessNoLog "Les droits d'exécution ont été attribués avec succès sur le fichier script de traitement de paquets"
-		} >> "$FILE_LOG_PATH"
+		HandleErrors "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" "Vérifiez ce qui cause ce problème."
 	fi
 }
 
 # Initialisation du script
 function ScriptInit()
 {
-	CheckArgs				# On appelle la fonction de vérification des arguments passés au script
-	CreateLogFile			# Puis la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
-	Mktmpdir 				# Puis la fonction de création du dossier temporaire
-	GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur
-	WritePackScript			# Puis la fonction de création de scripts d'installation
+	CheckArgs				# On appelle la fonction de vérification des arguments passés au script,
+	CreateLogFile			# Puis la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant,
+	Mktmpdir 				# Puis la fonction de création du dossier temporaire,
+	GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur,
+	WritePackScript			# Puis la fonction de création de scripts d'installation.
 
-	# On écrit dans le fichier de logs que l'on passe à la première étape "visible dans le terminal", à savoir l'étape d'initialisation du script
+	# On écrit dans le fichier de logs que l'on passe à la première étape "visible dans le terminal", à savoir l'étape d'initialisation du script.
 	{
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_CYAN" \
 			"VÉRIFICATION DES INFORMATIONS PASSÉES EN ARGUMENT" "0" >> "$FILE_LOG_PATH"
 	} >> "$FILE_LOG_PATH"
 
-	# On demande à l'utilisateur de bien confirmer son nom d'utilisateur, au cas où son compte utilisateur cohabite avec d'autres comptes
-	EchoNewstep "Nom d'utilisateur entré :$COL_RESET ${ARG_USERNAME}"
+	# On demande à l'utilisateur de bien confirmer son nom d'utilisateur, au cas où son compte utilisateur cohabite avec d'autres comptes et qu'il n'a pas passé le bon compte en argument.
+	EchoNewstep "Nom d'utilisateur entré :$COL_RESET ${ARG_USERNAME}."
 	EchoNewstep "Est-ce correct ? (oui/non)"
 	Newline
 
@@ -1220,7 +1230,7 @@ function ScriptInit()
 
 		case ${rep_script_init,,} in
 			"oui" | "yes")
-				EchoSuccess "Lancement du script"
+				EchoSuccess "Lancement du script."
 
 				return
 				;;
@@ -1231,7 +1241,7 @@ function ScriptInit()
 				exit 0
 				;;
 			*)
-				EchoError "Réponses attendues : $(DechoE "oui") ou $(DechoE "non") (pas de sensibilité à la casse)"
+				EchoError "Réponses attendues : $(DechoE "oui") ou $(DechoE "non") (pas de sensibilité à la casse)."
 				Newline
 
 				ReadScriptInit
@@ -1244,22 +1254,22 @@ function ScriptInit()
 	return
 }
 
-# Demande à l'utilisateur s'il souhaite vraiment lancer le script, puis connecte l'utilisateur en mode super-utilisateur
+# Demande à l'utilisateur s'il souhaite vraiment lancer le script, puis connecte l'utilisateur en mode super-utilisateur.
 function LaunchScript()
 {
     # Affichage du header de bienvenue
     HeaderStep "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $VER_SCRIPT"
-    EchoSuccess "Début de l'installation"
+    EchoSuccess "Début de l'installation."
 	Newline
 
 	EchoNewstep "Assurez-vous d'avoir lu au moins le mode d'emploi $(DechoN "(Mode d'emploi.odt)") avant de lancer l'installation."
-    EchoNewstep "Êtes-vous sûr de bien vouloir lancer l'installation ? (oui/non)"
+    EchoNewstep "Êtes-vous sûr de bien vouloir lancer l'installation ? (oui/non)."
 	Newline
 
-	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script
+	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il est sûr de lancer le script.
 	function ReadLaunchScript()
 	{
-        # On demande à l'utilisateur d'entrer une réponse
+        # On demande à l'utilisateur d'entrer une réponse.
 		read -rp "Entrez votre réponse : " rep_launch_script
 		echo "$rep_launch_script" >> "$FILE_LOG_PATH"
 		Newline
@@ -1273,72 +1283,73 @@ function LaunchScript()
 				return
 	            ;;
 	        "non")
-				EchoError "Le script ne sera pas exécuté"
+				EchoError "Le script ne sera pas exécuté."
 	            EchoError "Abandon"
 				Newline
 
 				exit 0
 	            ;;
-            # Si une réponse différente de "oui" ou de "non" est rentrée
+            # Si une réponse différente de "oui" ou de "non" est rentrée.
 			*)
 				Newline
 
-				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")"
+				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")."
 				Newline
 
-				# On rappelle la fonction "ReadLaunchScript" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée
+				# On rappelle la fonction "ReadLaunchScript" en boucle tant qu"une réponse différente de "oui" ou de "non" est entrée.
 				ReadLaunchScript
 				;;
 	    esac
 	}
-	# Appel de la fonction "ReadLaunchScript", car même si la fonction est définie dans la fonction "LaunchScript", ses instructions ne sont pas lues automatiquement
+	
+	# Appel de la fonction "ReadLaunchScript", car même si la fonction est définie dans la fonction "LaunchScript", ses instructions ne sont pas lues automatiquement.
 	ReadLaunchScript
 }
 
 
 ## DÉFINITION DES FONCTIONS DE CONNEXION À INTERNET ET DE MISES À JOUR
-# Vérification de la connexion à Internet
+# Vérification de la connexion à Internet.
 function CheckInternetConnection()
 {
 	HeaderStep "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
-	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1)
-	if ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"; then
-		EchoSuccess "Votre ordinateur est connecté à Internet"
+	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1).
+	if test ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"; then
+		EchoSuccess "Votre ordinateur est connecté à Internet."
 
 		return
 	# Sinon, si l'ordinateur n'est pas connecté à Internet
 	else
-		HandleErrors "AUCUNE CONNEXION À INTERNET" "Vérifiez que vous êtes bien connecté à Internet, puis relancez le script"
+		HandleErrors "AUCUNE CONNEXION À INTERNET" "Vérifiez que vous êtes bien connecté à Internet, puis relancez le script."
 	fi
 }
 
-# Mise à jour des paquets actuels selon le gestionnaire de paquets principal supporté
+# Mise à jour des paquets actuels selon le gestionnaire de paquets principal supporté (utilisé par la distribution)
 # (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
-# SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS PRINCIPAL (PAS DE SNAP OU DE FLATPAK) !!!)
+# SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS PRINCIPAL (PAS DE SNAP OU DE FLATPAK) !!!).
 function DistUpgrade()
 {
 	#***** Variables *****
-	# Noms du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur
-	local update_d_name="Update"		# Dossier contenant les fichiers
-	local pack_upg_f_name="pack.tmp"	# Fichier contenant la commande de mise à jour des paquets
+	# Noms du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur.
+	local update_d_name="Update"		# Dossier contenant les fichiers.
+	local pack_upg_f_name="pack.tmp"	# Fichier contenant la commande de mise à jour des paquets.
 
-	# Chemins du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur
-	local update_d_path="$DIR_TMP_PATH/$update_d_name"			# Chemin du dossier
-	local pack_upg_f_path="$update_d_path/$pack_upg_f_name"		# Chemin du fichier contenant la commande de mise à jour des paquets
+	# Chemins du dossier et des fichiers temporaires contenant les commandes de mise à jour selon le gestionnaire de paquets principal de l'utilisateur.
+	local update_d_path="$DIR_TMP_PATH/$update_d_name"			# Chemin du dossier.
+	local pack_upg_f_path="$update_d_path/$pack_upg_f_name"		# Chemin du fichier contenant la commande de mise à jour des paquets.
 
-	# Vérification du succès des mises à jour
+	# Vérification du succès des mises à jour.
 	local packs_updated="0"
 
 	#***** Code *****
 	HeaderStep "MISE À JOUR DU SYSTÈME"
 
-	# On crée le dossier contenant les commandes de mise à jour
+	# On crée le dossier contenant les commandes de mise à jour.
 	if test ! -d "$update_d_path"; then
 		Makedir "$DIR_TMP_PATH" "$update_d_name" "0" "0" >> "$FILE_LOG_PATH"
 	fi
 
-	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER",
+	# On récupère la commande de mise à jour du gestionnaire de paquets principal enregistée dans la variable "$PACK_MAIN_PACKAGE_MANAGER".
 	case "$PACK_MAIN_PACKAGE_MANAGER" in
 		"apt")
 			echo apt-get -y upgrade > "$pack_upg_f_path"
@@ -1359,23 +1370,19 @@ function DistUpgrade()
 
 	if test "$?" -eq 0; then
 		packs_updated="1"
-		EchoSuccess "Tous les paquets ont été mis à jour"
+		EchoSuccess "Tous les paquets ont été mis à jour."
 		Newline
-
 	else
-		EchoError "Une ou plusieurs erreurs ont eu lieu lors de la mise à jour des paquets"
+		EchoError "Une ou plusieurs erreurs ont eu lieu lors de la mise à jour des paquets."
 		Newline
 	fi
 
-	# On vérifie maintenant si le cache et les paquets ont bien été mis à jour
-	# Si les paquets ont été mis à jour avec succès
+	# On vérifie maintenant si les paquets ont bien été mis à jour.
 	if test $packs_updated = "1"; then
-		EchoSuccess "Les paquets ont été mis à jour avec succès"
+		EchoSuccess "Les paquets ont été mis à jour avec succès."
 		Newline
-
-	# Sinon, si rien n'a été mis à jour
 	else
-		EchoError "La mise à jour des paquets a échouée"
+		EchoError "La mise à jour des paquets a échouée."
 		Newline
 	fi
 
@@ -1384,29 +1391,30 @@ function DistUpgrade()
 
 
 ## DÉFINITION DES FONCTIONS DE PARAMÉTRAGE
-# Détection et installation de Sudo
+# Détection et installation de Sudo.
 function SetSudo()
 {
 	HeaderStep "DÉTECTION DE SUDO ET AJOUT DE L'UTILISATEUR À LA LISTE DES SUDOERS"
 
-	# On crée une backup du fichier de configuration "sudoers" au cas où l'utilisateur souhaite revenir à son ancienne configuration
+	# On crée une backup du fichier de configuration "sudoers" au cas où l'utilisateur souhaite revenir à son ancienne configuration.
 	local sudoers_old="/etc/sudoers - $DATE_TIME.old"
 
-    EchoNewstep "Détection de sudo $COL_RESET"
-
-	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur
-	command -v sudo > /dev/null 2>&1
-
-	if test "$?" != "0"; then
-			EchoNewstep "La commande $(DechoN "sudo") n'est pas installé sur votre système"
-			PackInstall "$PACK_MAIN_PACKAGE_MANAGER" "sudo"
-	else
-		EchoSuccess "La commande $(DechoS "sudo") est déjà installée sur votre système"
+    EchoNewstep "Détection de la commande sudo $COL_RESET."
+    Newline
+    
+	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur.
+	if test command -v sudo > /dev/null 2>&1; then
+        EchoSuccess "La commande $(DechoS "sudo") est déjà installée sur votre système."
 		Newline
+	else
+		EchoNewstep "La commande $(DechoN "sudo") n'est pas installé sur votre système."
+		Newline
+		
+		PackInstall "$PACK_MAIN_PACKAGE_MANAGER" "sudo"
 	fi
 
 	EchoNewstep "Le script va tenter de télécharger un fichier $(DechoN "sudoers") déjà configuré"
-	EchoNewstep "depuis le dossier des fichiers ressources de mon dépôt Git : "
+	EchoNewstep "depuis le dossier des fichiers ressources de mon dépôt Git :"
 	echo ">>>> https://github.com/DimitriObeid/Linux-reinstall/tree/Beta/Ressources"
 	Newline
 
@@ -1415,7 +1423,7 @@ function SetSudo()
 
 	echo ">>>> REMARQUE : Si vous disposez déjà des droits de super-utilisateur, ce n'est pas la peine de le faire !"
 	echo ">>>> Si vous avez déjà un fichier sudoers modifié, une sauvegarde du fichier actuel sera effectuée dans le même dossier,"
-	echo "	tout en arborant sa date de sauvegarde dans son nom (par exemple :$COL_CYAN sudoers - $DATE_TIME.old $COL_RESET)"
+	echo "	tout en arborant sa date de sauvegarde dans son nom (par exemple :$COL_CYAN sudoers - $DATE_TIME.old $COL_RESET)."
 	Newline
 
 	function ReadSetSudo()
@@ -1428,74 +1436,81 @@ function SetSudo()
 			"oui" | "yes")
 				Newline
 
-				# Sauvegarde du fichier "/etc/sudoers" existant en "sudoers.old"
-				EchoNewstep "Création d'une sauvegarde de votre fichier $(DechoN "sudoers") existant nommée $(DechoN "sudoers $DATE_TIME.old")"
-				cat "/etc/sudoers" > "$sudoers_old"
+				# Sauvegarde du fichier "/etc/sudoers" existant en "/etc/sudoers $date_et_heure.old"
+				EchoNewstep "Création d'une sauvegarde de votre fichier $(DechoN "sudoers") existant nommée $(DechoN "sudoers $DATE_TIME.old")."
+				Newline
 
-				if test "$?" != "0"; then
-					EchoError "Impossible de créer une sauvegarde du fichier $(DechoE "sudoers")"
+				if test cat "/etc/sudoers" > "$sudoers_old"; then
+					EchoSuccess "Le fichier de sauvegarde $(DechoS "$sudoers_old") a été créé avec succès."
+					Newline
+				else
+                    EchoError "Impossible de créer une sauvegarde du fichier $(DechoE "sudoers")."
 					Newline
 
 					return
-				else
-					EchoSuccess "Le fichier de sauvegarde $(DechoS "$sudoers_old") a été créé avec succès"
-					Newline
 				fi
 
-				# Téléchargement du fichier sudoers configuré
-				EchoNewstep "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO"
-				sleep 1
+				# Téléchargement du fichier sudoers configuré.
+				EchoNewstep "Téléchargement du fichier sudoers depuis le dépôt Git $SCRIPT_REPO."
 				Newline
+
+				sleep 1
 
 				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/Beta/Ressources/sudoers -O "$DIR_TMP_PATH/sudoers"
 
-				if test "$?" != "0"; then
-					EchoError "Impossible de télécharger le nouveau fichier $(DechoE "sudoers")"
+				if test "$?" == "0"; then
+                    EchoSuccess "Le nouveau fichier $(DechoS "sudoers") a été téléchargé avec succès."
+					Newline
+				else
+                    EchoError "Impossible de télécharger le nouveau fichier $(DechoE "sudoers")."
 
 					return
-				else
-					EchoSuccess "Le nouveau fichier $(DechoS "sudoers") téléchargé avec succès"
-					Newline
 				fi
 
-				# Déplacement du fichier vers le dossier "/etc/"
-				EchoNewstep "Déplacement du fichier $(DechoN "sudoers") vers le dossier $(DechoN "/etc")"
-				mv "$DIR_TMP_PATH/sudoers" /etc/sudoers
+				# Déplacement du fichier "sudoers" fraîchement téléchargé vers le dossier "/etc/".
+				EchoNewstep "Déplacement du fichier $(DechoN "sudoers") vers le dossier $(DechoN "/etc")."
+				Newline
 
-				if test "$?" != "0"; then
-					EchoError "Impossible de déplacer le fichier $(DechoE "sudoers") vers le dossier $(DechoE "/etc/")"
+				if test mv "$DIR_TMP_PATH/sudoers" /etc/sudoers; then
+					EchoSuccess "Fichier $(DechoS "sudoers") déplacé avec succès vers le dossier $(DechoS "/etc/")."
+					Newline
+				else
+                    EchoError "Impossible de déplacer le fichier $(DechoE "sudoers") vers le dossier $(DechoE "/etc/")."
+					Newline
 
 					return
-				else
-					EchoSuccess "Fichier $(DechoS "sudoers") déplacé avec succès vers le dossier $(DechoS "/etc/")"
-					Newline
 				fi
 
-				# Ajout de l'utilisateur au groupe "sudo"
-				EchoNewstep "Ajout de l'utilisateur $(DechoN "${ARG_USERNAME}") au groupe sudo"
+				# Ajout de l'utilisateur au groupe "sudo".
+				EchoNewstep "Ajout de l'utilisateur $(DechoN "${ARG_USERNAME}") au groupe sudo."
+				Newline
+				
 				usermod -aG root "${ARG_USERNAME}" 2>&1 | tee -a "$FILE_LOG_PATH"
 
-				if test "$?" != "0"; then
-					EchoError "Impossible d'ajouter l'utilisateur $(DechoE "${ARG_USERNAME}") à la liste des sudoers"
-
+				if test "$?" == "0"; then
+                    EchoSuccess "L'utilisateur $(DechoS "${ARG_USERNAME}") a été ajouté au groupe sudo avec succès."
+                    Newline
+					
 					return
 				else
-					EchoSuccess "L'utilisateur $(DechoS "${ARG_USERNAME}") a été ajouté au groupe sudo avec succès"
-
+					EchoError "Impossible d'ajouter l'utilisateur $(DechoE "${ARG_USERNAME}") à la liste des sudoers."
+                    Newline
+					
 					return
+
 				fi
 				;;
 			"non" | "no")
 				Newline
 
-				EchoSuccess "Le fichier $(DechoS "/etc/sudoers") ne sera pas modifié"
+				EchoSuccess "Le fichier $(DechoS "/etc/sudoers") ne sera pas modifié."
 
 				return
 				;;
 			*)
 				Newline
 
-				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")"
+				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")."
 				ReadSetSudo
 				;;
 		esac
@@ -1507,7 +1522,7 @@ function SetSudo()
 
 
 # DÉFINITION DES FONCTIONS DE FIN D'INSTALLATION
-# Suppression des paquets obsolètes
+# Suppression des paquets obsolètes.
 function Autoremove()
 {
 	HeaderStep "AUTO-SUPPRESSION DES PAQUETS OBSOLÈTES"
@@ -1515,7 +1530,7 @@ function Autoremove()
 	EchoNewstep "Souhaitez vous supprimer les paquets obsolètes ? (oui/non)"
 	Newline
 
-	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes
+	# Fonction d'entrée de réponse sécurisée et optimisée demandant à l'utilisateur s'il souhaite supprimer les paquets obsolètes.
 	function ReadAutoremove()
 	{
 		read -rp "Entrez votre réponse : " rep_autoremove
@@ -1525,7 +1540,7 @@ function Autoremove()
 			"oui" | "yes")
 				Newline
 
-				EchoNewstep "Suppression des paquets"
+				EchoNewstep "Suppression des paquets."
 				Newline
 
 	    		case "$PACK_MAIN_PACKAGE_MANAGER" in
@@ -1542,22 +1557,22 @@ function Autoremove()
 
 				Newline
 
-				EchoSuccess "Auto-suppression des paquets obsolètes effectuée avec succès"
+				EchoSuccess "Auto-suppression des paquets obsolètes effectuée avec succès."
 
 				return
 				;;
 			"non" | "no")
 				Newline
 
-				EchoSuccess "Les paquets obsolètes ne seront pas supprimés"
-				EchoSuccess "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets"
+				EchoSuccess "Les paquets obsolètes ne seront pas supprimés."
+				EchoSuccess "Si vous voulez supprimer les paquets obsolète plus tard, tapez la commande de suppression de paquets obsolètes adaptée à votre getionnaire de paquets."
 
 				return
 				;;
 			*)
 				Newline
 
-				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")"
+				EchoNewstep "Veuillez répondre EXACTEMENT par $(DechoN "oui") ou par $(DechoN "non")."
 				ReadAutoremove
 				;;
 		esac
@@ -1567,7 +1582,7 @@ function Autoremove()
 	return
 }
 
-# Fin de l'installation
+# Fin de l'installation.
 function IsInstallationDone()
 {
 	HeaderStep "INSTALLATION TERMINÉE"
@@ -1580,36 +1595,38 @@ function IsInstallationDone()
 
 	case ${rep_erase_tmp,,} in
 		"oui")
-			EchoNewstep "Déplacement du fichier de logs dans votre dossier personnel"
+			EchoNewstep "Déplacement du fichier de logs dans votre dossier personnel."
 			Newline
 
 			mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME" && FILE_LOG_PATH=$"$DIR_HOMEDIR" \
-				&& EchoSuccess "Le fichier de logs a bien été deplacé dans votre dossier personnel"
+				&& EchoSuccess "Le fichier de logs a bien été deplacé dans votre dossier personnel."
 
-			EchoNewstep "Suppression du dossier temporaire $DIR_TMP_PATH"
-			rm -rfv "$DIR_TMP_PATH" >> "$FILE_LOG_PATH"
-
-			if test "$?" != "0"; then
-				EchoError "Suppression du dossier temporaire impossible. Essayez de le supprimer manuellement"
-			else
-				EchoSuccess "Le dossier temporaire $(DechoS "$DIR_TMP_PATH") a été supprimé avec succès"
+			EchoNewstep "Suppression du dossier temporaire $DIR_TMP_PATH."
+			Newline
+			
+			if test rm -rfv "$DIR_TMP_PATH" >> "$FILE_LOG_PATH"; then
+				EchoSuccess "Le dossier temporaire $(DechoS "$DIR_TMP_PATH") a été supprimé avec succès."
 				Newline
+			else
+				EchoError "Suppression du dossier temporaire impossible. Essayez de le supprimer manuellement."
+                Newline
 			fi
 			;;
 		*)
-			EchoSuccess "Le dossier temporaire $(DechoS "$DIR_TMP_PATH") ne sera pas supprimé"
+			EchoSuccess "Le dossier temporaire $(DechoS "$DIR_TMP_PATH") ne sera pas supprimé."
+            Newline
 			;;
 	esac
 
-    EchoSuccess "Installation terminée. Votre distribution Linux est prête à l'emploi"
+    EchoSuccess "Installation terminée. Votre distribution Linux est prête à l'emploi."
 	Newline
 
 	echo "$COL_CYAN\Note :$COL_RESET Si vous avez constaté un bug ou tout autre problème lors de l'exécution du script,"
 	echo "vous pouvez m'envoyer le fichier de logs situé dans votre dossier personnel."
-	echo "Il porte le nom de $COL_CYAN$FILE_LOG_NAME$COL_RESET"
+	echo "Il porte le nom de $COL_CYAN$FILE_LOG_NAME$COL_RESET."
 	Newline
 
-    # On tue le processus de connexion en mode super-utilisateur
+    # On tue le processus de connexion en mode super-utilisateur.
 	sudo -k
 
 	exit 0
@@ -1626,15 +1643,15 @@ function IsInstallationDone()
 
 
 ## APPEL DES FONCTIONS D'INITIALISATION ET DE PRÉ-INSTALLATION
-# Détection du mode super-administrateur (root) et de la présence de l'argument contenant le nom d'utilisateur
-ScriptInit
+# Détection du mode super-administrateur (root) et de la présence de l'argument contenant le nom d'utilisateur.
+ScriptInit              # Initialisation du script.
+LaunchScript			# Assurance que l'utilisateur soit sûr de lancer le script.
+CheckInternetConnection	# Détection de la connexion à Internet.
+DistUpgrade				# Mise à jour des paquets actuels.
 
-LaunchScript			# Assurance que l'utilisateur soit sûr de lancer le script
-CheckInternetConnection	# Détection de la connexion à Internet
-DistUpgrade				# Mise à jour des paquets actuels
 
 ## INSTALLATIONS PRIORITAIRES ET CONFIGURATIONS DE PRÉ-INSTALLATION
-# On déclare une variable "main" et on lui assigne en valeur le nom du gestionnaire de paquet principal stocké dans la variable "$PACK_MAIN_PACKAGE_MANAGER"
+# On déclare une variable "main" et on lui assigne en valeur le nom du gestionnaire de paquet principal stocké dans la variable. "$PACK_MAIN_PACKAGE_MANAGER" pour éviter de retaper le nom de cette variable.
 main="$PACK_MAIN_PACKAGE_MANAGER"
 
 HeaderStep "INSTALLATION DES COMMANDES IMPORTANTES POUR LES TÉLÉCHARGEMENTS"
@@ -1642,23 +1659,25 @@ PackInstall "$main" curl
 PackInstall "$main" snapd
 PackInstall "$main" wget
 
-command -v curl snap wget >> "$FILE_LOG_PATH"
+EchoNewstep "Vérification de l'installation des commandes $(DechoN "curl"), $(DechoN "snapd") et $(DechoN "wget")."
+Newline
 
-if test "$?" != "0"; then
-	HandleErrors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" "Essayez de  télécharger manuellement ces paquets : $(DechoE "curl"), $(DechoE "snapd") et $(DechoE "wget")"
+if test command -v curl snap wget | tee -a "$FILE_LOG_PATH"; then
+	EchoSuccess "Les commandes importantes d'installation ont été installées avec succès."
+	Newline
 else
-	EchoSuccess "Les commandes importantes d'installation ont été installées avec succès"
+    HandleErrors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" "Essayez de  télécharger manuellement ces paquets : $(DechoE "curl"), $(DechoE "snapd") et $(DechoE "wget")."
 fi
 
-# Installation de sudo (pour les distributions livrées sans la commande) et configuration du fichier "sudoers" ("/etc/sudoers")
+# Installation de sudo (pour les distributions livrées sans la commande) et configuration du fichier "sudoers" ("/etc/sudoers").
 SetSudo
 
 
-## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS
-HeaderStep "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS"
+## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS PRINCIPAUX ET SECONDAIRES
+HeaderStep "INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS PRINCIPAUX ET SECONDAIRES"
 
-EchoSuccess "Vous pouvez désormais quitter votre ordinateur pour chercher un café"
-EchoSuccess "La partie d'installation de vos programmes commence véritablement"
+EchoSuccess "Vous pouvez désormais quitter votre ordinateur pour chercher un café,"
+EchoSuccess "La partie d'installation de vos programmes commence véritablement."
 sleep 1
 
 Newline
@@ -1674,8 +1693,8 @@ PackInstall "$main" tree
 
 # Développement
 HeaderInstall "INSTALLATION DES OUTILS DE DÉVELOPPEMENT"
-PackInstall "snap" atom --classic --stable		# Éditeur de code Atom
-PackInstall "snap" code --classic	--stable	# Éditeur de code Visual Studio Code
+PackInstall "snap" atom --classic --stable		# Éditeur de code Atom.
+PackInstall "snap" code --classic	--stable	# Éditeur de code Visual Studio Code.
 PackInstall "$main" emacs
 PackInstall "$main" g++
 PackInstall "$main" gcc
@@ -1697,22 +1716,22 @@ PackInstall "$main" thunderbird
 
 # LAMP
 HeaderInstall "INSTALLATION DES PAQUETS NÉCESSAIRES AU BON FONCTIONNEMENT DE LAMP"
-PackInstall "$main" apache2
-PackInstall "$main" php
-PackInstall "$main" libapache2-mod-php
-PackInstall "$main" mariadb-server		# Pour installer un serveur MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server"
-PackInstall "$main" php-mysql
-PackInstall "$main" php-curl
-PackInstall "$main" php-gd
-PackInstall "$main" php-intl
-PackInstall "$main" php-json
-PackInstall "$main" php-mbstring
-PackInstall "$main" php-xml
-PackInstall "$main" php-zip
+PackInstall "$main" apache2             # Installe le serveur HTTP Apache 2 (il dépend du paquet "libapache2-mod-php", installé plus loin).
+PackInstall "$main" php                 # Installe l'interpréteur PHP.
+PackInstall "$main" libapache2-mod-php  # Installe un module d'Apache nécessaire à son bon fonctionnement.
+PackInstall "$main" mariadb-server		# Installe le serveur de base de données MariaDB (Si vous souhaitez un seveur MySQL, remplacez "mariadb-server" par "mysql-server").
+PackInstall "$main" php-mysql           # Module PHP permettant d'utiliser MySQL ou MariaDB avec PHP.
+PackInstall "$main" php-curl            # Module PHP permettant le support de la commande "curl" pour se connecter et communiquer avec d'autres serveurs grâce à différents protocoles de communication (HTTP(S), FTP, LDAP, etc...).
+PackInstall "$main" php-gd              # Module PHP permettant à PHP de créer et de manipuler différents formats d'images (PNG, JPEG, GIF, etc...).
+PackInstall "$main" php-intl            # Module PHP installant les fonctions d'internationalisation (paramètres régionaux, conversion d'encodages, opérations de calendrier, etc...).
+PackInstall "$main" php-json            # Module PHP implémentant le support de l'analyse de fichiers au format d'échange de données JSON.
+PackInstall "$main" php-mbstring        # Module PHP fournissant des fonctions de traitement de jeux de caractères très grands pour certaines langues.
+PackInstall "$main" php-xml             # Module PHP implémentant le support de l'analyse de fichiers au format d'échange de données XML.
+PackInstall "$main" php-zip             # Module PHP permettant à l'interpréteur PHP de lire et écrire des archives compressées au format ZIP, ainsi que d'accéder aux fichiers et aux dossiers s'y trouvant.
 
 # Librairies
 HeaderInstall "INSTALLATION DES LIBRAIRIES"
-PackInstall "$main" python3.7
+PackInstall "$main" python3.8
 
 # Réseau
 HeaderInstall "INSTALLATION DES LOGICIELS RÉSEAU"
@@ -1733,11 +1752,12 @@ EchoSuccess "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS DEPUIS LES  GEST
 HeaderStep "INSTALLATION DES LOGICIELS INDISPONIBLES DANS LES BASES DE DONNÉES DES GESTIONNAIRES DE PAQUETS"
 
 EchoNewstep "Les logiciels téléchargés via la commande $(DechoN "wget") sont déplacés vers le nouveau dossier $(DechoN "$DIR_SOFTWARE_NAME"), localisé dans votre dossier personnel"
-sleep 1
 Newline
 
-# Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur
-EchoNewstep "Création du dossier d'installation des logiciels"
+sleep 1
+
+# Création du dossier "Logiciels.Linux-reinstall.d" dans le dossier personnel de l'utilisateur.
+EchoNewstep "Création du dossier d'installation des logiciels."
 Newline
 
 Makedir "$DIR_HOMEDIR" "$DIR_SOFTWARE_NAME" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
@@ -1754,12 +1774,9 @@ SoftwareInstall "http://www.jfreesoft.com" \
 				"Développement"
 
 
-## INSTALLATIONS SUPPLÉMENTAIRES
-# Installation de paquets
-
 ## FIN D'INSTALLATION
-# Suppression des paquets obsolètes
+# Suppression des paquets obsolètes.
 Autoremove
 
-# Fin de l'installation
+# Fin de l'installation.
 IsInstallationDone
