@@ -293,7 +293,8 @@ function HandleErrors()
 	#***** Paramètres *****
 	local error_string=$1		# Chaîne de caractères du type d'erreur à afficher.
 	local advise_string=$2		# Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème.
-
+    local lineno=$3             # Ligne à laquelle le message d'erreur s'est produite.
+	
 	# ***** Code *****
 	HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $error_string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
 
@@ -304,13 +305,20 @@ function HandleErrors()
 	EchoError "$advise_string"
 	Newline
 
+	EchoError "L'erreur en question s'est produite à la ligne $lineno."
+	Newline
+	
 	EchoError "Arrêt de l'installation."
 	Newline
 
-	# Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur).
-	if test ! -f "$DIR_HOMEDIR/$FILE_LOG_NAME"; then
-		mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME"
-		FILE_LOG_PATH="$DIR_HOMEDIR/$FILE_LOG_NAME"
+	# Si l'argument de débug n'est pas passé lors de l'exécution du script (donc un seul argument est passé).
+	if test "$#" -eq 1; then
+        # Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur).
+        if test ! -f "$DIR_HOMEDIR/$FILE_LOG_NAME"; then
+            mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME" || { EchoError "Impossible de déplacer le fichier de logs dans le dossier $HOME"; Newline; exit 1; }
+            
+            FILE_LOG_PATH="$DIR_HOMEDIR/$FILE_LOG_NAME"
+        fi
 	fi
 
 	EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé à l'adresse suivante : $(DechoE "$FILE_LOG_PATH")."
@@ -343,68 +351,8 @@ function Makedir()
 	EchoNewstepCustomTimer "Traitement du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")." "$sleep_txt"
 	echo ""		# On ne redirige aucun saut de ligne vers le fichier de logs, pour éviter de les afficher en double, étant donné que la fonction est appelée avec une redirection (directement dans le fichier de logs ou dans ce dernier PLUS sur le terminal).
 
-	# Si le dossier à traiter n'existe pas, alors le script le crée.
-	if test ! -d "$path"; then
-		EchoNewstepCustomTimer "Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")." "$sleep_txt"
-		echo ""
-
-		mkdir -v "$path"
-
-		# On vérifie si le dossier a bien été créé en vérifiant le code de retour de la commande "mkdir".
-		if test "$?" == "0"; then
-            echo ""
-
-			EchoSuccessCustomTimer "Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
-			echo ""
-		else
-            echo ""
-
-			HandleErrors "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")" "Essayez de le créer manuellement."
-		fi
-
-		# On change les droits du dossier nouvellement créé par le script
-		# Comme ce dernier est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
-		# Pour attribuer récursivement la propriété du dossier à l'utilisateur normal, on appelle la commande chown avec pour arguments :
-		#		- Le nom de l'utilisateur à qui donner les droits
-		#		- Le chemin du dossier cible
-
-		EchoNewstepCustomTimer "Changement récursif des droits du nouveau dossier $(DechoN "$path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")." "$sleep_txt"
-		echo ""
-
-		chown -Rv "${ARG_USERNAME}" "$path"
-
-        # On vérifie que les droits du dossier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
-		if test "$?" == "0"; then
-			echo ""
-
-			EchoSuccessCustomTimer "Les droits du dossier $(DechoS "$name") ont été changés avec succès." "$sleep_txt"
-			echo ""
-
-			EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$path/")." "$sleep_txt"
-			DrawLine "$COL_RESET" "$block_char"
-			sleep "$sleep_blk"
-			echo ""
-
-			return
-		else
-            echo ""
-
-			EchoErrorCustomTimer "Impossible de changer les droits du dossier $(DechoE "$path/")." "$sleep_txt"
-			EchoErrorCustomTimer "Pour changer les droits du dossier $(DechoE "$path/") de manière récursive," "$sleep_txt"
-			EchoErrorCustomTimer "utilisez la commande :" "$sleep_txt"
-			echo "	chown -R ${ARG_USERNAME} $path"
-			echo ""
-
-			EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$path/")." "$sleep_txt"
-			DrawLine "$COL_RESET" "$block_char"		# On dessine la deuxième et dernière ligne du bloc.
-			sleep "$sleep_blk"
-			echo ""
-
-			return
-        fi
-
-	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier contient AU MOINS un fichier ou dossier.
-	elif test -d "$path" && test "$(ls -A "$path")"; then
+    # Si le dossier à créer existe déjà dans son dossier parent ET que ce dossier contient AU MOINS un fichier ou dossier.
+	if test -d "$path" && test "$(ls -A "$path")"; then
 		EchoNewstepCustomTimer "Un dossier non-vide portant exactement le même nom $(DechoN "$name") se trouve déjà dans le dossier cible $(DechoN "$parent/")." "$sleep_txt"
 		EchoNewstepCustomTimer "Suppression du contenu du dossier $(DechoN "$path/")." "$sleep_txt"
 		echo ""
@@ -413,7 +361,7 @@ function Makedir()
 		# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
 		rm -rfv "${path/:?}/"*
 
-		if test "$?" == "0"; then
+		if test "$?" -eq "0"; then
 			echo ""
 
 			EchoSuccessCustomTimer "Suppression du contenu du dossier $(DechoS "$path/") effectuée avec succès." "$sleep_txt"
@@ -452,7 +400,67 @@ function Makedir()
 		echo ""
 
 		return
-	fi
+	
+	# Sinon, si le dossier à traiter n'existe pas, alors le script le crée.
+	elif test ! -d "$path"; then
+		EchoNewstepCustomTimer "Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")." "$sleep_txt"
+		echo ""
+
+		local lineno=$LINENO; mkdir -v "$path"
+
+		# On vérifie si le dossier a bien été créé en vérifiant le code de retour de la commande "mkdir".
+		if test "$?" -eq "0"; then
+            echo ""
+
+			EchoSuccessCustomTimer "Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
+			echo ""
+		else
+            echo ""
+
+			HandleErrors "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
+		fi
+
+		# On change les droits du dossier nouvellement créé par le script
+		# Comme ce dernier est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
+		# Pour attribuer récursivement la propriété du dossier à l'utilisateur normal, on appelle la commande chown avec pour arguments :
+		#		- Le nom de l'utilisateur à qui donner les droits
+		#		- Le chemin du dossier cible
+
+		EchoNewstepCustomTimer "Changement récursif des droits du nouveau dossier $(DechoN "$path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")." "$sleep_txt"
+		echo ""
+
+		chown -Rv "${ARG_USERNAME}" "$path"
+
+        # On vérifie que les droits du dossier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
+		if test "$?" -eq "0"; then
+			echo ""
+
+			EchoSuccessCustomTimer "Les droits du dossier $(DechoS "$name") ont été changés avec succès." "$sleep_txt"
+			echo ""
+
+			EchoSuccessCustomTimer "Fin du traitement du dossier $(DechoS "$path/")." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo ""
+
+			return
+		else
+            echo ""
+
+			EchoErrorCustomTimer "Impossible de changer les droits du dossier $(DechoE "$path/")." "$sleep_txt"
+			EchoErrorCustomTimer "Pour changer les droits du dossier $(DechoE "$path/") de manière récursive," "$sleep_txt"
+			EchoErrorCustomTimer "utilisez la commande :" "$sleep_txt"
+			echo "	chown -R ${ARG_USERNAME} $path"
+			echo ""
+
+			EchoErrorCustomTimer "Fin du traitement du dossier $(DechoE "$path/")." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"		# On dessine la deuxième et dernière ligne du bloc.
+			sleep "$sleep_blk"
+			echo ""
+
+			return
+        fi
+    fi
 }
 
 # Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur.
@@ -477,20 +485,59 @@ function Makefile()
 	EchoNewstepCustomTimer "Traitement du fichier $(DechoN "$name")." "$sleep_txt"
 	echo ""
 
-	# Si le fichier à traiter n'existe pas, on le crée avec l'aide de la commande "touch".
-	if test ! -s "$path"; then
+    # Si le fichier à créer existe déjà ET qu'il n'est pas vide.
+	if test -f "$path" && test -s "$path"; then
+		EchoNewstepCustomTimer "Le fichier $(DechoN "$path") existe déjà et n'est pas vide." "$sleep_txt"
+		EchoNewstepCustomTimer "Écrasement des données du fichier $(DechoN "$path")." "$sleep_txt"
+		echo ""
+
+		true > "$path"
+
+		# On vérifie que le contenu du fichier cible a bien été supprimé en testant le code de retour de la commande "true".
+		if test "$?" -eq "0"; then
+			EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$path") a été écrasé avec succès." "$sleep_txt"
+			echo ""
+
+			EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo ""
+        else
+            EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$path") n'a pas été écrasé." "$sleep_txt"
+			echo ""
+
+			EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$path")." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo ""
+		fi
+
+		return
+
+	# Sinon, si le fichier à créer existe déjà ET qu'il est vide.
+	elif test -f "$path" && test ! -s "$path"; then
+		EchoSuccessCustomTimer "Le fichier $(DechoS "$name") existe déjà dans le dossier $(DechoS "$parent/")." "$sleep_txt"
+		echo ""
+
+		EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")." "$sleep_txt"
+		DrawLine "$COL_RESET" "$block_char"
+
+		return
+	
+	# Sinon, si le fichier à traiter n'existe pas, on le crée avec l'aide de la commande "touch".
+	elif test ! -s "$path"; then
         EchoNewstepCustomTimer "Création du fichier $(DechoN "$name") dans le dossier $(DechoN "$parent/")." "$sleep_txt"
 		echo ""
 
-		touch "$path"
+		local lineno=$LINENO; touch "$path"
 
 		# On vérifie que le fichier a bien été créé en vérifiant le code de retour de la commande "touch".
-		if test "$?" == "0"; then
+		if test "$?" -eq "0"; then
             EchoSuccessCustomTimer "Le fichier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
 			echo ""
 
         else
-            HandleErrors "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement."
+            HandleErrors "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
 		fi
 
 		# On change les droits du fichier créé par le script.
@@ -506,7 +553,7 @@ function Makefile()
 		chown -v "${ARG_USERNAME}" "$path"
 
 		# On vérifie que les droits du fichier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
-		if test "$?" == "0"; then
+		if test "$?" -eq "0"; then
 			echo ""
 
 			EchoSuccessCustomTimer "Les droits du fichier $(DechoS "$parent") ont été changés avec succès." "$sleep_txt"
@@ -533,45 +580,6 @@ function Makefile()
 
 			return
 		fi
-
-	# Sinon, si le fichier à créer existe déjà ET qu'il est vide.
-	elif test -f "$path" && test -s "$path"; then
-		EchoSuccessCustomTimer "Le fichier $(DechoS "$name") existe déjà dans le dossier $(DechoS "$parent/")." "$sleep_txt"
-		echo ""
-
-		EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")." "$sleep_txt"
-		DrawLine "$COL_RESET" "$block_char"
-
-		return
-
-	# Sinon, si le fichier à créer existe déjà ET qu'il n'est pas vide.
-	elif test -f "$path" && test ! -s "$path"; then
-		EchoNewstepCustomTimer "Le fichier $(DechoN "$path") existe déjà et n'est pas vide." "$sleep_txt"
-		EchoNewstepCustomTimer "Écrasement des données du fichier $(DechoN "$path")." "$sleep_txt"
-		echo ""
-
-		true > "$path"
-
-		# On vérifie que le contenu du fichier cible a bien été supprimé en testant le code de retour de la commande "true".
-		if test "$?" != "0"; then
-			EchoSuccessCustomTimer "Le contenu du fichier $(DechoS "$path") a été écrasé avec succès." "$sleep_txt"
-			echo ""
-
-			EchoSuccessCustomTimer "Fin du traitement du fichier $(DechoS "$path")." "$sleep_txt"
-			DrawLine "$COL_RESET" "$block_char"
-			sleep "$sleep_blk"
-			echo ""
-        else
-            EchoErrorCustomTimer "Le contenu du fichier $(DechoE "$path") n'a pas été écrasé." "$sleep_txt"
-			echo ""
-
-			EchoErrorCustomTimer "Fin du traitement du fichier $(DechoE "$path")." "$sleep_txt"
-			DrawLine "$COL_RESET" "$block_char"
-			sleep "$sleep_blk"
-			echo ""
-		fi
-
-		return
 	fi
 }
 
@@ -594,9 +602,9 @@ function OptimizeInstallation()
 
 	#**** Code *****
 	# On vérifie si tous les arguments sont bien appelés (IMPORTANT POUR UNE INSTALLATION SANS PROBLÈMES)
-	if test "$#" != 5; then
+	if test "$#" -ne 5; then
 		HandleErrors "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")" \
-			"Vérifiez quels arguments manquent à la fonction."
+			"Vérifiez quels arguments manquent à la fonction." "$LINENO_INST"
 	fi
 
 	# On vérifie si la valeur de l'argument correspond à un des trois types attendus.
@@ -619,13 +627,15 @@ function OptimizeInstallation()
 				 $(DechoE "HD") pour la recherche de paquets sur le système,
 				 $(DechoE "DB") pour la recherche de paquets dans la base de données du gestionnaire de paquets,
 				 $(DechoE "INST") pour l'installation de paquets.
-				 "
+				 " \
+                "$LINENO_INST"
+				 
 	esac
 
 	# Exécution du script.
-	(pwd && echo "" && cd "$parent" && pwd && ./"$file" "$FILE_LOG_PATH" "$cmd" && echo "$?" > "$GETVAL_PATH" && GETVAL=$(cat "$GETVAL_PATH"))
-
-	echo "$GETVAL"
+	local lineno=$LINENO; (pwd && echo "" && cd "$parent" && pwd && ./"$file" "$FILE_LOG_PATH" "$cmd")
+	
+	echo "$?" > "$GETVAL_PATH" && GETVAL=$(cat "$GETVAL_PATH") && echo "$GETVAL"
 
 	case "$GETVAL" in
 		"1")
@@ -684,19 +694,22 @@ function OptimizeInstallation()
 			;;
 		"2")
 			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
-				"Veuillez passer le chemin vers le fichier de logs en premier argument, PUIS la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument."
+				"Veuillez passer le chemin vers le fichier de logs en premier argument, PUIS la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument." "$lineno"
 			;;
 		"3")
 			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN DEUXIÈME ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
-				"Veuillez passer le nom de la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument."
+				"Veuillez passer le nom de la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument." \
+				"$lineno"
 			;;
         "4")
             HandleErrors "TROP D'ARGUMENTS ONT ÉTÉ PASSÉS LORS DE L'APPEL DU SCRIPT" \
-                "Pour rappel, le script ne prend que deux arguments : le chemin du fichier de logs et la commande à exécuter."
+                "Pour rappel, le script ne prend que deux arguments : le chemin du fichier de logs et la commande à exécuter." \
+                "$lineno"
             ;;
 		"5")
 			HandleErrors "UNE ERREUR INCONNUE S'EST PRODUITE PENDANT L'EXÉCUTION DU SCRIPT" \
-				""
+				"" \
+				"$lineno"
 			;;
 		"0")
 			case "$type" in
@@ -718,7 +731,8 @@ function OptimizeInstallation()
 			;;
 		*)
 			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
-				"Vérifiez ce qui a causé cette erreur en commentant la condition contenant le message d'erreur suivant : $(DechoE "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE \$(DechoE \"\$cmd\")")."
+				"Vérifiez ce qui a causé cette erreur en commentant la condition contenant le message d'erreur suivant : $(DechoE "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE \$(DechoE \"\$cmd\")"), à la ligne $(DechoE "$LINENO")." \
+				"$lineno"
 			;;
 	esac
 }
@@ -728,11 +742,12 @@ function OptimizeInstallation()
 function PackInstall()
 {
 	#***** Paramètres *****
-	local package_manager_name=$1		# Nom du gestionnaire de paquets.
-	local package_name=$2				# Nom du paquet à installer.
+	local package_manager_name=$1	# Nom du gestionnaire de paquets.
+	local package_name=$2			# Nom du paquet à installer.
 
 	#***** Autres variables *****
-	local block_char="="		# Caractère composant la ligne.
+	local block_char="="	# Caractère composant la ligne.
+	LINENO_INST=$LINENO
 
 	#***** Code *****
 	# S'il n'existe pas, on crée le dossier contenant des informations concernant les éventuels paquets non-trouvés dans la base de données
@@ -790,7 +805,8 @@ function PackInstall()
 			;;
 		"")
 			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
-				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)."
+				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)." \
+				"$LINENO, avec le paquet $(DechoE "$package_name")"
 				;;
 			*)
 			EchoError "Le nom du gestionnaire de paquets passé en premier argument $(DechoE "$package_manager_name") ne correspond à aucun gestionnaire de paquets présent sur votre système."
@@ -798,7 +814,8 @@ function PackInstall()
 			Newline
 
 			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
-				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯"
+				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯" \
+				"$LINENO, avec le paquet $(DechoE "$package_name")"
 			;;
 	esac
 
@@ -809,7 +826,7 @@ function PackInstall()
 	# On appelle en premier lieu la commande de recherche de paquets installés sur le système de l'utilisateur, puis on quitte la fonction "PackInstall" si le paquet recherché est déjà installé sur le disque dur de l'utilisateur.
 	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
 
-	if test "$var_type" == "HD" && test "$GETVAL" == "1"; then
+	if test "$var_type" = "HD" && test "$GETVAL" -eq "1"; then
 		return
 	fi
 
@@ -820,7 +837,7 @@ function PackInstall()
 	# On appelle en deuxième lieu la commande de recherche de paquets dans la base de données du gestionnaire de paquets de l'utilisateur, puis on quitte la fonction "PackInstall" si le paquet recherché est absent de la base de données.
 	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
 
-	if test "$var_type" == "DB" && test "$GETVAL" == "1"; then
+	if test "$var_type" = "DB" && test "$GETVAL" -eq "1"; then
 		return
 	fi
 
@@ -831,7 +848,7 @@ function PackInstall()
 	# On appelle en troisième et dernier lieu la commande d'installation de paquets, puis on quitte la fonction "PackInstall" si le paquet n'a pas pu être installé.
 	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
 
-	if test "$var_type" == "INST" && test "$GETVAL" == "1"; then
+	if test "$var_type" = "INST" && test "$GETVAL" -eq "1"; then
 		return
 	fi
 
@@ -849,10 +866,10 @@ function UncompressSoftwareArchive()
     
     #***** Code *****
     # On exécute la commande de décompression en passant en arguments ses options et le chemin vers l'archive.
-    "$cmd" "$option" "$path"
+    "$cmd $option $path"
     
-    if test "$?" == 0; then
-        EchoSuccessNoLog "La décompression de l'archive $(DechoS "$name") s'est faite avec brio."
+    if test "$?" -eq 0; then
+        EchoSuccessNoLog "La décompression de l'archive $(DechoS "$name") s'est effectuée avec brio."
         Newline
     else
         EchoErrorNoLog "La décompression de l'archive $(DechoE "$name") a échouée."
@@ -884,8 +901,10 @@ function SoftwareInstall()
 	#***** Code *****
 	EchoNewstep "Téléchargement du logiciel $(DechoN "$software_name")."
 
-	# On crée un dossier dédié au logiciel dans le dossier d'installation de logiciels.
-	Makedir "$DIR_SOFTWARE_NAME" "$software_name" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
+	# S'il n'existe pas, on crée le dossier dédié aux logiciels dans le dossier d'installation de logiciels.
+	if test ! -d "$software_inst_path"; then
+        Makedir "$DIR_SOFTWARE_NAME" "$software_name" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
+    fi
 	
 	if test wget -v "$software_dl_link" -O "$software_inst_path" >> "$FILE_LOG_PATH"; then
 		EchoSuccess "L'archive du logiciel $(DechoS "$software_name") a été téléchargé avec succès."
@@ -903,19 +922,19 @@ function SoftwareInstall()
 	{
 		case "$software_archive" in
 			"*.zip")
-				UncompressSoftwareArchive "unzip" "" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "unzip" "" "$software_inst_path/$software_archive" "$software_archive"
 				;;
 			"*.7z")
-				UncompressSoftwareArchive "7z" "e" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "7z" "e" "$software_inst_path/$software_archive" "$software_archive"
 				;;
 			"*.rar")
-				UncompressSoftwareArchive "unrar" "e" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "unrar" "e" "$software_inst_path/$software_archive" "$software_archive"
 				;;
 			"*.tar.gz")
-				UncompressSoftwareArchive "tar" "-zxvf" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "tar" "-zxvf" "$software_inst_path/$software_archive" "$software_archive"
 				;;
 			"*.tar.bz2")
-				UncompressSoftwareArchive "tar" "-jxvf" "$DIR_SOFTWARE_NAME/$software_name/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "tar" "-jxvf" "$software_inst_path/$software_archive" "$software_archive"
 				;;
 			*)
 				EchoError "Le format de fichier de l'archive $(DechoE "$software_archive") n'est pas supporté."
@@ -1103,11 +1122,13 @@ function Mktmpdir()
 	# Avant de déplacer le fichier de logs, on vérifie si l'utilisateur n'a pas passé la valeur "debug" en tant que deuxième argument (vérification importante, étant donné que le chemin et le nom du fichier sont redéfinis dans ce cas).
 	
 	# Dans le cas où l'utilisateur ne passe pas de deuxième argument, une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà, puis on redéfinit le chemin du fichier de logs de la variable "$FILE_LOG_PATH". Si ce n'est pas le cas, le fichier de logs n'est déplacé nulle part ailleurs dans l'arborescence.
-	if test "$#" == 1; then
+	if test "$#" -eq 1; then
 		FILE_LOG_PATH="$DIR_LOG_PATH/$FILE_LOG_NAME"
 
 		# On vérifie que le fichier de logs a bien été déplacé vers le dossier temporaire en vérifiant le code de retour de la commande "mv".
-		if test mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"; then
+		local lineno=$LINENO; mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"
+		
+		if test "$?" -eq 0; then
         {
             echo ""
             
@@ -1117,9 +1138,9 @@ function Mktmpdir()
 			echo "" >> "$FILE_LOG_PATH"
 
 			# Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" ""
+			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" "" "$lineno"
 		fi
-    elif test "$#" == 2; then
+    elif test "$#" -eq 2; then
     {        
         # Rappel : Dans cette situation où un deuxième argument est passé, les valeurs des variables "FILE_LOG_NAME" et "$DIR_LOG_PATH" ont été redéfinies dans la fonction "CheckArgs".
         EchoSuccessNoLog "Le fichier $(DechoS "$FILE_LOG_NAME") reste dans le dossier $(DechoS "$DIR_LOG_PATH")."
@@ -1142,9 +1163,9 @@ function GetMainPackageManager()
 	command -v pacman &> /dev/null && PACK_MAIN_PACKAGE_MANAGER="pacman"
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée).
-	if test "$PACK_MAIN_PACKAGE_MANAGER" = ""; then
+	if test -z "$PACK_MAIN_PACKAGE_MANAGER"; then
         # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ" "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")."
+		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ" "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")." "$LINENO"
 	else
 		EchoSuccessNoLog "Gestionnaire de paquets principal trouvé : $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")" >> "$FILE_LOG_PATH"
 	fi
@@ -1190,7 +1211,9 @@ function WritePackScript()
 		echo ""
 	} >> "$FILE_LOG_PATH"
 
-	if test chmod +x -v "$FILE_SCRIPT_PATH" >> "$FILE_LOG_PATH" 2>&1; then
+	local lineno=$LINENO; chmod +x -v "$FILE_SCRIPT_PATH" >> "$FILE_LOG_PATH" 2>&1
+	
+	if test "$?" -eq 0; then
 	{
 		echo ""
 
@@ -1199,7 +1222,7 @@ function WritePackScript()
     else
     	echo "" >> "$FILE_LOG_PATH"
 
-		HandleErrors "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" "Vérifiez ce qui cause ce problème."
+		HandleErrors "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" "Vérifiez ce qui cause ce problème" "$lineno"
 	fi
 }
 
@@ -1317,14 +1340,16 @@ function CheckInternetConnection()
 {
 	HeaderStep "VÉRIFICATION DE LA CONNEXION À INTERNET"
 
-	# Si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1).
-	if test ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"; then
+	# On vérifie si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1).
+	local lineno=$LINENO; ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"
+	
+	if test "$?" -eq 0; then
 		EchoSuccess "Votre ordinateur est connecté à Internet."
 
 		return
 	# Sinon, si l'ordinateur n'est pas connecté à Internet
 	else
-		HandleErrors "AUCUNE CONNEXION À INTERNET" "Vérifiez que vous êtes bien connecté à Internet, puis relancez le script."
+		HandleErrors "AUCUNE CONNEXION À INTERNET" "Vérifiez que vous êtes bien connecté à Internet, puis relancez le script." "$lineno"
 	fi
 }
 
@@ -1406,8 +1431,10 @@ function SetSudo()
     EchoNewstep "Détection de la commande sudo $COL_RESET."
     Newline
     
-	# On effectue un test pour savoir si la commande "sudo" est installée sur le système de l'utilisateur.
-	if test command -v sudo > /dev/null 2>&1; then
+	# On vérifie si la commande "sudo" est installée sur le système de l'utilisateur.
+	command -v sudo > /dev/null 2>&1
+	
+	if test "$?" -eq 0; then
         EchoSuccess "La commande $(DechoS "sudo") est déjà installée sur votre système."
 		Newline
 	else
@@ -1444,7 +1471,9 @@ function SetSudo()
 				EchoNewstep "Création d'une sauvegarde de votre fichier $(DechoN "sudoers") existant nommée $(DechoN "sudoers $DATE_TIME.old")."
 				Newline
 
-				if test cat "/etc/sudoers" > "$sudoers_old"; then
+				cat "/etc/sudoers" > "$sudoers_old"
+				
+				if test "$?" -eq 0; then
 					EchoSuccess "Le fichier de sauvegarde $(DechoS "$sudoers_old") a été créé avec succès."
 					Newline
 				else
@@ -1462,7 +1491,7 @@ function SetSudo()
 
 				wget https://raw.githubusercontent.com/DimitriObeid/Linux-reinstall/Beta/Ressources/sudoers -O "$DIR_TMP_PATH/sudoers"
 
-				if test "$?" == "0"; then
+				if test "$?" -eq "0"; then
                     EchoSuccess "Le nouveau fichier $(DechoS "sudoers") a été téléchargé avec succès."
 					Newline
 				else
@@ -1475,7 +1504,9 @@ function SetSudo()
 				EchoNewstep "Déplacement du fichier $(DechoN "sudoers") vers le dossier $(DechoN "/etc")."
 				Newline
 
-				if test mv "$DIR_TMP_PATH/sudoers" /etc/sudoers; then
+				mv "$DIR_TMP_PATH/sudoers" /etc/sudoers
+				
+				if test "$?" -eq 0; then
 					EchoSuccess "Fichier $(DechoS "sudoers") déplacé avec succès vers le dossier $(DechoS "/etc/")."
 					Newline
 				else
@@ -1666,11 +1697,13 @@ PackInstall "$main" wget
 EchoNewstep "Vérification de l'installation des commandes $(DechoN "curl"), $(DechoN "snapd") et $(DechoN "wget")."
 Newline
 
-if test command -v curl snap wget | tee -a "$FILE_LOG_PATH"; then
+lineno=$LINENO; command -v curl snap wget | tee -a "$FILE_LOG_PATH"
+
+if test "$?" == 0; then
 	EchoSuccess "Les commandes importantes d'installation ont été installées avec succès."
 	Newline
 else
-    HandleErrors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" "Essayez de  télécharger manuellement ces paquets : $(DechoE "curl"), $(DechoE "snapd") et $(DechoE "wget")."
+    HandleErrors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" "Essayez de  télécharger manuellement ces paquets : $(DechoE "curl"), $(DechoE "snapd") et $(DechoE "wget")." "$lineno"
 fi
 
 # Installation de sudo (pour les distributions livrées sans la commande) et configuration du fichier "sudoers" ("/etc/sudoers").
