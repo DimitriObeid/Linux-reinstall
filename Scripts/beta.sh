@@ -633,10 +633,12 @@ function OptimizeInstallation()
 	esac
 
 	# Exécution du script.
-	local lineno=$LINENO; (pwd && echo "" && cd "$parent" && pwd && ./"$file" "$FILE_LOG_PATH" "$cmd")
+	local lineno=$LINENO; (pwd && echo "" && cd "$parent" && pwd && ./"$file" "$FILE_LOG_PATH" "$cmd" && echo "$?" > "$GETVAL_PATH")
 	
-	echo "$?" > "$GETVAL_PATH" && GETVAL=$(cat "$GETVAL_PATH") && echo "$GETVAL"
-
+	while read -r "${GETVAL_PATH?}"; do
+        echo "$GETVAL"
+    done < "$GETVAL_PATH"
+	
 	case "$GETVAL" in
 		"1")
 			case "$type" in
@@ -729,11 +731,11 @@ function OptimizeInstallation()
 					;;
 			esac
 			;;
-		*)
-			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
-				"Vérifiez ce qui a causé cette erreur en commentant la condition contenant le message d'erreur suivant : $(DechoE "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE \$(DechoE \"\$cmd\")"), à la ligne $(DechoE "$LINENO")." \
-				"$lineno"
-			;;
+# 		*)
+# 			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
+# 				"Vérifiez ce qui a causé cette erreur en commentant la condition contenant le message d'erreur suivant : $(DechoE "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE \$(DechoE \"\$cmd\")"), à la ligne $(DechoE "$LINENO")." \
+# 				"$lineno"
+# 			;;
 	esac
 }
 
@@ -882,62 +884,62 @@ function SoftwareInstall()
 {
 	#***** Paramètres *****
 	local web_link=$1		# Adresse de téléchargement du logiciel (téléchargement via la commande "wget"), SANS LE NOM DE L'ARCHIVE.
-	local software_archive=$2		# Nom de l'archive contenant les fichiers du logiciel.
-	local software_name=$3			# Nom du logiciel.
-	local software_comment=$4		# Affichage d'un commentaire descriptif du logiciel lorsque l'utilisateur passe le curseur de sa souris pas dessus le fichier ".desktop".
-	local software_exec=$5			# Adresse du fichier exécutable du logiciel.
-	local software_icon=$6			# Emplacement du fichier image de l'icône du logiciel.
-	local software_type=$7			# Détermine si le fichier ".desktop" pointe vers une application, un lien ou un dossier.
-	local software_category=$8		# Catégorie(s) du logiciel (jeu, développement, bureautique, etc...).
+	local archive=$2		# Nom de l'archive contenant les fichiers du logiciel.
+	local name=$3			# Nom du logiciel.
+	local comment=$4		# Affichage d'un commentaire descriptif du logiciel lorsque l'utilisateur passe le curseur de sa souris pas dessus le fichier ".desktop".
+	local exe=$5			# Adresse du fichier exécutable du logiciel.
+	local icon=$6			# Emplacement du fichier image de l'icône du logiciel.
+	local type=$7			# Détermine si le fichier ".desktop" pointe vers une application, un lien ou un dossier.
+	local category=$8		# Catégorie(s) du logiciel (jeu, développement, bureautique, etc...).
 
 	#***** Autres variables *****
 	# Dossiers
- 	local software_inst_path="$DIR_SOFTWARE_PATH/$software_name"			   # Dossier d'installation du logiciel.
-	local software_shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	   # Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés.
+ 	local inst_path="$DIR_SOFTWARE_PATH/$name"			   # Dossier d'installation du logiciel.
+	local shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	   # Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés.
 
 	# Fichiers
-	local software_dl_link="$web_link/$software_archive"				# Lien de téléchargement de l'archive.
+	local software_dl_link="$web_link/$archive"				# Lien de téléchargement de l'archive.
 
 	#***** Code *****
-	EchoNewstep "Téléchargement du logiciel $(DechoN "$software_name")."
+	EchoNewstep "Téléchargement du logiciel $(DechoN "$name")."
 
 	# S'il n'existe pas, on crée le dossier dédié aux logiciels dans le dossier d'installation de logiciels.
-	if test ! -d "$software_inst_path"; then
-        Makedir "$DIR_SOFTWARE_NAME" "$software_name" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
+	if test ! -d "$inst_path"; then
+        Makedir "$DIR_SOFTWARE_NAME" "$name" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
     fi
 	
-	if test wget -v "$software_dl_link" -O "$software_inst_path" >> "$FILE_LOG_PATH"; then
-		EchoSuccess "L'archive du logiciel $(DechoS "$software_name") a été téléchargé avec succès."
+	if test wget -v "$software_dl_link" -O "$inst_path" >> "$FILE_LOG_PATH"; then
+		EchoSuccess "L'archive du logiciel $(DechoS "$name") a été téléchargé avec succès."
 		Newline
 
 	else
-		EchoError "Échec du téléchargement de l'archive du logiciel $(DechoE "$software_name")."
+		EchoError "Échec du téléchargement de l'archive du logiciel $(DechoE "$name")."
 		Newline
 
 		return
 	fi
 
 	# On décompresse l'archive téléchargée selon le format de compression tout en redirigeant toutes les sorties vers le terminal et le fichier de logs.
-	EchoNewstep "Décompression de l'archive $(DechoN "$software_archive")."
+	EchoNewstep "Décompression de l'archive $(DechoN "$archive")."
 	{
-		case "$software_archive" in
+		case "$archive" in
 			"*.zip")
-				UncompressSoftwareArchive "unzip" "" "$software_inst_path/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "unzip" "" "$inst_path/$archive" "$archive"
 				;;
 			"*.7z")
-				UncompressSoftwareArchive "7z" "e" "$software_inst_path/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "7z" "e" "$inst_path/$archive" "$archive"
 				;;
 			"*.rar")
-				UncompressSoftwareArchive "unrar" "e" "$software_inst_path/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "unrar" "e" "$inst_path/$archive" "$archive"
 				;;
 			"*.tar.gz")
-				UncompressSoftwareArchive "tar" "-zxvf" "$software_inst_path/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "tar" "-zxvf" "$inst_path/$archive" "$archive"
 				;;
 			"*.tar.bz2")
-				UncompressSoftwareArchive "tar" "-jxvf" "$software_inst_path/$software_archive" "$software_archive"
+				UncompressSoftwareArchive "tar" "-jxvf" "$inst_path/$archive" "$archive"
 				;;
 			*)
-				EchoError "Le format de fichier de l'archive $(DechoE "$software_archive") n'est pas supporté."
+				EchoError "Le format de fichier de l'archive $(DechoE "$archive") n'est pas supporté."
 				Newline
 
 				return
@@ -946,7 +948,7 @@ function SoftwareInstall()
 	} 2>&1 | tee -a "$FILE_LOG_PATH"
 
 	# On vérifie que le dossier contenant les fichiers desktop (servant de raccourci) existe, pour ne pas encombrer le bureau de l'utilisateur.
-	if test ! -d "$software_shortcut_dir"; then
+	if test ! -d "$shortcut_dir"; then
 		EchoNewstep "Création d'un dossier contenant les raccourcis vers les logiciels téléchargés via la commande wget (pour ne pas encombrer votre bureau)."
 		Newline
 
@@ -955,38 +957,39 @@ function SoftwareInstall()
 		EchoSuccess "Le dossier  vous pourrez déplacer les raccourcis sur votre bureau sans avoir à les modifier."
 	fi
 
-	EchoNewstep "Création d'un lien symbolique pointant vers le fichier exécutable du logiciel $(DechoN "$software_name")."
-	ln -s "$software_exec" "$software_name"
+	EchoNewstep "Création d'un lien symbolique pointant vers le fichier exécutable du logiciel $(DechoN "$name")."
+	ln -s "$exe" "$name"
 
-	if test "$?" != "0"; then
-		EchoError "Impossible de créer un lien symbolique pointant vers $(DechoE "$software_exec")."
-	else
+	if test "$?" == "0"; then
 		EchoSuccess "Le lien symbolique a été créé avec succès."
 		Newline
+	else
+        EchoError "Impossible de créer un lien symbolique pointant vers $(DechoE "$exe")."
+        Newline
 	fi
 
-	EchoNewstep "Création du raccourci vers le fichier exécutable du logiciel $(DechoN "$software_name")."
+	EchoNewstep "Création du raccourci vers le fichier exécutable du logiciel $(DechoN "$name")."
 	{
 		echo "[Desktop Entry]"
-		echo "Name=$software_name"
-		echo "Comment=$software_comment"
-		echo "Exec=$software_inst_path/$software_exec"
-		echo "Icon=$software_icon"
-		echo "Type=$software_type"
-		echo "Categories=$software_category;"
-	} > "$software_shortcut_dir/$software_name.desktop" \
-	&& EchoSuccess "Le fichier $(DechoS "$software_name.desktop") a été créé avec succès dans le dossier $(DechoS "$software_shortcut_dir")."
+		echo "Name=$name"
+		echo "Comment=$comment"
+		echo "Exec=$inst_path/$exe"
+		echo "Icon=$icon"
+		echo "Type=$type"
+		echo "Categories=$category;"
+	} > "$shortcut_dir/$name.desktop" \
+	&& EchoSuccess "Le fichier $(DechoS "$name.desktop") a été créé avec succès dans le dossier $(DechoS "$software_shortcut_dir")."
 	Newline
 
-	EchoNewstep "Suppression de l'archive $(DechoN "$software_archive")."
+	EchoNewstep "Suppression de l'archive $(DechoN "$archive")."
 	Newline
 
 	# On vérifie que l'archive a bien été supprimée.
-	if test rm -f "$software_inst_path/$software_archive"; then
-        EchoSuccess "L'archive $(DechoS "$software_archive") a été correctement supprimée."
+	if test rm -f "$inst_path/$archive"; then
+        EchoSuccess "L'archive $(DechoS "$archive") a été correctement supprimée."
 		Newline
     else
-		EchoError "La suppression de l'archive $(DechoE "$software_archive") a échouée."
+		EchoError "La suppression de l'archive $(DechoE "$archive") a échouée."
 		Newline
 	fi
 }
