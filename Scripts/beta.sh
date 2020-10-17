@@ -27,6 +27,7 @@
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute.
 ARG_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur.
 ARG_DEBUG=$2		# Utilitaire de déboguage.
+ARG_DEBUG_VAL="debug"
 
 
 ## COULEURS
@@ -978,7 +979,7 @@ function SoftwareInstall()
 		echo "Type=$type"
 		echo "Categories=$category;"
 	} > "$shortcut_dir/$name.desktop" \
-	&& EchoSuccess "Le fichier $(DechoS "$name.desktop") a été créé avec succès dans le dossier $(DechoS "$software_shortcut_dir")."
+	&& EchoSuccess "Le fichier $(DechoS "$name.desktop") a été créé avec succès dans le dossier $(DechoS "$shortcut_dir")."
 	Newline
 
 	EchoNewstep "Suppression de l'archive $(DechoN "$archive")."
@@ -1052,7 +1053,7 @@ function CheckArgs()
 
 	# On vérifie si l'utilisateur passe une chaîne de caractères "debug" en deuxième argument
 	# Je me sers de cette fonction pour effectuer des tests sur mon script, sans attendre que ce dernier arrive à l'étape souhaitée. Son contenu est susceptible de changer énormément
-	if test "debug" = "${ARG_DEBUG}"; then
+	if test "$ARG_DEBUG_VAL" = "${ARG_DEBUG}"; then
 		# On redéfinit le nom du fichier de logs est redéfini pour qu'il soit facilement trouvable par le script de déboguage,
 		# PUIS on redéfinit le chemin, MÊME si la valeur initiale de la variable "$FILE_LOG_PATH" est identique à la nouvelle valeur.
 
@@ -1067,7 +1068,7 @@ function CheckArgs()
 		WritePackScript			# Puis la fonction de création de scripts d'installation
 
 		# APPEL DES FONCTIONS À TESTER
-		EchoNewstepNoLog "Test de la fonction d'installation"
+		EchoNewstep "Test de la fonction d'installation"
 
 		HeaderStep "TEST D'INSTALLATION DE PAQUETS"
 		PackInstall "apt" "nano"
@@ -1076,9 +1077,9 @@ function CheckArgs()
 		exit 0
 
 	# Si un deuxième argument est passé ET si la valeur du second argument ne correspond pas à la valeur attendue ("debug")
-	elif test ! -z "${ARG_DEBUG}" && test ! "debug" = "${ARG_DEBUG}" ; then
-		EchoError "LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS À LA VALEUR ATTENDUE : $(DechoE "debug")"
-		EchoError "Si vous souhaitez tester une fonction du script, passez la valeur $(DechoE "debug") sans faire de fautes"
+	elif test ! -z "${ARG_DEBUG}" && test "$ARG_DEBUG_VAL" != "${ARG_DEBUG}" ; then
+		EchoErrorNoLog "LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS À LA VALEUR ATTENDUE : $(DechoE "debug")"
+		EchoErrorNoLog "Si vous souhaitez tester une fonction du script, passez la valeur $(DechoE "debug") sans faire de fautes"
 		echo ""
 
 		exit 1
