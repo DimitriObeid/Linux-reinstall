@@ -411,6 +411,7 @@ function Makedir()
 		EchoNewstepCustomTimer "Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")." "$sleep_txt"
 		echo ""
 
+		# On crée une variable nommée "lineno". Elle enregistre la valeur de la variable globale "$LINENO", qui enregistre le numéro de la ligne dans laquelle est est appelée dans un script.
 		local lineno=$LINENO; mkdir -v "$path"
 
 		# On vérifie si le dossier a bien été créé en vérifiant le code de retour de la commande "mkdir".
