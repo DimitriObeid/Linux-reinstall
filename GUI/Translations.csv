@@ -16,4 +16,4 @@ addPackGUI_BtnAddPackMsg, "Ajouter un paquet selon sa catégorie", "Add a packag
 addPackGUI_BtnAddPPA, "Ajouter un PPA", ""
 addPackGUI_btnAddPPAMsg, "Ajouter un PPA", "Add a PPA"
 addPackGUI_Cancel, "Annuler", "Cancel"
-addPackGUI_CancelMsg, "", ""
+addPackGUI_CancelMsg, "Annuler les changements effectués", "Cancel the "
