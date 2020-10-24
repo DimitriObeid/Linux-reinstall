@@ -1,12 +1,19 @@
 ## DOSSIERS
-
+# Dossier contenant divers fichiers
 .divers/
+
+# Dossier de projet PyCharm (et autres IDE de JetBrains)
+.idea/
+
+# Dossier généré par Visual Studio Code
 .vscode/
 Parser/obj/
+
+# Dossier de tests
 tests/
 
 ## FICHIERS
-# Fichier généré par KDE
+# Fichier généré par l'environnement de bureau KDE
 .directory
 
 # Fichiers temporaires créés par Nano lors de l'édition d'un fichier
