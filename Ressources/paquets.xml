@@ -34,7 +34,7 @@
 
                     • Les similitudes et les différences entre ces deux commandes sont listées dans cet article → https://daniel.haxx.se/docs/curl-vs-wget.html
 
-                    • ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
+                    • ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
                 </description>
                 <script>&sio;</script>
             </paquet>
@@ -54,7 +54,7 @@
                 <description>
                     • Cette commande vous permet de télécharger des fichiers téléchargeables disponibles sur une page web, en passant en arguments le ou les liens des fichiers que vous souhaitez télécharger.
 
-                    • ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
+                    • ATTENTION !!! COMME TOUT TÉLÉCHARGEMENT, NE TÉLÉCHARGEZ QUE DEPUIS UN SITE OFFICIEL, CONNU ET FIABLE !!!
                 </description>
                 <script>&sio;</script>
             </paquet>
@@ -98,7 +98,7 @@
                     à côté du logo de votre distribution, parfois dessiné en art ASCII.
 
                     • Selon son fichier de configuration (localisé dans le dossier ~/.config/neofetch/config.conf),
-                    la commande retourne (exemple sur ma distribution Kubuntu 18.04) :
+                    la commande retourne (exemple sur ma distribution Kubuntu 18.04) :
                         • La version de votre système d’exploitation
                         • Le nom de l’hôte du système d’exploitation (votre ordinateur)
                         • La version de votre kernel (noyau Linux)
@@ -127,7 +127,7 @@
             <paquet>
                 <nom>sl</nom>
                 <description>
-                    • Cette commande n’a rien de bien sérieux, si ce n’est d’afficher une locomotive à vapeur passer sur votre terminal si, au lieu de taper la commande « ls », vous tapez « sl » ou « LS ».
+                    • Cette commande n’a rien de bien sérieux, si ce n’est d’afficher une locomotive à vapeur passer sur votre terminal si, au lieu de taper la commande « ls », vous tapez « sl » ou « LS ».
                 </description>
                 <script>&perso;</script>
             </paquet>
@@ -206,7 +206,7 @@
 
                     • Ce logiciel vous permettant de scanner un dossier choisi et de cartographier tous les fichiers du dossier et des sous-dossiers en carrés et rectangles. Plus ces carrés ou rectangles sont gros, plus ces fichiers sont volumineux.
 
-                    • Un point fort de ce logiciel par rapport à son équivalent Windows « Windirstat » est qu’il vous permet de partir à partir de n’importe quel dossier, si vous ne voulez pas partir depuis le dossier racine (ce qui évite de perdre du temps à scanner des dossiers non voulus dans les dossiers système pouvant peser jusqu’à plusieurs gigaoctets).
+                    • Un point fort de ce logiciel par rapport à son équivalent Windows « Windirstat » est qu’il vous permet de partir à partir de n’importe quel dossier, si vous ne voulez pas partir depuis le dossier racine (ce qui évite de perdre du temps à scanner des dossiers non voulus dans les dossiers système pouvant peser jusqu’à plusieurs gigaoctets).
                 </description>
                 <script>&sio;</script>
             </paquet>
@@ -231,7 +231,7 @@
                 <nom>thunderbird</nom>
                 <description>
                     • Thunderbird est un client messagerie développé par la fondation Mozilla. Sécurisé, gratuit, libre et open-source, vous proposant :
-                        ◦ La gestion de plusieurs comptes de messagerie, avec :
+                        ◦ La gestion de plusieurs comptes de messagerie, avec :
                             ▪ Recherche rapide de messages
                             ▪ Filtrage de messages
                             ▪ Groupement de messages
@@ -250,7 +250,7 @@
             <paquet>
                 <nom>bsdgames</nom>
                 <description>
-                    • Ce paquet rajoute un « Snake » en version terminal. Vous devez ramasser le plus d’argent possible sans vous faire dévorer par le serpent. Vous pouvez quitter à tout moment en passant sur la dièse ‘#’ et sauvegarder votre record.
+                    • Ce paquet rajoute un « Snake » en version terminal. Vous devez ramasser le plus d’argent possible sans vous faire dévorer par le serpent. Vous pouvez quitter à tout moment en passant sur la dièse ‘#’ et sauvegarder votre record.
                 </description>
                 <script>&perso;</script>
             </paquet>
@@ -271,17 +271,17 @@
             <paquet>
                 <nom>pacman</nom>
                 <description>
-                    • Le nom du paquet n’est il pas assez explicite ?
+                    • Le nom du paquet n’est il pas assez explicite ?
                 </description>
                 <script>&perso;</script>
             </paquet>
             <paquet>
                 <nom>supertux2</nom>
                 <description>
-                    • Vous aimez Super Mario Bros ? Vous avez toujours voulu :
-                        ◦ Jouer à un clone libre et open-source de ce jeu légendaire, tout en incarnant le légendaire manchot Tux, la mascotte du noyau Linux ?
+                    • Vous aimez Super Mario Bros ? Vous avez toujours voulu :
+                        ◦ Jouer à un clone libre et open-source de ce jeu légendaire, tout en incarnant le légendaire manchot Tux, la mascotte du noyau Linux ?
 
-                        ◦ Jouer à un jeu régulièrement mis à jour proposant, en plus des nombreux niveau disponibles, un nombre incalculable de niveaux créés par la communauté ?
+                        ◦ Jouer à un jeu régulièrement mis à jour proposant, en plus des nombreux niveau disponibles, un nombre incalculable de niveaux créés par la communauté ?
 
                     • Alors foncez, ce jeu est fait pour vous !
                 </description>
