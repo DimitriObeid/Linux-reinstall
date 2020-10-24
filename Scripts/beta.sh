@@ -296,7 +296,7 @@ function HandleErrors()
 	local error_string=$1		# Chaîne de caractères du type d'erreur à afficher.
 	local advise_string=$2		# Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème.
     local lineno=$3             # Ligne à laquelle le message d'erreur s'est produite.
-	
+
 	# ***** Code *****
 	HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $error_string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
 
@@ -309,7 +309,7 @@ function HandleErrors()
 
 	EchoError "L'erreur en question s'est produite à la ligne $lineno."
 	Newline
-	
+
 	EchoError "Arrêt de l'installation."
 	Newline
 
@@ -318,7 +318,7 @@ function HandleErrors()
         # Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur).
         if test ! -f "$DIR_HOMEDIR/$FILE_LOG_NAME"; then
             mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME" || { EchoError "Impossible de déplacer le fichier de logs dans le dossier $HOME"; Newline; exit 1; }
-            
+
             FILE_LOG_PATH="$DIR_HOMEDIR/$FILE_LOG_NAME"
         fi
         EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé dans le dossier $(DechoE "$DIR_LOG_PATH")."
@@ -376,7 +376,7 @@ function Makedir()
 			DrawLine "$COL_RESET" "$block_char"
 			sleep "$sleep_blk"
 			echo ""
-			
+
 		else
             echo ""
 
@@ -405,7 +405,7 @@ function Makedir()
 		echo ""
 
 		return
-	
+
 	# Sinon, si le dossier à traiter n'existe pas, alors le script le crée.
 	elif test ! -d "$path"; then
 		EchoNewstepCustomTimer "Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")." "$sleep_txt"
@@ -529,9 +529,9 @@ function Makefile()
 		DrawLine "$COL_RESET" "$block_char"
 
 		return
-	
+
 	# Sinon, si le fichier à traiter n'existe pas, on le crée avec l'aide de la commande "touch".
-	elif test ! -s "$path"; then
+	elif test ! -f "$path"; then
         EchoNewstepCustomTimer "Création du fichier $(DechoN "$name") dans le dossier $(DechoN "$parent/")." "$sleep_txt"
 		echo ""
 
@@ -595,12 +595,12 @@ function Makefile()
 function OptimizeInstallation()
 {
 	#***** Paramètres *****
-	local parent=$1        # Dossier parent du fichier script à exécuter.
-	local file=$2          # Nom du fichier script à exécuter.
-	local cmd=$3           # Commande du gestionnaire de paquets à exécuter.
-	local pack_manager=$4  # Nom du gestionnaire de paquets utilisé.
-	local package=$4       # Nom du paquet.
-	local type=$5          # Type de commande envoyée (recherche sur le disque dur, dans la base de données ou installation de paquets).
+	local parent=$1            # Dossier parent du fichier script à exécuter.
+	local file=$2              # Nom du fichier script à exécuter.
+	local cmd=$3               # Commande du gestionnaire de paquets à exécuter.
+	local package_manager=$4   # Nom du gestionnaire de paquets utilisé.
+	local package=$5           # Nom du paquet.
+	local type=$6              # Type de commande envoyée (recherche sur le disque dur, dans la base de données ou installation de paquets).
 
 	#***** Autres variables *****
 	local parent="$DIR_INSTALL_PATH"
@@ -608,7 +608,7 @@ function OptimizeInstallation()
 
 	#**** Code *****
 	# On vérifie si tous les arguments sont bien appelés (IMPORTANT POUR UNE INSTALLATION SANS PROBLÈMES)
-	if test "$#" -ne 5; then
+	if test "$#" -ne 6; then
 		HandleErrors "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")" \
 			"Vérifiez quels arguments manquent à la fonction." "$LINENO_INST"
 	fi
@@ -620,7 +620,7 @@ function OptimizeInstallation()
 			Newline
 			;;
 		"DB")
-			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package") dans la base de données du gestionnaire $(DechoN "$pack_manager")."
+			EchoNewstep "Vérification de la présence du paquet $(DechoN "$package") dans la base de données du gestionnaire $(DechoN "$package_manager")."
 			Newline
 			;;
 		"INST")
@@ -635,16 +635,17 @@ function OptimizeInstallation()
 				 $(DechoE "INST") pour l'installation de paquets.
 				 " \
                 "$LINENO_INST"
-				 
+
 	esac
 
 	# Exécution du script.
-	local lineno=$LINENO; (pwd && echo "" && cd "$parent" && pwd && ./"$file" "$FILE_LOG_PATH" "$cmd" && echo "$?" > "$GETVAL_PATH")
-	
-	while read -r "${GETVAL_PATH?}"; do
-        echo "$GETVAL"
-    done < "$GETVAL_PATH"
-	
+	local lineno=$LINENO; (cd "$parent" && ./"$file" "$FILE_LOG_PATH" "$cmd" && cat <<-EOF > "$GETVAL_PATH"
+	"$?"
+EOF
+)
+
+	$GETVAL=$(cat "$GETVAL_PATH")
+
 	case "$GETVAL" in
 		"1")
 			case "$type" in
@@ -657,24 +658,23 @@ function OptimizeInstallation()
 					sleep 1
 					;;
 				"DB")
-					EchoError "Le paquet $(DechoE "$package") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$pack_manager")."
+					EchoError "Le paquet $(DechoE "$package") n'a pas été trouvé dans la base de données du gestionnaire $(DechoE "$package_manager")."
 					EchoError "Écriture du nom du paquet $(DechoE "$package") dans le fichier $(DechoE "$DIR_PACKAGES_PATH")."
 					Newline
 
 					# S'il n'existe pas, on crée le fichier contenant les noms des paquets introuvables dans la base de données.
 					if test ! -f "$FILE_PACKAGES_DB_PATH"; then
 						Makefile "$DIR_PACKAGES_PATH" "$FILE_PACKAGES_DB_NAME" "0" "0" >> "$FILE_LOG_PATH"
-						echo "Gestionnaire de paquets : $pack_manager" > "$FILE_PACKAGES_DB_PATH"
+						echo "Gestionnaire de paquets : $package_manager" > "$FILE_PACKAGES_DB_PATH"
 						echo "" >> "$FILE_PACKAGES_DB_PATH"
 					fi
 
-					echo "$package_name" >> "$FILE_PACKAGES_DB_PATH"
+					echo "$package" >> "$FILE_PACKAGES_DB_PATH"
 
 					EchoError "Abandon de l'installation du paquet $(DechoE "$package")."
 					Newline
 
 					Drawline "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
-					Newline
 					Newline
 					;;
 				"INST")
@@ -685,7 +685,7 @@ function OptimizeInstallation()
 					if test ! -f "$FILE_PACKAGES_INST_PATH"; then
 						Makefile "$DIR_PACKAGES_PATH" "$FILE_PACKAGES_INST_NAME" "0" "0" >> "$FILE_LOG_PATH"
 
-						echo "Gestionnaire de paquets : $pack_manager" > "$FILE_PACKAGES_INST_PATH"
+						echo "Gestionnaire de paquets : $package_manager" > "$FILE_PACKAGES_INST_PATH"
 						echo "" >> "$FILE_PACKAGES_INST_PATH"
 					fi
 
@@ -695,7 +695,6 @@ function OptimizeInstallation()
 					Newline
 
 					Drawline "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
-					Newline
 					Newline
 					;;
 			esac
@@ -727,10 +726,9 @@ function OptimizeInstallation()
 
 					Drawline "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
 					Newline
-					Newline
 					;;
 				"DB")
-					EchoSuccess "Le paquet $(DechoS "$package") a été trouvé dans la base de données du gestionnaire $(DechoS "$pack_manager")."
+					EchoSuccess "Le paquet $(DechoS "$package") a été trouvé dans la base de données du gestionnaire $(DechoS "$package_manager")."
 					;;
 				"INST")
 					EchoSuccess "Le paquet $(DechoS "$package") a bien été installé."
@@ -750,80 +748,74 @@ function OptimizeInstallation()
 function PackInstall()
 {
 	#***** Paramètres *****
-	local package_manager_name=$1	# Nom du gestionnaire de paquets.
-	local package_name=$2			# Nom du paquet à installer.
+	local package_manager=$1	# Nom du gestionnaire de paquets.
+	local package=$2			# Nom du paquet à installer.
 
 	#***** Autres variables *****
 	local block_char="="	# Caractère composant la ligne.
 	LINENO_INST=$LINENO
 
 	#***** Code *****
-	# S'il n'existe pas, on crée le dossier contenant des informations concernant les éventuels paquets non-trouvés dans la base de données
-	# du gestionnaire de paquets ou les éventuels paquets impossibles à installer sur le disque dur de l'utilisateur.
-	if test ! -d "$DIR_PACKAGES_PATH"; then
-		Makedir "$DIR_TMP_PATH" "$DIR_PACKAGES_NAME" "0" "0" >> "$FILE_LOG_PATH"
-	fi
-
-	# Si le fichier contenant la commande de recherche sur le système n'existe pas.
-	if test ! -f "$FILE_INSTALL_HD_PATH"; then
-		Makefile "$DIR_INSTALL_PATH" "$FILE_INSTALL_HD_NAME" "0" "0" >> "$FILE_LOG_PATH"
-	fi
-
-	# Si le fichier contenant la commande de recherche dans la base de données n'exite pas.
-	if test ! -f "$FILE_INSTALL_DB_PATH"; then
-		Makefile "$DIR_INSTALL_PATH" "$FILE_INSTALL_DB_NAME" "0" "0" >> "$FILE_LOG_PATH"
-	fi
-
-	# Si le fichier contenant la commande d'installation n'existe pas.
-	if test ! -f "$FILE_INSTALL_INST_PATH"; then
-		Makefile "$DIR_INSTALL_PATH" "$FILE_INSTALL_INST_NAME" "0" "0" >> "$FILE_LOG_PATH"
-	fi
-
 	DrawLine "$COL_RESET" "$block_char" 2>&1 | tee -a "$FILE_LOG_PATH"
 	sleep 1
 	Newline
 
-	EchoNewstep "Traitement du paquet $(DechoN "$package_name")."
+	EchoNewstep "Traitement du paquet $(DechoN "$package")."
 	Newline
 
 	# On définit les commandes de recherche et d'installation de paquets selon le nom du gestionnaire de paquets passé en premier argument.
-	case ${package_manager_name} in
+	case ${package_manager} in
 		"$PACK_MAIN_PACKAGE_MANAGER")
 			case ${PACK_MAIN_PACKAGE_MANAGER} in
 				"apt")
-					echo apt-cache policy "$package_name" | grep "$package_name" > "$FILE_INSTALL_HD_PATH"
-					echo apt-cache show "^$package_name\$" > "$FILE_INSTALL_DB_PATH"
-					echo apt-get -y install "$package_name" > "$FILE_INSTALL_INST_PATH"
+                    # Pour enregistrer la commande souhaitée dans un fichier, il faut utiliser un here document. Le tiret après les chevrons "<<" sert à effacer tous les espaces avant le premier caractère d'une ligne du fichier, étant donné qu'il y a plusieurs tabulations servant à indenter le script. Il ne faut pas mettre de guillemets uniques avant et après le nom du délimiteur (EOF) pour prendre en compte la valeur de la variable "$package", enregistrant le nom du paquet à installer.
+					cat <<-EOF > "$FILE_INSTALL_HD_PATH"
+					apt-cache policy "$package" | grep "$package"
+					EOF
+					cat <<-EOF > "$FILE_INSTALL_DB_PATH"
+					apt-cache show "$package" | grep "$package"
+					EOF
+					cat <<-EOF > "$FILE_INSTALL_INST_PATH"
+					apt-get -y install "$package"
+					EOF
 					;;
 			#	"dnf")
 			#		search_pack_hdrive_command=""
 			#		search_pack_db_command=""
-			#		echo dnf -y install "$package_name" > "$FILE_INSTALL_INST_PATH"
+			#		cat <<-EOF > "$FILE_INSTALL_INST_PATH"
+            #           dnf -y install "$package"
+            #        EOF
 			#		;;
 			#	"pacman")
-			#		echo pacman -Q "$package_name" > "$FILE_INSTALL_HD_PATH"
+			#		cat <<-EOF > "$FILE_INSTALL_HD_PATH"
+			#             pacman -Q "$package"
+			#        EOF
 			#		search_pack_db_command=""
-			#		echo pacman --noconfirm -S "$package_name" > "$FILE_INSTALL_INST_PATH"
+			#		cat <<-EOF > "$FILE_INSTALL_INST_PATH"
+			#            pacman --noconfirm -S "$package"
+            #       EOF
 			esac
 			;;
 		"snap")
-			echo snap list "$package_name" > "$FILE_INSTALL_HD_PATH"
+			cat <<-EOF > "$FILE_INSTALL_HD_PATH" snap list "$package"
+			EOF
 			# search_pack_db_command=""
-			snap install "$*" > "$FILE_INSTALL_INST_PATH"
+			cat <<-EOF > "$FILE_INSTALL_INST_PATH" snap install "$*"
+			EOF
 			;;
 		"")
 			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
 				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)." \
-				"$LINENO, avec le paquet $(DechoE "$package_name")"
+				"$LINENO, avec le paquet $(DechoE "$package")"
 				;;
 			*)
-			EchoError "Le nom du gestionnaire de paquets passé en premier argument $(DechoE "$package_manager_name") ne correspond à aucun gestionnaire de paquets présent sur votre système."
+			EchoError "Le nom du gestionnaire de paquets passé en premier argument $(DechoE "$package_manager") ne correspond à aucun gestionnaire de paquets présent sur votre système."
 			EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande."
 			Newline
 
-			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager_name")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
+			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
 				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯" \
-				"$LINENO, avec le paquet $(DechoE "$package_name")"
+				"$LINENO, avec le paquet $(DechoE "$package")"
 			;;
 	esac
 
@@ -832,7 +824,7 @@ function PackInstall()
 	var_type="HD"	# On enregistre la valeur du troisième paramètre de la fonction "OptimizeInstallation" pour mieux le récupérer lors du test.
 
 	# On appelle en premier lieu la commande de recherche de paquets installés sur le système de l'utilisateur, puis on quitte la fonction "PackInstall" si le paquet recherché est déjà installé sur le disque dur de l'utilisateur.
-	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
+	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_manager" "$package" "$var_type"
 
 	if test "$var_type" = "HD" && test "$GETVAL" -eq "1"; then
 		return
@@ -843,7 +835,7 @@ function PackInstall()
 	var_type="DB"
 
 	# On appelle en deuxième lieu la commande de recherche de paquets dans la base de données du gestionnaire de paquets de l'utilisateur, puis on quitte la fonction "PackInstall" si le paquet recherché est absent de la base de données.
-	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
+	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_manager" "$package" "$var_type"
 
 	if test "$var_type" = "DB" && test "$GETVAL" -eq "1"; then
 		return
@@ -854,7 +846,7 @@ function PackInstall()
 	var_type="INST"
 
 	# On appelle en troisième et dernier lieu la commande d'installation de paquets, puis on quitte la fonction "PackInstall" si le paquet n'a pas pu être installé.
-	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_name" "$var_type"
+	OptimizeInstallation "$DIR_INSTALL_PATH" "$FILE_SCRIPT_NAME" "$var_file_content" "$package_manager" "$package" "$var_type"
 
 	if test "$var_type" = "INST" && test "$GETVAL" -eq "1"; then
 		return
@@ -871,11 +863,11 @@ function UncompressSoftwareArchive()
     option=$2  # Option de la commande de décompression (dans le cas où l'appel d'une option n'est pas obligatoire, laisser une chaîne de caractères vide lors de l'appel de la fonction).
     path=$3    # Chemin vers l'archive à décompresser.
     name=$4    # Nom de l'archive.
-    
+
     #***** Code *****
     # On exécute la commande de décompression en passant en arguments ses options et le chemin vers l'archive.
     "$cmd $option $path"
-    
+
     if test "$?" -eq 0; then
         EchoSuccessNoLog "La décompression de l'archive $(DechoS "$name") s'est effectuée avec brio."
         Newline
@@ -900,11 +892,11 @@ function SoftwareInstall()
 
 	#***** Autres variables *****
 	# Dossiers
- 	local inst_path="$DIR_SOFTWARE_PATH/$name"			   # Dossier d'installation du logiciel.
+ 	local inst_path="$DIR_SOFTWARE_PATH/$name"	   # Dossier d'installation du logiciel.
 	local shortcut_dir="$DIR_HOMEDIR/Bureau/Linux-reinstall.links"	   # Dossier de stockage des raccourcis vers les fichiers exécutables des logiciels téléchargés.
 
 	# Fichiers
-	local software_dl_link="$web_link/$archive"				# Lien de téléchargement de l'archive.
+	local software_dl_link="$web_link/$archive"		# Lien de téléchargement de l'archive.
 
 	#***** Code *****
 	EchoNewstep "Téléchargement du logiciel $(DechoN "$name")."
@@ -913,7 +905,7 @@ function SoftwareInstall()
 	if test ! -d "$inst_path"; then
         Makedir "$DIR_SOFTWARE_NAME" "$name" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
     fi
-	
+
 	if test wget -v "$software_dl_link" -O "$inst_path" >> "$FILE_LOG_PATH"; then
 		EchoSuccess "L'archive du logiciel $(DechoS "$name") a été téléchargé avec succès."
 		Newline
@@ -954,12 +946,13 @@ function SoftwareInstall()
 	} 2>&1 | tee -a "$FILE_LOG_PATH"
 
 	# On vérifie que le dossier contenant les fichiers desktop (servant de raccourci) existe, pour ne pas encombrer le bureau de l'utilisateur.
+	# S'il n'existe pas, alors le script le crée
 	if test ! -d "$shortcut_dir"; then
 		EchoNewstep "Création d'un dossier contenant les raccourcis vers les logiciels téléchargés via la commande wget (pour ne pas encombrer votre bureau)."
 		Newline
 
 		Makedir "$DIR_HOMEDIR/Bureau/" "Linux-reinstall.link" "2" "1" 2>&1 | tee -a "$FILE_LOG_PATH"
-		
+
 		EchoSuccess "Le dossier  vous pourrez déplacer les raccourcis sur votre bureau sans avoir à les modifier."
 	fi
 
@@ -1032,7 +1025,7 @@ function CheckArgs()
 		echo ""
 
 		exit 1
-	
+
 	# Sinon, si le script est lancé en mode super-utilisateur sans argument
 	elif test -z "${ARG_USERNAME}"; then
 		EchoErrorNoLog "Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script :"
@@ -1044,11 +1037,11 @@ function CheckArgs()
 		echo ""
 
 		exit 1
-		
+
 	# Sinon, si le premier argument passé ne correspond à aucun compte d'utilisateur existant.
 	elif ! id -u "${ARG_USERNAME}" > /dev/null; then
         echo ""
-        
+
 		EchoErrorNoLog "NOM D'UTILISATEUR INCORRECT"
 		EchoErrorNoLog "Veuillez entrer correctement votre nom d'utilisateur"
 		echo ""
@@ -1095,7 +1088,7 @@ function CheckArgs()
 function CreateLogFile()
 {
 	# Récupération des informations sur le système d'exploitation de l'utilisateur, me permettant de corriger tout bug pouvant survenir sur une distribution Linux précise.
-	
+
 	# Tout ce qui se trouve entre les accolades suivantes est envoyé dans le fichier de logs.
 	{
 		# Le script crée d'abord le fichier de logs dans le dossier actuel (pour cela, on passe la valeur de la variable d'environnement $PWD en premier argument de la fonction "Makefile").
@@ -1129,18 +1122,18 @@ function Mktmpdir()
 	} >> "$FILE_LOG_PATH"
 
 	# Avant de déplacer le fichier de logs, on vérifie si l'utilisateur n'a pas passé la valeur "debug" en tant que deuxième argument (vérification importante, étant donné que le chemin et le nom du fichier sont redéfinis dans ce cas).
-	
-	# Dans le cas où l'utilisateur ne passe pas de deuxième argument, une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà, puis on redéfinit le chemin du fichier de logs de la variable "$FILE_LOG_PATH". Si ce n'est pas le cas, le fichier de logs n'est déplacé nulle part ailleurs dans l'arborescence.
-	if test "$#" -eq 1; then
-		FILE_LOG_PATH="$DIR_LOG_PATH/$FILE_LOG_NAME"
 
+	# Dans le cas où l'utilisateur ne passe pas de deuxième argument, une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà, puis on redéfinit le chemin du fichier de logs de la variable "$FILE_LOG_PATH". Si ce n'est pas le cas, le fichier de logs n'est déplacé nulle part ailleurs dans l'arborescence.
+	if [[ "$#" -eq 1 ]]; then
+		FILE_LOG_PATH="$DIR_LOG_PATH/$FILE_LOG_NAME"
+		echo "ARG = 1"
 		# On vérifie que le fichier de logs a bien été déplacé vers le dossier temporaire en vérifiant le code de retour de la commande "mv".
 		local lineno=$LINENO; mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"
-		
+
 		if test "$?" -eq 0; then
         {
             echo ""
-            
+
             EchoSuccessNoLog "Le fichier de logs a été déplacé avec succès dans le dossier $(DechoS "$DIR_LOG_PATH")."
         } >> "$FILE_LOG_PATH"
 		else
@@ -1149,8 +1142,9 @@ function Mktmpdir()
 			# Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
 			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" "" "$lineno"
 		fi
-    elif test "$#" -eq 2; then
-    {        
+    elif (( "$#" -eq 2 )); then
+    {
+		echo "ARG = 2"
         # Rappel : Dans cette situation où un deuxième argument est passé, les valeurs des variables "FILE_LOG_NAME" et "$DIR_LOG_PATH" ont été redéfinies dans la fonction "CheckArgs".
         EchoSuccessNoLog "Le fichier $(DechoS "$FILE_LOG_NAME") reste dans le dossier $(DechoS "$DIR_LOG_PATH")."
     } >> "$FILE_LOG_PATH"
@@ -1221,7 +1215,7 @@ function WritePackScript()
 	} >> "$FILE_LOG_PATH"
 
 	local lineno=$LINENO; chmod +x -v "$FILE_SCRIPT_PATH" >> "$FILE_LOG_PATH" 2>&1
-	
+
 	if test "$?" -eq 0; then
 	{
 		echo ""
@@ -1337,7 +1331,7 @@ function LaunchScript()
 				;;
 	    esac
 	}
-	
+
 	# Appel de la fonction "ReadLaunchScript", car même si la fonction est définie dans la fonction "LaunchScript", ses instructions ne sont pas lues automatiquement.
 	ReadLaunchScript
 }
@@ -1351,7 +1345,7 @@ function CheckInternetConnection()
 
 	# On vérifie si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1).
 	local lineno=$LINENO; ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"
-	
+
 	if test "$?" -eq 0; then
 		EchoSuccess "Votre ordinateur est connecté à Internet."
 
@@ -1439,20 +1433,20 @@ function SetSudo()
 
     EchoNewstep "Détection de la commande sudo $COL_RESET."
     Newline
-    
+
 	# On vérifie si la commande "sudo" est installée sur le système de l'utilisateur.
 	command -v sudo 2>&1 | tee -a "$FILE_LOG_PATH"
-	
+
 	if test "$?" -eq 0; then
         Newline
-        
+
         EchoSuccess "La commande $(DechoS "sudo") est déjà installée sur votre système."
 		Newline
 	else
 		Newline
 		EchoNewstep "La commande $(DechoN "sudo") n'est pas installé sur votre système."
 		Newline
-		
+
 		PackInstall "$PACK_MAIN_PACKAGE_MANAGER" "sudo"
 	fi
 
@@ -1474,7 +1468,7 @@ function SetSudo()
 		read -rp "Entrez votre réponse : " rep_set_sudo
 		echo "$rep_set_sudo" >> "$FILE_LOG_PATH"
 		Newline
-		
+
 		# Cette condition case permer de tester les cas où l'utilisateur répond par "oui", "non" ou autre chose que "oui" ou "non".
 		case ${rep_set_sudo,,} in
 			"oui" | "yes")
@@ -1483,7 +1477,7 @@ function SetSudo()
 				Newline
 
 				cat "/etc/sudoers" > "$sudoers_old"
-				
+
 				if test "$?" -eq 0; then
 					EchoSuccess "Le fichier de sauvegarde $(DechoS "$sudoers_old") a été créé avec succès."
 					Newline
@@ -1516,7 +1510,7 @@ function SetSudo()
 				Newline
 
 				mv "$DIR_TMP_PATH/sudoers" /etc/sudoers
-				
+
 				if test "$?" -eq 0; then
 					EchoSuccess "Fichier $(DechoS "sudoers") déplacé avec succès vers le dossier $(DechoS "/etc/")."
 					Newline
@@ -1530,18 +1524,18 @@ function SetSudo()
 				# Ajout de l'utilisateur au groupe "sudo".
 				EchoNewstep "Ajout de l'utilisateur $(DechoN "${ARG_USERNAME}") au groupe sudo."
 				Newline
-				
+
 				usermod -aG root "${ARG_USERNAME}" 2>&1 | tee -a "$FILE_LOG_PATH"
 
 				if test "$?" == "0"; then
                     EchoSuccess "L'utilisateur $(DechoS "${ARG_USERNAME}") a été ajouté au groupe sudo avec succès."
                     Newline
-					
+
 					return
 				else
 					EchoError "Impossible d'ajouter l'utilisateur $(DechoE "${ARG_USERNAME}") à la liste des sudoers."
                     Newline
-					
+
 					return
 
 				fi
@@ -1641,7 +1635,7 @@ function IsInstallationDone()
 
 			EchoNewstep "Suppression du dossier temporaire $DIR_TMP_PATH."
 			Newline
-			
+
 			if test rm -rfv "$DIR_TMP_PATH" >> "$FILE_LOG_PATH"; then
 				EchoSuccess "Le dossier temporaire $(DechoS "$DIR_TMP_PATH") a été supprimé avec succès."
 				Newline
