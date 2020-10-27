@@ -644,7 +644,7 @@ function OptimizeInstallation()
 EOF
 )
 
-	$GETVAL=$(cat "$GETVAL_PATH")
+	GETVAL=$(cat "$GETVAL_PATH")
 
 	case "$GETVAL" in
 		"1")
@@ -1124,7 +1124,7 @@ function Mktmpdir()
 	# Avant de déplacer le fichier de logs, on vérifie si l'utilisateur n'a pas passé la valeur "debug" en tant que deuxième argument (vérification importante, étant donné que le chemin et le nom du fichier sont redéfinis dans ce cas).
 
 	# Dans le cas où l'utilisateur ne passe pas de deuxième argument, une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà, puis on redéfinit le chemin du fichier de logs de la variable "$FILE_LOG_PATH". Si ce n'est pas le cas, le fichier de logs n'est déplacé nulle part ailleurs dans l'arborescence.
-	if [[ "$#" -eq 1 ]]; then
+	if test "$#" -eq 1 && test "${ARG_USERNAME}" = "${ARG_USERNAME}" ; then
 		FILE_LOG_PATH="$DIR_LOG_PATH/$FILE_LOG_NAME"
 		echo "ARG = 1"
 		# On vérifie que le fichier de logs a bien été déplacé vers le dossier temporaire en vérifiant le code de retour de la commande "mv".
@@ -1139,10 +1139,10 @@ function Mktmpdir()
 		else
 			echo "" >> "$FILE_LOG_PATH"
 
-			# Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
+            # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "CreateLogFile" dans la fonction "ScriptInit, il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
 			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" "" "$lineno"
 		fi
-    elif (( "$#" -eq 2 )); then
+    elif test "$#" -eq 2; then
     {
 		echo "ARG = 2"
         # Rappel : Dans cette situation où un deuxième argument est passé, les valeurs des variables "FILE_LOG_NAME" et "$DIR_LOG_PATH" ont été redéfinies dans la fonction "CheckArgs".
@@ -1167,7 +1167,7 @@ function GetMainPackageManager()
 
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée).
 	if test -z "$PACK_MAIN_PACKAGE_MANAGER"; then
-        # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "ScriptInit", il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
+        # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "CreateLogFile" dans la fonction "ScriptInit, il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
 		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ" "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")." "$LINENO"
 	else
 		EchoSuccessNoLog "Gestionnaire de paquets principal trouvé : $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")" >> "$FILE_LOG_PATH"
