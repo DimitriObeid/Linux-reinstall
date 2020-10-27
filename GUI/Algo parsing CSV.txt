@@ -1,0 +1,27 @@
+###
+
+VARIABLES
+lang <- string
+current_win <- string (à voir)
+
+DÉBUT
+    OUVRIR -> "Translations.csv"
+
+    SI current_win <- "Menu principal", ALORS
+        SI lang == "en", ALORS
+            ASSIGNER welcomeGUI_* <- Colonne "en"
+
+        SINON, SI lang == "fr", ALORS
+            ASSIGNER welcomeGUI_* <- Colonne "fr"
+        FIN SI lang
+
+    SINON, SI current_win <- "Ajout de paquets", ALORS
+        SI lang == "en", ALORS
+            ASSIGNER addPackageGUI_* <- Colonne "en"
+
+        SINON, SI lang == "fr", ALORS
+            ASSIGNER addPackageGUI_* <- Colonne "fr"
+        FIN SI lang
+
+    FIN SI current_win
+FIN

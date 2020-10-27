@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
-import PySimpleGUI as sg
 
-layout = [[sg.Text("Bienvenue dans le")], [sg.Button("OK")]]
+# *** Importing Tkinter modules
+from tkinter import *
+# from tkinter import ttk
 
-# Create the window
-window = sg.Window("Demo", layout)
 
-# Create an event loop
-while True:
-    event, values = window.read()
-    # End program if user closes window or
-    # presses the OK button
-    if event == "OK" or event == sg.WIN_CLOSED:
-        break
+# *** Importing variables /
+# from Translate import welcomeGUI*
 
-window.close()
+# *** Code
+def main():
+    app = Tk()  # Window creation
+
+    # Defining window geometry
+    # Window dimensions must be written as a string, as a single argument.
+    # The multiplier isn't the star character '*', but the latin alphabet character 'x'
+    app.geometry('300x300')
+    app['bg'] = 'black'
+
+    # Program's main loop
+    app.mainloop()
+
+    exit(0)
+
+
+main()
