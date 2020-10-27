@@ -13,7 +13,10 @@ Parser/obj/
 tests/
 
 ## FICHIERS
-# Fichier généré par l'environnement de bureau KDE
+# Fichiers de backup
+*.bak
+
+# Fichiers générés par l'environnement de bureau KDE
 .directory
 
 # Fichiers temporaires créés par Nano lors de l'édition d'un fichier
