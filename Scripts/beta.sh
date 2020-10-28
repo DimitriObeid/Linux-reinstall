@@ -1089,12 +1089,13 @@ function CreateLogFile()
 {
 	# Récupération des informations sur le système d'exploitation de l'utilisateur, me permettant de corriger tout bug pouvant survenir sur une distribution Linux précise.
 
+	# Le script crée d'abord le fichier de logs dans le dossier actuel (pour cela, on passe la valeur de la variable d'environnement $PWD en premier argument de la fonction "Makefile").
+	lineno=$LINENO; Makefile "$PWD" "$FILE_LOG_NAME" "0" "0" > /dev/null
+	
+	# On vérifie si le fichier de logs a bien été créé
+	if test -f "$FILE_LOG_PATH" && test -s "$FILE_LOG_PATH"; then
 	# Tout ce qui se trouve entre les accolades suivantes est envoyé dans le fichier de logs.
 	{
-		# Le script crée d'abord le fichier de logs dans le dossier actuel (pour cela, on passe la valeur de la variable d'environnement $PWD en premier argument de la fonction "Makefile").
-		Makefile "$PWD" "$FILE_LOG_NAME" "0" "0"
-		echo ""
-
 		# On évite d'appeler les fonctions d'affichage propre "EchoSuccess" ou "EchoError" (sans le "NoLog") pour éviter
 		# d'écrire deux fois le même texte, vu que ces fonctions appellent chacune une commande écrivant dans le fichier de logs.
 		EchoSuccessNoLog "Fichier de logs créé avec succès"
@@ -1108,6 +1109,17 @@ function CreateLogFile()
 
 		EchoSuccessNoLog "Fin de la récupération d'informations sur le système d'exploitation."
 	} >> "$FILE_LOG_PATH"	# Au moment de la création du fichier de logs, la variable "$FILE_LOG_PATH" correspond au dossier actuel de l'utilisateur.
+    else
+        # Étant donné que le fichier de logs n'existe pas dans ce cas, il est impossible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise
+        EchoErrorNoLog "IMPOSSIBLE DE CRÉER LE FICHIER DE LOGS"
+        EchoErrorNoLog ""
+        echo ""
+        
+        EchoErrorNoLog "L'erreur s'est produite à la ligne $lineno"
+        echo ""
+        
+        exit 1
+    fi
 }
 
 # Création du dossier temporaire où sont stockés les fichiers et dossiers temporaires.
