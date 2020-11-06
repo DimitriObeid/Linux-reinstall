@@ -12,6 +12,9 @@ Parser/obj/
 # Dossier de tests
 tests/
 
+# Dossier contenant les fichiers de l'interface graphique
+GUI/
+
 ## FICHIERS
 # Fichiers de backup
 *.bak
