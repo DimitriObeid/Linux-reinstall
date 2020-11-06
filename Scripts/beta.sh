@@ -26,9 +26,11 @@
 ## ARGUMENTS
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute.
 ARG_USERNAME=$1		# Premier argument : Le nom du compte de l'utilisateur.
-ARG_PACKS=$2        # Deuxième argument : Le type de paquets à installer (version SIO (travail) ou personnelle (travail + logiciels pour un usage presonnel))
-ARG_DEBUG=$3		# Utilitaire de déboguage.
-ARG_DEBUG_VAL="debug"
+ARG_PACKS=$2        # Deuxième argument : Le type de paquets à installer (version SIO (travail) ou personnelle (travail + logiciels pour un usage presonnel)).
+ARG_DEBUG=$3		# Argument servant d'utilitaire de déboguage.
+
+ARG_DEBUG_VAL="debug"   # Valeur de l'agument de déboguage.
+ARGV=("$@")             # Tableau d'arguments.
 
 
 ## COULEURS
@@ -136,27 +138,27 @@ VER_PACKS=""        # Version d'installation (SIO ou personnelle)
 
 
 #### DÉFINITION DES FONCTIONS D'AFFICHAGE DE TEXTE
-# Fonctions servant à colorer d'une autre couleur une partie de texte (jeu de mots entre "déco(ration)" et "echo"), suivi de la première lettre du nom du type de message (passage, échec ou succès).
-function Decho() { local string=$1; echo "$COL_CYAN$string$COL_RESET"; }    # Affichage d'un message dans un simple message écrit via la commande "echo"
-function DechoE() { local string=$1; echo "$COL_CYAN$string$COL_RED"; }     # Affichage d'un message d'erreur
-function DechoH() { local string=$1; echo "$COL_BLUE$string$COL_CYAN"; }    # Affichage d'un message dans un texte de header
-function DechoN() { local string=$1; echo "$COL_CYAN$string$COL_YELLOW"; }  # Affichage d'un message de changement de sous-étape
-function DechoS() { local string=$1; echo "$COL_CYAN$string$COL_GREEN"; }   # Affichage d'un message de succès
+# Fonctions servant à colorer d'une autre couleur une partie de texte (jeu de mots entre "déco(ration)" et "echo", suivi de la première lettre du nom du type de message (passage à une nouvelle sous-étape, d'échec ou de succès)).
+function Decho() { local string=$1; echo "$COL_CYAN$string$COL_RESET"; }    # Affichage d'un message dans un simple message écrit via la commande "echo".
+function DechoE() { local string=$1; echo "$COL_CYAN$string$COL_RED"; }     # Affichage d'un message d'erreur.
+function DechoH() { local string=$1; echo "$COL_BLUE$string$COL_CYAN"; }    # Affichage d'un message dans un texte de header.
+function DechoN() { local string=$1; echo "$COL_CYAN$string$COL_YELLOW"; }  # Affichage d'un message de changement de sous-étape.
+function DechoS() { local string=$1; echo "$COL_CYAN$string$COL_GREEN"; }   # Affichage d'un message de succès.
 
 # Affichage d'un message en redirigeant les sorties standard et les sorties d'erreur vers le fichier de logs, selon sa couleur d'affichage, avec des chevrons et sans avoir à encoder la couleur au début et la fin de la chaîne de caractères.
-function EchoError() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }     # Affichage d'un message d'échec
-function EchoNewstep() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }   # Affichage d'un message de changement de sous-étape
-function EchoSuccess() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }   # Affichage d'un message de succès
+function EchoError() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }     # Affichage d'un message d'échec.
+function EchoNewstep() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }   # Affichage d'un message de changement de sous-étape.
+function EchoSuccess() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }   # Affichage d'un message de succès.
 
 # Affichage d'un message dont le temps de pause du script peut être choisi en argument.
-function EchoErrorCustomTimer() { local string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET"; sleep "$timer"; }     # Affichage d'un message d'échec
-function EchoNewstepCustomTimer() { local string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET"; sleep "$timer"; }   # Affichage d'un message de changement de sous-étape
-function EchoSuccessCustomTimer() { local string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET"; sleep "$timer"; }   # Affichage d'un message de succès
+function EchoErrorCustomTimer() { local string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET"; sleep "$timer"; }     # Affichage d'un message d'échec.
+function EchoNewstepCustomTimer() { local string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET"; sleep "$timer"; }   # Affichage d'un message de changement de sous-étape.
+function EchoSuccessCustomTimer() { local string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET"; sleep "$timer"; }   # Affichage d'un message de succès.
 
 # Affichage d'un message sans redirections vers le fichier de logs.
-function EchoNewstepNoLog() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; }   # Affichage d'un message de changement de sous-étape
-function EchoErrorNoLog() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET"; }     # Affichage d'un message d'échec
-function EchoSuccessNoLog() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET"; }   # Affichage d'un message de succès
+function EchoNewstepNoLog() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; }   # Affichage d'un message de changement de sous-étape.
+function EchoErrorNoLog() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET"; }     # Affichage d'un message d'échec.
+function EchoSuccessNoLog() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET"; }   # Affichage d'un message de succès.
 
 # Fonction de saut de ligne pour la zone de texte du terminal et pour le fichier de logs.
 function Newline() { echo "" | tee -a "$FILE_LOG_PATH"; }
@@ -745,31 +747,36 @@ function PackInstall()
 		"$PACK_MAIN_PACKAGE_MANAGER")
 			case ${PACK_MAIN_PACKAGE_MANAGER} in
 				"apt")
-                    # Pour enregistrer la commande souhaitée dans un fichier, il faut utiliser un here document. Le tiret après les chevrons "<<" sert à effacer tous les espaces avant le premier caractère d'une ligne du fichier, étant donné qu'il y a plusieurs tabulations servant à indenter le script. Il ne faut pas mettre de guillemets uniques avant et après le nom du délimiteur (EOF) pour prendre en compte la valeur de la variable "$package", enregistrant le nom du paquet à installer.
+                    # Pour enregistrer la commande souhaitée dans un fichier, il faut utiliser un here document. Le tiret après les chevrons "<<" sert à effacer tous les espaces avant le premier caractère d'une ligne du fichier, étant donné qu'il y a plusieurs tabulations servant à indenter le script. Il ne faut pas mettre de guillemets uniques (') avant et après le nom du délimiteur (EOF) pour prendre en compte la valeur de la variable "$package", enregistrant le nom du paquet à installer.
 					cat <<-EOF > "$FILE_INSTALL_HD_PATH"
 					apt-cache policy "$package" | grep "$package"
 					EOF
+					
 					cat <<-EOF > "$FILE_INSTALL_DB_PATH"
 					apt-cache show "$package" | grep "$package"
 					EOF
+					
 					cat <<-EOF > "$FILE_INSTALL_INST_PATH"
 					apt-get -y install "$package"
 					EOF
 					;;
 			#	"dnf")
 			#		search_pack_hdrive_command=""
+			
 			#		search_pack_db_command=""
+			
 			#		cat <<-EOF > "$FILE_INSTALL_INST_PATH"
-            #           dnf -y install "$package"
-            #        EOF
+            #       dnf -y install "$package"
+            #       EOF
 			#		;;
 			#	"pacman")
 			#		cat <<-EOF > "$FILE_INSTALL_HD_PATH"
-			#             pacman -Q "$package"
-			#        EOF
+			#       pacman -Q "$package"
+			#       EOF
+			
 			#		search_pack_db_command=""
 			#		cat <<-EOF > "$FILE_INSTALL_INST_PATH"
-			#            pacman --noconfirm -S "$package"
+			#       pacman --noconfirm -S "$package"
             #       EOF
 			esac
 			;;
@@ -830,6 +837,16 @@ function PackInstall()
 	fi
 
 	return
+}
+
+# Redirection des sorties des commandes (pas d'installation) vers le fichier de logs
+function CommandLogs()
+{
+    #***** Variables *****
+    local cmd="$*"
+    
+    #***** Code *****
+    $cmd 2>&1 | tee -a "$FILE_LOG_PATH"
 }
 
 # Décompression des archives des logiciels selon la méthode de compression utilisée (voir la fonction "SoftwareInstall").
@@ -982,10 +999,6 @@ function SoftwareInstall()
 # Détection du passage des arguments au script
 function CheckArgs()
 {
-    #***** Variables *****
-    array=("perso" "sio" "SIO")
-    
-    #***** Code *****
 	# Si le script n'est pas lancé en mode super-utilisateur (root)
 	if test "$EUID" -ne 0; then
 		EchoErrorNoLog "Ce script doit être exécuté en tant que super-utilisateur (root)"
@@ -1007,7 +1020,7 @@ function CheckArgs()
 
 		exit 1
 
-	# Sinon, si le script est lancé en mode super-utilisateur sans argument
+	# Sinon, si le script est lancé en mode super-utilisateur sans argument.
 	elif test -z "${ARG_USERNAME}"; then
 		EchoErrorNoLog "Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script :"
 		echo "	sudo $0 votre_nom_d'utilisateur"
@@ -1030,33 +1043,33 @@ function CheckArgs()
 		exit 1
 	fi
 
-	# Si le deuxième argument obligatoire n'est pas passé
+	# Si le deuxième argument obligatoire n'est pas passé.
 	if test -z "${ARG_PACKS}"; then
         echo ""
 
         EchoErrorNoLog "VOUS N'AVEZ PAS PASSÉ LE TYPE D'INSTALLATION EN DEUXIÈME ARGUMENT"
-        EchoErrorNoLog "Veuillez entrez une seule valeur après votre nom d'utilisateur"
+        EchoErrorNoLog "Veuillez entrez une seule valeur après votre nom d'utilisateur."
         echo ""
         
-        EchoErrorNoLog "Les valeurs attendues sont : $(DechoE "${array[@]}")"
+        EchoErrorNoLog "Les valeurs attendues sont : $(DechoE "perso") ou $(DechoE "sio")."
         echo ""
         
         exit 1
 	    
-    # Sinon, si le deuxième argument est passé, on vérifie s'il correspond à une des valeurs attendues
+    # Sinon, si le deuxième argument est passé, on vérifie s'il correspond à une des valeurs attendues ("perso" ou "sio", sans sensibilité à la casse).
    	else
         case ${ARG_PACKS,,} in
             "perso")
-                VER_SCRIPT="$ARG_PACKS"
+                VER_PACKS="$ARG_PACKS"
                 ;;
             "sio")
-                VER_SCRIPT="$ARG_PACKS"
+                VER_PACKS="$ARG_PACKS"
                 ;;
             *)
                 echo ""
         
                 EchoErrorNoLog "LA VALEUR DU DEUXIÈME ARGUMENT NE CORRESPOND PAS À L'UNE DES VALEURS ATTENDUES"
-                EchoErrorNoLog "Les valeurs attendues sont : $(DechoE "perso") ou $(DechoE "sio")"
+                EchoErrorNoLog "Les valeurs attendues sont : $(DechoE "perso") ou $(DechoE "sio")."
                 echo ""
             
                 exit 1
@@ -1065,21 +1078,21 @@ function CheckArgs()
     fi
 		
 	
-	# On vérifie si l'utilisateur passe une chaîne de caractères "debug" en troisième argument
-	# Je me sers de cette fonction pour effectuer des tests sur mon script, sans attendre que ce dernier arrive à l'étape souhaitée. Son contenu est susceptible de changer énormément
+	# On vérifie si l'utilisateur passe une chaîne de caractères "debug" en dernier argument
+	# Je me sers de cette fonction pour effectuer des tests sur mon script, sans attendre que ce dernier arrive à l'étape souhaitée. Son contenu est susceptible de changer énormément.
 	if test "$ARG_DEBUG_VAL" = "${ARG_DEBUG}"; then
 		# On redéfinit le nom du fichier de logs est redéfini pour qu'il soit facilement trouvable par le script de déboguage,
 		# PUIS on redéfinit le chemin, MÊME si la valeur initiale de la variable "$FILE_LOG_PATH" est identique à la nouvelle valeur.
 
-		# Dans ce cas là, si la valeur de la variable "$FILE_LOG_PATH" n'est pas redéfinie, c'est l'ancienne valeur qui est appelée
+		# Dans ce cas là, si la valeur de la variable "$FILE_LOG_PATH" n'est pas redéfinie, c'est l'ancienne valeur qui est appelée.
 		FILE_LOG_NAME="Linux-reinstall $DATE_TIME.test"
 		FILE_LOG_PATH="$PWD/$FILE_LOG_NAME"
 
 		## APPEL DES FONCTIONS D'INITIALISATION
-		CreateLogFile			# On appelle la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant
-		Mktmpdir				# Puis la fonction de création du dossier temporaire
-		GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur
-		WritePackScript			# Puis la fonction de création de scripts d'installation
+		CreateLogFile			# On appelle la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant.
+		Mktmpdir				# Puis la fonction de création du dossier temporaire.
+		GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur.
+		WritePackScript			# Puis la fonction de création de scripts d'installation.
 
 		# APPEL DES FONCTIONS À TESTER
 		EchoNewstep "Test de la fonction d'installation"
@@ -1090,7 +1103,7 @@ function CheckArgs()
 
 		exit 0
 
-	# Si un deuxième argument est passé ET si la valeur du second argument ne correspond pas à la valeur attendue ("debug")
+	# Si un deuxième argument est passé ET si la valeur attendue ("debug") ne correspond pas à la valeur du dernier argument.
 	elif test ! -z "${ARG_DEBUG}" && test "$ARG_DEBUG_VAL" != "${ARG_DEBUG}" ; then
 		EchoErrorNoLog "LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS À LA VALEUR ATTENDUE : $(DechoE "debug")"
 		EchoErrorNoLog "Si vous souhaitez tester une fonction du script, passez la valeur $(DechoE "debug") sans faire de fautes"
@@ -1100,7 +1113,7 @@ function CheckArgs()
 	fi
 }
 
-# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard (STDOUT) ou sortie d'erreurs (STDERR))
+# Création du fichier de logs pour répertorier chaque sortie de commande (sortie standard (STDOUT) ou sortie d'erreurs (STDERR)).
 function CreateLogFile()
 {
 	# Récupération des informations sur le système d'exploitation de l'utilisateur, me permettant de corriger tout bug pouvant survenir sur une distribution Linux précise.
@@ -1108,7 +1121,7 @@ function CreateLogFile()
 	# Le script crée d'abord le fichier de logs dans le dossier actuel (pour cela, on passe la valeur de la variable d'environnement $PWD en premier argument de la fonction "Makefile").
 	lineno=$LINENO; Makefile "$PWD" "$FILE_LOG_NAME" "0" "0" > /dev/null
 	
-	# On vérifie si le fichier de logs a bien été créé
+	# On vérifie si le fichier de logs a bien été créé.
 	if test -f "$FILE_LOG_PATH"; then
 	# Tout ce qui se trouve entre les accolades suivantes est envoyé dans le fichier de logs.
 	{
@@ -1126,12 +1139,12 @@ function CreateLogFile()
 		EchoSuccessNoLog "Fin de la récupération d'informations sur le système d'exploitation."
 	} >> "$FILE_LOG_PATH"	# Au moment de la création du fichier de logs, la variable "$FILE_LOG_PATH" correspond au dossier actuel de l'utilisateur.
     else
-        # Étant donné que le fichier de logs n'existe pas dans ce cas, il est impossible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise
+        # Étant donné que le fichier de logs n'existe pas dans ce cas, il est impossible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise (cependant, il ne s'agit pas de bugs importants).
         EchoErrorNoLog "IMPOSSIBLE DE CRÉER LE FICHIER DE LOGS"
         EchoErrorNoLog ""
         echo ""
         
-        EchoErrorNoLog "L'erreur s'est produite à la ligne $lineno"
+        EchoErrorNoLog "L'erreur s'est produite à la ligne $lineno."
         echo ""
         
         exit 1
@@ -1141,7 +1154,7 @@ function CreateLogFile()
 # Création du dossier temporaire où sont stockés les fichiers et dossiers temporaires.
 function Mktmpdir()
 {
-    local argc=${#argv[@]} 
+    #***** Code *****
 	{
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" \
 			"CRÉATION DU DOSSIER TEMPORAIRE $COL_JAUNE\"$DIR_TMP_NAME$COL_BLUE\" DANS LE DOSSIER $COL_JAUNE\"$DIR_TMP_PARENT\"$COL_RESET" "0"
@@ -1151,11 +1164,11 @@ function Mktmpdir()
 	} >> "$FILE_LOG_PATH"
 
 	# Avant de déplacer le fichier de logs, on vérifie si l'utilisateur n'a pas passé la valeur "debug" en tant que dernier argument (vérification importante, étant donné que le chemin et le nom du fichier sont redéfinis dans ce cas).
-
+    EchoNewstepNoLog "Déplacement du fichier de logs dans le dossier $(DechoN "$DIR_LOG_PATH")" >> "$FILE_LOG_PATH"
+	
 	# Dans le cas où l'utilisateur ne le passe pas, une fois le dossier temporaire créé, on y déplace le fichier de logs tout en vérifiant s'il ne s'y trouve pas déjà, puis on redéfinit le chemin du fichier de logs de la variable "$FILE_LOG_PATH". Sinon, le fichier de logs n'est déplacé nulle part ailleurs dans l'arborescence.
-	if test "$argc" -eq 2; then
+	if test -z "${ARGV[2]}"; then
 		FILE_LOG_PATH="$DIR_LOG_PATH/$FILE_LOG_NAME"
-		echo "ARG = 2"
 		
 		# On vérifie que le fichier de logs a bien été déplacé vers le dossier temporaire en vérifiant le code de retour de la commande "mv".
 		local lineno=$LINENO; mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"
@@ -1173,10 +1186,9 @@ function Mktmpdir()
 			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" "" "$lineno"
 		fi
     else
-        echo "ARG = 3"
-    {		
+    {
         # Rappel : Dans cette situation où l'argument de débug est passé, les valeurs des variables "FILE_LOG_NAME" et "$DIR_LOG_PATH" ont été redéfinies dans la fonction "CheckArgs".
-        EchoSuccessNoLog "Le fichier $(DechoS "$FILE_LOG_NAME") reste dans le dossier $(DechoS "$DIR_LOG_PATH")."
+        EchoSuccessNoLog "Le fichier $(DechoS "$FILE_LOG_NAME") reste dans le dossier $(DechoS "$PWD")."
     } >> "$FILE_LOG_PATH"
 	fi
 }
@@ -1204,7 +1216,7 @@ function GetMainPackageManager()
 	fi
 }
 
-# Création du script de traitement de paquets à installer
+# Création du script de traitement de paquets à installer.
 function WritePackScript()
 {
 	# Création du dossier contenant le script de traitement de paquets et les fichiers contenant les commandes de recherche et d'installation de paquets.
@@ -1216,7 +1228,7 @@ function WritePackScript()
 	} >> "$FILE_LOG_PATH"
 
 	# On écrit le contenu du script dans le fichier de script en utilisant un here document.
-	cat <<-'INSTALL_SCRIPT'
+	cat <<-'INSTALL_SCRIPT' > "$FILE_SCRIPT_PATH"
 	#!/usr/bin/env bash
 
 	LOG=$1
@@ -1257,7 +1269,7 @@ function WritePackScript()
 	fi
 }
 
-# Initialisation du script
+# Initialisation du script.
 function ScriptInit()
 {
 	CheckArgs				# On appelle la fonction de vérification des arguments passés au script,
@@ -1288,8 +1300,6 @@ function ScriptInit()
 
 		case ${rep_script_init,,} in
 			"oui" | "yes")
-				EchoSuccess "Lancement du script."
-
 				return
 				;;
 			"non" | "no")
@@ -1384,9 +1394,9 @@ function CheckInternetConnection()
 	fi
 }
 
-# Mise à jour des paquets actuels selon le gestionnaire de paquets principal supporté (utilisé par la distribution)
-# (ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE PAS MODIFIER CE QUI SE TROUVE DANS LA CONDITION "CASE",
-# SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS PRINCIPAL (PAS DE SNAP OU DE FLATPAK) !!!).
+# Mise à jour des paquets actuels selon le gestionnaire de paquets principal supporté (utilisé par la distribution).
+# C'EST UNE ÉTAPE IMPORTANTE SUR UNE INSTALLATION FRAÎCHE, NE MODIFIEZ PAS CE QUI SE TROUVE DANS LA CONDITION "CASE",
+# SAUF EN CAS D'AJOUT D'UN NOUVEAU GESTIONNAIRE DE PAQUETS PRINCIPAL (PAS DE SNAP OU DE FLATPAK) !!!.
 function DistUpgrade()
 {
 	#***** Variables *****
@@ -1586,7 +1596,75 @@ function SetSudo()
 
 
 ## INSTALLATION DES PAQUETS DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS PRINCIPAUX ET SECONDAIRES
-# Installation des paquets de base
+# Installation du framework PHP Laravel.
+function LaravelInstall()
+{
+    #***** Variables *****
+#    phpver=
+    local envpath="$DIR_HOMEDIR/.config/composer/vendor/bin:"
+
+    #***** Code *****
+    HeaderInstall "INSTALLATION DU FRAMEWORK LARAVEL"
+    
+    CommandLogs systemctl start apache2     # Démarrage du serveur Apache.
+    CommandLogs systemctl enable apache2    # Démarrage du serveur Apache lors de la procédure de boot du système d'exploitation.
+    
+    # Ajout des services HTTP, HTTPS et SSH au firewall UFW.
+    for svc in http https ssh; do
+        ufw allow $svc
+    done
+    
+    # Démarrage du firewall UFW
+    uwf enable
+    
+    # Installation des paquets et modules PHP importants pour le bon fonctionnement de Laravel et des outils associés
+    PackInstall "$main" libapache2-mod-php
+    # PackInstall "$main" php                   # Le paquet étant déja installé avec Apache 2, il reste là comme rappel, au cas où vous souhaitez récupérer la fonction "LaravelInstall" pour l'implémenter dans un script personnel
+    PackInstall "$main" php-bcmath
+    PackInstall "$main" php-common
+    # PackInstall "$main" php-json              # Le paquet étant déja installé avec Apache 2, il reste là comme rappel, au cas où vous souhaitez récupérer la fonction "LaravelInstall" pour l'implémenter dans un script personnel
+    # PackInstall "$main" php-mbstring          # Le paquet étant déja installé avec Apache 2, il reste là comme rappel, au cas où vous souhaitez récupérer la fonction "LaravelInstall" pour l'implémenter dans un script personnel
+    PackInstall "$main" php-opcache
+    PackInstall "$main" php-tokenizer
+    # PackInstall "$main" php-xml               # Le paquet étant déja installé avec Apache 2, il reste là comme rappel, au cas où vous souhaitez récupérer la fonction "LaravelInstall" pour l'implémenter dans un script personnel
+    # PackInstall "$main" php-zip               # Le paquet étant déja installé avec Apache 2, il reste là comme rappel, au cas où vous souhaitez récupérer la fonction "LaravelInstall" pour l'implémenter dans un script personnel
+    PackInstall "$main" unzip
+    
+    # Modification de la valeur de la variable "cgi.fix_pathinfo" (booléen) en la mettant à 0
+    sed -ie 's/cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.4/apache2/php.ini
+    
+    # Redémarrage du serveur Apache après avoir modifié le fichier "php.ini"
+    systemctl restart apache2
+    
+    # Installation de Composer pour gérer les paquets PHP
+    curl -sS https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer
+    composer --version
+    
+    # Installation de Laravel
+    composer global require laravel/installer
+    
+    # Ajout du dossier ~/.config/composer/vendor/bin dans la variable d'environnement "$PATH"
+    local lineno=$LINENO; cat <<-EOF >> "$DIR_HOMEDIR/.bashrc"
+    export PATH="$envpath$PATH"
+EOF
+
+    # Mise à jour du fichier de configuration "~/.bashrc" et vérification de l'application de la modification de la variable d'environnement
+    source "$DIR_HOMEDIR/.bashrc"
+    echo $PATH | grep "$envpath"
+    
+    if test "$?" -eq 0; then
+        EchoSuccess "La variable d'environnement $(DechoS "\$PATH") a été modifiée avec succès."
+        Newline
+    else
+        HandleErrors "LA VARIABLE D'ENVIRONNEMENT $(DechoE "\$PATH") N'A PAS ÉTÉ MODIFÉE" \
+            "Échec de l'installation de Laravel." "$lineno"
+    fi
+    
+    EchoSuccess "Le framework Laravel a été installé avec succès sur votre système"
+}
+
+# Installation des paquets de base.
 function SIOInstall()
 {
     HeaderStep "INSTALLATION DES PAQUETS DE BASE DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS PRINCIPAUX ET SECONDAIRES"
@@ -1654,11 +1732,45 @@ function SIOInstall()
     EchoSuccess "TOUS LES PAQUETS ONT ÉTÉ INSTALLÉS AVEC SUCCÈS DEPUIS LES GESTIONNAIRES DE PAQUETS !"
 }
 
+# Fonction regroupant les fonctions d'installation et de configuration (telles que "LaravelInstall", etc...) pour éviter de retaper leur nom à différents endroits si elles deviennent nombreuses
+function InstallAndConfig()
+{
+    HeaderStep "INSTALLATIONS ET CONFIGURATIONS"
+
+    LaravelInstall
+}
+
 # Installation des paquets secondaires
 function CustomInstall()
 {
     HeaderStep "INSTALLATION DES PAQUETS DE BASE DEPUIS LES DÉPÔTS DES GESTIONNAIRES DE PAQUETS PRINCIPAUX ET SECONDAIRES"
 
+    # Commandes
+    HeaderInstall "INSTALLATION DE COMMANDES"
+    PackInstall "$main" sl              # Commande
+    
+    # Images
+    HeaderInstall "INSTALLATION DES LOGICIELS DE TRAITEMENT D'IMAGES"
+    PackInstall "$main" gimp            # Logiciel de traitement d'image libre et open-source
+    
+    # Jeux
+    HeaderInstall "INSTALLATION DE JEUX VIDÉO"
+    PackInstall "$main" bsdgames        # Comprend les jeux "Snake",
+    PackInstall "$main" desmumes        # Émulateur Nintendo DS
+    PackInstall "$main" mgba            # Émulateur Nintendo GBA
+    PackInstall "$main" pacman          # Pacman
+    PackInstall "$main" supertux        # Clone de Super Mario Bros
+    PackInstall "$main" supertuxkart    # Clone de Mario Kart
+    PackInstall "$main" wesnoth         # 
+    
+    # Librairies
+    HeaderInstall "INSTALLATION DES LIBRAIRIES"
+    PackInstall "$main" libcsfml-dev
+    PackInstall "$main" libsfml-dev
+    
+    # Modélisation 3D
+    HeaderInstall "INSTALLATION DES LOGICIELS DE MODÉLISATION 3D"
+    PackInstall "$main" blender
 }
 
 
@@ -1824,13 +1936,15 @@ Newline
 
 sleep 3
 
-case ${ARG_PACKS} in
+case ${VER_PACKS,,} in
     "sio")
         SIOInstall
+        InstallAndConfig
         ;;
     "perso")
         SIOInstall
         CustomInstall
+        InstallAndConfig
         ;;
 esac
 
