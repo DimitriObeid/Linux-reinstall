@@ -281,7 +281,7 @@ function HandleErrors()
     local lineno=$4            # Ligne à laquelle le message d'erreur s'est produite.
 
 	# ***** Code *****
-	if test $return_code -eq 0; then
+	if test "$return_code" -eq 0; then
         return
     else
         HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $error_string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
@@ -751,20 +751,20 @@ function PackInstall()
 					cat <<-EOF > "$FILE_INSTALL_HD_PATH"
 					apt-cache policy "$package" | grep "$package"
 					EOF
-					
+
 					cat <<-EOF > "$FILE_INSTALL_DB_PATH"
 					apt-cache show "$package" | grep "$package"
 					EOF
-					
+
 					cat <<-EOF > "$FILE_INSTALL_INST_PATH"
 					apt-get -y install "$package"
 					EOF
 					;;
 			#	"dnf")
 			#		search_pack_hdrive_command=""
-			
+
 			#		search_pack_db_command=""
-			
+
 			#		cat <<-EOF > "$FILE_INSTALL_INST_PATH"
             #       dnf -y install "$package"
             #       EOF
@@ -773,7 +773,7 @@ function PackInstall()
 			#		cat <<-EOF > "$FILE_INSTALL_HD_PATH"
 			#       pacman -Q "$package"
 			#       EOF
-			
+
 			#		search_pack_db_command=""
 			#		cat <<-EOF > "$FILE_INSTALL_INST_PATH"
 			#       pacman --noconfirm -S "$package"
@@ -844,7 +844,7 @@ function CommandLogs()
 {
     #***** Variables *****
     local cmd="$*"
-    
+
     #***** Code *****
     $cmd 2>&1 | tee -a "$FILE_LOG_PATH"
 }
@@ -962,16 +962,18 @@ function SoftwareInstall()
 	fi
 
 	EchoNewstep "Création du raccourci vers le fichier exécutable du logiciel $(DechoN "$name")."
-	{
-		echo "[Desktop Entry]"
-		echo "Name=$name"
-		echo "Comment=$comment"
-		echo "Exec=$inst_path/$exe"
-		echo "Icon=$icon"
-		echo "Type=$type"
-		echo "Categories=$category;"
-	} > "$shortcut_dir/$name.desktop" \
-	&& EchoSuccess "Le fichier $(DechoS "$name.desktop") a été créé avec succès dans le dossier $(DechoS "$shortcut_dir")."
+
+	cat <<-EOF > "$shortcut_dir/$name.desktop"
+	[Desktop Entry]
+	Name="$name"
+	Comment="$comment"
+	Exec="$inst_path/$exe"
+	Icon="$icon"
+	Type="$type"
+	Categories="$category";
+	EOF
+
+	EchoSuccess "Le fichier $(DechoS "$name.desktop") a été créé avec succès dans le dossier $(DechoS "$shortcut_dir")."
 	Newline
 
 	EchoNewstep "Suppression de l'archive $(DechoN "$archive")."
@@ -1631,7 +1633,7 @@ EOF
 
     # Mise à jour du fichier de configuration "~/.bashrc" et vérification de l'application de la modification de la variable d'environnement
     source "$DIR_HOMEDIR/.bashrc"
-    echo $PATH | grep "$envpath"
+    echo "$PATH" | grep "$envpath"
     
     HandleErrors "LA VARIABLE D'ENVIRONNEMENT $(DechoE "\$PATH") N'A PAS ÉTÉ MODIFÉE" \
         "Échec de l'installation de Laravel." "$lineno"
