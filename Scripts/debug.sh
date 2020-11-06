@@ -11,14 +11,14 @@ else
     echo ""
 fi
 
-read -rp "Souhaitez-vous lire le fichier de logs ? " rep
+#read -rp "Souhaitez-vous lire le fichier de logs ? " rep
 
-case ${rep,,} in
-    "oui" | "o" | "yes" | "y")
-        less -R "Linux-reinstall.log" || echo "Aucun fichier de logs valide trouvé"
-        ;;
-    *)
-        false
-        ;;
-    esac
-exit 0
+#case ${rep,,} in
+#    "oui" | "o" | "yes" | "y")
+#        less -R "Linux-reinstall.log" || echo "Aucun fichier de logs valide trouvé"
+#        ;;
+#    *)
+#        false
+#        ;;
+#    esac
+#exit 0

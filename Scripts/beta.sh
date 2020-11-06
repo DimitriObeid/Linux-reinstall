@@ -160,6 +160,9 @@ function EchoNewstepNoLog() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESE
 function EchoErrorNoLog() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET"; }     # Affichage d'un message d'échec.
 function EchoSuccessNoLog() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET"; }   # Affichage d'un message de succès.
 
+# Redirection de la sortie de la commande "echo" dans le fichier de logs
+function EchoLog() { echo "" >> "$FILE_LOG_PATH"; }
+
 # Fonction de saut de ligne pour la zone de texte du terminal et pour le fichier de logs.
 function Newline() { echo "" | tee -a "$FILE_LOG_PATH"; }
 
@@ -272,43 +275,49 @@ function HeaderInstall()
 function HandleErrors()
 {
 	#***** Paramètres *****
-	local error_string=$1		# Chaîne de caractères du type d'erreur à afficher.
-	local advise_string=$2		# Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème.
-    local lineno=$3             # Ligne à laquelle le message d'erreur s'est produite.
+	local return_code=$1       # Code de retour de la dernière commande lancée
+	local error_string=$2      # Chaîne de caractères du type d'erreur à afficher.
+	local advise_string=$3     # Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème.
+    local lineno=$4            # Ligne à laquelle le message d'erreur s'est produite.
 
 	# ***** Code *****
-	HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $error_string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
+	if test $return_code -eq 0; then
+        return
+    else
+        HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "ERREUR FATALE : $error_string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
 
-	EchoErrorNoLog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$FILE_LOG_PATH"
-	EchoError "$error_string"
-	Newline
+        EchoErrorNoLog "Une erreur fatale s'est produite :" 2>&1 | tee -a "$FILE_LOG_PATH"
+        EchoError "$error_string"
+        Newline
 
-	EchoError "$advise_string"
-	Newline
+        EchoError "$advise_string"
+        Newline
 
-	EchoError "L'erreur en question s'est produite à la ligne $lineno."
-	Newline
+        EchoError "L'erreur en question s'est produite à la ligne $lineno."
+        Newline
 
-	EchoError "Arrêt de l'installation."
-	Newline
+        EchoError "Arrêt de l'installation."
+        Newline
 
-	# Si l'argument de débug n'est pas passé lors de l'exécution du script (donc un seul argument est passé).
-	if test "$#" -eq 1; then
-        # Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur).
-        if test ! -f "$DIR_HOMEDIR/$FILE_LOG_NAME"; then
-            mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME" || { EchoError "Impossible de déplacer le fichier de logs dans le dossier $HOME"; Newline; exit 1; }
+        # TODO : Modifier la détection d'arguments
+        # Si l'argument de débug n'est pas passé lors de l'exécution du script (donc un seul argument est passé).
+        if test "$#" -eq 1; then
+            # Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur).
+            if test ! -f "$DIR_HOMEDIR/$FILE_LOG_NAME"; then
+                mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME" || { EchoError "Impossible de déplacer le fichier de logs dans le dossier $HOME"; Newline; exit 1; }
 
-            FILE_LOG_PATH="$DIR_HOMEDIR/$FILE_LOG_NAME"
+                FILE_LOG_PATH="$DIR_HOMEDIR/$FILE_LOG_NAME"
+            fi
+            EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé dans le dossier $(DechoE "$DIR_LOG_PATH")."
+            Newline
+        else
+            EchoError "Vous pouvez m'envoyer le fichier de logs si vous avez besoin d'aide pour débugguer le script et / ou déchiffrer les erreurs renvoyées."
+            EchoError "Il se situe dans le dossier $(DechoE "$DIR_LOG_PATH")"
+            Newline
         fi
-        EchoError "En cas de bug, veuillez m'envoyer le fichier de logs situé dans le dossier $(DechoE "$DIR_LOG_PATH")."
-        Newline
-	else
-        EchoError "Vous pouvez m'envoyer le fichier de logs si vous avez besoin d'aide pour débugguer le script et / ou déchiffrer les erreurs renvoyées."
-        EchoError "Il se situe dans le dossier $(DechoE "$DIR_LOG_PATH")"
-        Newline
-	fi
 
-	exit 1
+        exit 1
+    fi
 }
 
 
@@ -393,17 +402,12 @@ function Makedir()
 		# On crée une variable nommée "lineno". Elle enregistre la valeur de la variable globale "$LINENO", qui enregistre le numéro de la ligne dans laquelle est est appelée dans un script.
 		local lineno=$LINENO; mkdir -v "$path"
 
-		# On vérifie si le dossier a bien été créé en vérifiant le code de retour de la commande "mkdir".
-		if test "$?" -eq "0"; then
-            echo ""
+        # On vérifie si le dossier a bien été créé en vérifiant le code de retour de la commande "mkdir" via la fonction "HandleErrors"
+		HandleErrors "$?" "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
+        echo ""
 
-			EchoSuccessCustomTimer "Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
-			echo ""
-		else
-            echo ""
-
-			HandleErrors "LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
-		fi
+        EchoSuccessCustomTimer "Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
+        echo ""
 
 		# On change les droits du dossier nouvellement créé par le script
 		# Comme ce dernier est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
@@ -516,14 +520,10 @@ function Makefile()
 
 		local lineno=$LINENO; touch "$path"
 
-		# On vérifie que le fichier a bien été créé en vérifiant le code de retour de la commande "touch".
-		if test "$?" -eq "0"; then
-            EchoSuccessCustomTimer "Le fichier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
-			echo ""
-
-        else
-            HandleErrors "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
-		fi
+		# On vérifie que le fichier a bien été créé en vérifiant le code de retour de la commande "touch" via la fonction "HandleErrors".
+        HandleErrors "$?" "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
+        EchoSuccessCustomTimer "Le fichier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
+        echo ""
 
 		# On change les droits du fichier créé par le script.
 		# Comme il est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
@@ -588,7 +588,7 @@ function OptimizeInstallation()
 	#**** Code *****
 	# On vérifie si tous les arguments sont bien appelés (IMPORTANT POUR UNE INSTALLATION SANS PROBLÈMES)
 	if test "$#" -ne 6; then
-		HandleErrors "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")" \
+		HandleErrors "1" "UN OU PLUSIEURS ARGUMENTS MANQUENT À LA FONCTION $(DechoE "OptimizeInstallation")" \
 			"Vérifiez quels arguments manquent à la fonction." "$LINENO_INST"
 	fi
 
@@ -607,7 +607,7 @@ function OptimizeInstallation()
 			Newline
 			;;
 		*)
-			HandleErrors "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN CINQUIÈME ARGUMENT $(DechoE "$type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
+			HandleErrors "1" "LA VALEUR DE LA CHAÎNE DE CARACTÈRES PASSÉE EN CINQUIÈME ARGUMENT $(DechoE "$type") NE CORRESPOND À AUCUNE DES TROIS CHAÎNES ATTENDUES" \
 				"Les trois chaînes de caractères attendues sont :
 				 $(DechoE "HD") pour la recherche de paquets sur le système,
 				 $(DechoE "DB") pour la recherche de paquets dans la base de données du gestionnaire de paquets,
@@ -679,21 +679,21 @@ EOF
 			esac
 			;;
 		"2")
-			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
+			HandleErrors "2" "AUCUNE COMMANDE N'EST PASSÉE EN ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
 				"Veuillez passer le chemin vers le fichier de logs en premier argument, PUIS la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument." "$lineno"
 			;;
 		"3")
-			HandleErrors "AUCUNE COMMANDE N'EST PASSÉE EN DEUXIÈME ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
+			HandleErrors "3" "AUCUNE COMMANDE N'EST PASSÉE EN DEUXIÈME ARGUMENT LORS DE L'APPEL DE LA FONCTION $(DechoE "OptimizeInstallation")" \
 				"Veuillez passer le nom de la commande souhaitée (recherche (système ou base de données) ou installation) en deuxième argument." \
 				"$lineno"
 			;;
         "4")
-            HandleErrors "TROP D'ARGUMENTS ONT ÉTÉ PASSÉS LORS DE L'APPEL DU SCRIPT" \
+            HandleErrors "4" "TROP D'ARGUMENTS ONT ÉTÉ PASSÉS LORS DE L'APPEL DU SCRIPT" \
                 "Pour rappel, le script ne prend que deux arguments : le chemin du fichier de logs et la commande à exécuter." \
                 "$lineno"
             ;;
 		"5")
-			HandleErrors "UNE ERREUR INCONNUE S'EST PRODUITE PENDANT L'EXÉCUTION DU SCRIPT" \
+			HandleErrors "5" "UNE ERREUR INCONNUE S'EST PRODUITE PENDANT L'EXÉCUTION DU SCRIPT" \
 				"" \
 				"$lineno"
 			;;
@@ -715,7 +715,7 @@ EOF
 			esac
 			;;
 # 		*)
-# 			HandleErrors "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
+# 			HandleErrors "1" "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE $(DechoE "$cmd")" \
 # 				"Vérifiez ce qui a causé cette erreur en commentant la condition contenant le message d'erreur suivant : $(DechoE "UNE ERREUR S'EST PRODUITE LORS DE LA LECTURE DE LA SORTIE DE LA COMMANDE \$(DechoE \"\$cmd\")"), à la ligne $(DechoE "$LINENO")." \
 # 				"$lineno"
 # 			;;
@@ -788,7 +788,7 @@ function PackInstall()
 			EOF
 			;;
 		"")
-			HandleErrors "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
+			HandleErrors "1" "AUCUN NOM DE GESTIONNAIRE DE PAQUETS N'A ÉTÉ PASSÉ EN ARGUMENT" \
 				"Passez un gestionnaire de paquets supporté en argument (pour rappel, les gestionnaires de paquets supportés sont $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman"). Si vous avez rajouté un gestionnaire de paquets, n'oubliez pas d'inclure ses commandes de recherche et d'installation de paquets)." \
 				"$LINENO, avec le paquet $(DechoE "$package")"
 				;;
@@ -797,7 +797,7 @@ function PackInstall()
 			EchoError "Vérifiez que le nom du gestionnaire de paquets passé en arguments ne contienne pas de majuscules et corresponde EXACTEMENT au nom de la commande."
 			Newline
 
-			HandleErrors "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
+			HandleErrors "1" "LE NOM DU GESTIONNAIRE DE PAQUETS PASSÉ EN PREMIER ARGUMENT ($(DechoE "$package_manager")) NE CORRESPOND À AUCUN GESTIONNAIRE DE PAQUETS PRÉSENT SUR VOTRE SYSTÈME" \
 				"Désolé, ce gestionnaire de paquets n'est pas supporté ¯\_(ツ)_/¯" \
 				"$LINENO, avec le paquet $(DechoE "$package")"
 			;;
@@ -1173,23 +1173,14 @@ function Mktmpdir()
 		# On vérifie que le fichier de logs a bien été déplacé vers le dossier temporaire en vérifiant le code de retour de la commande "mv".
 		local lineno=$LINENO; mv "$PWD/$FILE_LOG_NAME" "$FILE_LOG_PATH"
 
-		if test "$?" -eq 0; then
-        {
-            echo ""
+        # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où l'argument de débug est passé) et "CreateLogFile" dans la fonction "ScriptInit, il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
+        HandleErrors "$?" "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" "" "$lineno"
+        EchoLog
 
-            EchoSuccessNoLog "Le fichier de logs a été déplacé avec succès dans le dossier $(DechoS "$DIR_LOG_PATH")."
-        } >> "$FILE_LOG_PATH"
-		else
-			echo "" >> "$FILE_LOG_PATH"
-
-            # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où l'argument de débug est passé) et "CreateLogFile" dans la fonction "ScriptInit, il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-			HandleErrors "IMPOSSIBLE DE DÉPLACER LE FICHIER DE LOGS VERS LE DOSSIER $(DechoE "$DIR_LOG_PATH")" "" "$lineno"
-		fi
+        EchoSuccessNoLog "Le fichier de logs a été déplacé avec succès dans le dossier $(DechoS "$DIR_LOG_PATH")." >> "$FILE_LOG_PATH"
     else
-    {
         # Rappel : Dans cette situation où l'argument de débug est passé, les valeurs des variables "FILE_LOG_NAME" et "$DIR_LOG_PATH" ont été redéfinies dans la fonction "CheckArgs".
-        EchoSuccessNoLog "Le fichier $(DechoS "$FILE_LOG_NAME") reste dans le dossier $(DechoS "$PWD")."
-    } >> "$FILE_LOG_PATH"
+        EchoSuccessNoLog "Le fichier $(DechoS "$FILE_LOG_NAME") reste dans le dossier $(DechoS "$PWD")." >> "$FILE_LOG_PATH"
 	fi
 }
 
@@ -1210,7 +1201,7 @@ function GetMainPackageManager()
 	# Si, après la recherche de la commande, la chaîne de caractères contenue dans la variable $PACK_MAIN_PACKAGE_MANAGER est toujours nulle (aucune commande trouvée).
 	if test -z "$PACK_MAIN_PACKAGE_MANAGER"; then
         # Étant donné que la fonction "Mktmpdir" est appelée après la fonction de création du fichier de logs (CreateLogFile) dans les fonctions "CheckArgs" (dans le cas où le deuxième argument de débug est passé) et "CreateLogFile" dans la fonction "ScriptInit, il est possible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise.
-		HandleErrors "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ" "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")." "$LINENO"
+		HandleErrors "1" "AUCUN GESTIONNAIRE DE PAQUETS PRINCIPAL SUPPORTÉ TROUVÉ" "Les gestionnaires de paquets supportés sont : $(DechoE "APT"), $(DechoE "DNF") et $(DechoE "Pacman")." "$LINENO"
 	else
 		EchoSuccessNoLog "Gestionnaire de paquets principal trouvé : $(DechoS "$PACK_MAIN_PACKAGE_MANAGER")" >> "$FILE_LOG_PATH"
 	fi
@@ -1256,17 +1247,12 @@ function WritePackScript()
 
 	local lineno=$LINENO; chmod +x -v "$FILE_SCRIPT_PATH" >> "$FILE_LOG_PATH" 2>&1
 
-	if test "$?" -eq 0; then
-	{
-		echo ""
+    HandleErrors "$?" "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" "Vérifiez ce qui cause ce problème" "$lineno"
+    {
+        echo ""
 
 		EchoSuccessNoLog "Les droits d'exécution ont été attribués avec succès sur le fichier script de traitement de paquets."
-	} >> "$FILE_LOG_PATH"
-    else
-    	echo "" >> "$FILE_LOG_PATH"
-
-		HandleErrors "IMPOSSIBLE DE CHANGER LES DROITS D'EXÉCUTION DU FICHIER SCRIPT DE TRAITEMENT DE PAQUETS" "Vérifiez ce qui cause ce problème" "$lineno"
-	fi
+    } >> "$FILE_LOG_PATH"
 }
 
 # Initialisation du script.
@@ -1383,15 +1369,11 @@ function CheckInternetConnection()
 
 	# On vérifie si l'ordinateur est connecté à Internet (pour le savoir, on ping le serveur DNS d'OpenDNS avec la commande ping 1.1.1.1).
 	local lineno=$LINENO; ping -q -c 1 -W 1 opendns.com 2>&1 | tee -a "$FILE_LOG_PATH"
+    
+    HandleErrors "$?" "AUCUNE CONNEXION À INTERNET" "Vérifiez que vous êtes bien connecté à Internet, puis relancez le script." "$lineno"
+    EchoSuccess "Votre ordinateur est connecté à Internet."
 
-	if test "$?" -eq 0; then
-		EchoSuccess "Votre ordinateur est connecté à Internet."
-
-		return
-	# Sinon, si l'ordinateur n'est pas connecté à Internet
-	else
-		HandleErrors "AUCUNE CONNEXION À INTERNET" "Vérifiez que vous êtes bien connecté à Internet, puis relancez le script." "$lineno"
-	fi
+    return
 }
 
 # Mise à jour des paquets actuels selon le gestionnaire de paquets principal supporté (utilisé par la distribution).
@@ -1450,10 +1432,8 @@ function DistUpgrade()
 	# On vérifie maintenant si les paquets ont bien été mis à jour.
 	if test $packs_updated = "1"; then
 		EchoSuccess "Les paquets ont été mis à jour avec succès."
-		Newline
 	else
 		EchoError "La mise à jour des paquets a échouée."
-		Newline
 	fi
 
 	return
@@ -1653,13 +1633,10 @@ EOF
     source "$DIR_HOMEDIR/.bashrc"
     echo $PATH | grep "$envpath"
     
-    if test "$?" -eq 0; then
-        EchoSuccess "La variable d'environnement $(DechoS "\$PATH") a été modifiée avec succès."
-        Newline
-    else
-        HandleErrors "LA VARIABLE D'ENVIRONNEMENT $(DechoE "\$PATH") N'A PAS ÉTÉ MODIFÉE" \
-            "Échec de l'installation de Laravel." "$lineno"
-    fi
+    HandleErrors "LA VARIABLE D'ENVIRONNEMENT $(DechoE "\$PATH") N'A PAS ÉTÉ MODIFÉE" \
+        "Échec de l'installation de Laravel." "$lineno"
+    EchoSuccess "La variable d'environnement $(DechoS "\$PATH") a été modifiée avec succès."
+    Newline
     
     EchoSuccess "Le framework Laravel a été installé avec succès sur votre système"
 }
@@ -1912,13 +1889,9 @@ EchoNewstep "Vérification de l'installation des commandes $(DechoN "curl"), $(D
 Newline
 
 lineno=$LINENO; command -v curl snap wget | tee -a "$FILE_LOG_PATH"
-
-if test "$?" == 0; then
-	EchoSuccess "Les commandes importantes d'installation ont été installées avec succès."
-	Newline
-else
-    HandleErrors "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" "Essayez de  télécharger manuellement ces paquets : $(DechoE "curl"), $(DechoE "snapd") et $(DechoE "wget")." "$lineno"
-fi
+HandleErrors "$?" "AU MOINS UNE DES COMMANDES D'INSTALLATION MANQUE À L'APPEL" "Essayez de  télécharger manuellement ces paquets : $(DechoE "curl"), $(DechoE "snapd") et $(DechoE "wget")." "$lineno"
+EchoSuccess "Les commandes importantes d'installation ont été installées avec succès."
+Newline
 
 # Installation de sudo (pour les distributions livrées sans la commande) et configuration du fichier "sudoers" ("/etc/sudoers").
 SetSudo
