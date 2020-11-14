@@ -1,0 +1,6 @@
+N'incluez que des fonctions dont vous avez besoin dans les fichiers .lib.
+
+Vous pouvez copier-coller les fonctions de n'importe quel fichier de librairie proposés dans le projet "Scripts-pratiques", sur Github :
+https://github.com/DimitriObeid/Scripts-pratiques
+
+Assurez-vous de les ajouter dans les fichiers appropriés, pour des raisons de praticité.

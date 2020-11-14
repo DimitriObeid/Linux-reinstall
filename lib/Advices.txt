@@ -1,0 +1,6 @@
+Include only functions you need in the .lib files.
+
+You can copy and paste functions from any of the library files offered in the "Scripts-Pratiques" project on Github :
+https://github.com/DimitriObeid/Scripts-pratiques
+
+Be sure to add them in the appropriate files for convenience.
