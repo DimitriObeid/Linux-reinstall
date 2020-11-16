@@ -1,0 +1,14 @@
+# Pour utiliser plus facilement l'interpréteur Python en version 3.7
+alias py='python 3.7'
+
+# Pour effacer un fichier de manière sécurisée tant que l'option "-f" n'est pas utilisée
+alias rm='rm -i --preserve-root'
+
+# Qualques alias de la commande "ls" très pratiques
+alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -alF'
+alias lla='ls -la'
+alias lll='ls -larth'
+
+#
