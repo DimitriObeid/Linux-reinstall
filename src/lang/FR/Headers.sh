@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+## Messages de la fonction "HandleErrors"
+MSG_HNDERR_FATAL="ERREUR FATALE"
+MSG_HNDERR_FATAL_HAP="Une erreur fatale s'est produite"
+MSG_HNDERR_FATAL_LINE="L'erreur en question s'est produite à la ligne"
+MSG_HNDERR_FATAL_STOP="Arrêt de l'installation"
+
+MSG_HNDERR_MV_FAIL="Impossible de déplacer le fichier de logs dans le dossier $DIR_HOMEDIR"
+MSG_HNDERR_IFBUG="En cas de bug, veuillez m'envoyer le fichier de logs situé dans le dossier $(DechoE "$DIR_LOG_PATH")"
+
+MSG_HNDERR_SEND="Vous pouvez m'envoyer le fichier de logs si vous avez besoin d'aide pour débugguer le script et / ou déchiffrer les erreurs renvoyées"
+MSG_HNDERR_SEND_PATH="Il se situe dans le dossier $(DechoE "$DIR_LOG_PATH")"
