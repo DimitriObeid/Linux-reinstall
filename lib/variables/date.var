@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+######################################## DEFINING VARIABLES #######################################
+
+#### DATE
+
+## GETTING THE DATE
+# Saving the current date in YYYYY-MM-DD hh-mm-ss format (YEAR-MONTH-DAY hour-minute-second)
+DATE_TIME=$(date +"%Y-%m-%d %Hh-%Mm-%Ss")
+
+# -----------------------------------------------

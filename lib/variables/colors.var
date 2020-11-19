@@ -3,6 +3,7 @@
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 #### COULEURS | COLORS
+
 ## ENCODAGES | ENCODING
 # Encodage des couleurs pour mieux lire les étapes de l'exécution du script.
 COL_BLUE=$(tput setaf 4)		# Bleu foncé	--> Couleur des headers à n'écrire que dans le fichier de logs.

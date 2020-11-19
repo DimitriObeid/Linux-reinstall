@@ -13,6 +13,7 @@ TXT_COLS=$(tput cols)
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 #### CARACTÈRES | CHARACTERS
+
 ## CARACTÈRE DE LIGNES DU HEADER | HEADER'S LINES CHARACTER
 # Caractère utilisé pour dessiner les lignes des headers. Si vous souhaitez mettre un autre caractère à la place d'un tiret, changez le caractère entre les double guillemets.
 # Ne mettez pas plus d'un caractère si vous ne souhaitez pas voir le texte de chaque header apparaître entre plusieurs lignes (une ligne de chaque caractère).
@@ -24,6 +25,7 @@ TXT_HEADER_LINE_CHAR="-"		# Caractère à afficher en boucle pour créer une lig
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 #### ÉCRITURE
+
 ## ÉCRITURE DE CHEVRONS | CHEVRONS WRITING
 # Affichage de chevrons avant une chaîne de caractères (par exemple).
 TXT_TAB=">>>>"

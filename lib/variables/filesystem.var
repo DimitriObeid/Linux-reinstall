@@ -3,6 +3,7 @@
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 #### DOSSIERS | FOLDERS
+
 ## DOSSIER PERSONNEL DE L'UTILISATEUR | USER'S HOME FOLDER.
 DIR_HOMEDIR="/home/${ARG_USERNAME}"     # Chemin | Path
 
@@ -39,6 +40,7 @@ DIR_SOFTWARE_PATH="$DIR_HOMEDIR/$DIR_SOFTWARE_NAME"
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 #### FICHIERS | FILES
+
 ## FICHIER DE LOGS
 # Définition du nom et du chemin du fichier de logs.
 FILE_LOG_NAME="Linux-reinstall $DATE_TIME.log"		# Nom | Name
@@ -79,3 +81,6 @@ GETVAL_NAME="getval.tmp"
 GETVAL_PATH="$DIR_INSTALL_PATH/$GETVAL_NAME"
 
 # -----------------------------------------------
+
+## FICHIERS D'INSTALLATION DE LOGICIELS | SOFTWARE INSTALLATION FILES
+# 

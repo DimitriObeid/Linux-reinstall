@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
 #### INCLUSION DES VARIABLES DU SCRIPT PRINCIPAL
 # shellcheck source=../variables/colors.sh
 source ../variables/colors.sh || echo "../variables/.sh : not found" && exit 1
@@ -11,13 +13,19 @@ source ../variables/filesystem.sh || echo "../variables/filesystem.sh : not foun
 source ../variables/text.sh || echo "../variables/text.sh : not found" && exit 1
 
 
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
 #### INCLUSION DES FONCTIONS | INCLUDING FUNCTIONS
 # shellcheck source="Echo.sh"
-source "Echo.sh"
+source Echo.sh || echo "Echo.sh : not found" && exit 1
 
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 #### DÉFINITION DES VARIABLES LOCALES | INCLUDING VARIABLES
 
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
 
 ## DÉFINITION DES FONCTIONS DE CRÉATION DE HEADERS
 # Fonction de création et d'affichage de lignes selon le nombre de colonnes de la zone de texte du terminal.
@@ -68,7 +76,7 @@ function DrawLine()
         echo -ne "$COL_RESET"
 	fi
 
-	# Étant donné que l'on a utilisé l'option '-n' de la commande "echo", on effectue un saut de ligne.
+	# Étant donné que l'on a utilisé l'option '-n' de la commande "echo", on effectue un saut de ligne pour éviter d'avoir à le répéter après chaque appel de la commande pour laisser un espace vide entre la ligne et le prochain caractère.
 	echo ""
 
 	return
@@ -98,37 +106,52 @@ function HeaderBase()
 }
 
 # Fonction d'affichage des headers lors d'un changement d'étape.
-function HeaderStep()
-{
-	#***** Paramètre *****
-	# Chaîne de caractères contenant la phrase à afficher.
-	local string=$1
-
-	# ***** Code *****
-	HeaderBase "$COL_CYAN" "$TXT_HEADER_LINE_CHAR" "$COL_CYAN" "$string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"
-
-	return
-}
+function HeaderStep() { local string=$1; HeaderBase "$COL_CYAN" "$TXT_HEADER_LINE_CHAR" "$COL_CYAN" "$string" "1.5"; }
+function HeaderStepLog() { local string=$1; HeaderBase "$COL_CYAN" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "$string" "1.5" >> "$FILE_LOG_PATH"; }
+function HeaderStepTee() { local string=$1; HeaderBase "$COL_CYAN" "$TXT_HEADER_LINE_CHAR" "$COL_CYAN" "$string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH"; }
 
 # Fonction d'affichage de headers lors du passage à une nouvelle catégorie de paquets lors de l'installation de ces derniers.
-function HeaderInstall()
-{
-	#***** Paramètre *****
-	# Chaîne de caractères contenant la phrase à afficher.
-	local string=$1
-
-	# ***** Code *****
-	HeaderBase "$COL_YELLOW" "$TXT_HEADER_LINE_CHAR" "$COL_GREEN" "$string" "1.5"  2>&1 | tee -a "$FILE_LOG_PATH"
-
-	return
-}
+function HeaderInstall() { local string=$1; HeaderBase "$COL_YELLOW" "$TXT_HEADER_LINE_CHAR" "$COL_GREEN" "$string" "1.5"; }
+function HeaderInstallLog() { local string=$1; HeaderBase "$COL_YELLOW" "$TXT_HEADER_LINE_CHAR" "$COL_GREEN" "$string" "1.5" >> "$FILE_LOG_PATH"; }
+function HeaderInstallTee() { local string=$1; HeaderBase "$COL_YELLOW" "$TXT_HEADER_LINE_CHAR" "$COL_GREEN" "$string" "1.5" 2>&1 | tee -a "$FILE_LOG_PATH;"}
 
 # Fonction de gestion d'erreurs fatales (impossibles à corriger).
 function HandleErrors()
 {
 	#***** Paramètres *****
 	local return_code=$1       # Code de retour de la dernière commande lancée
-	local error_string=$2            # Chaîne de caractères du type d'erreur à afficher.
+	local error_string=$2      # Chaîne de caractères du type d'erreur à afficher.
+	local advise_string=$3     # Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème.
+    local lineno=$4            # Ligne à laquelle le message d'erreur s'est produite.
+
+	# ***** Code *****
+	if test "$return_code" -eq 0; then
+        return
+    else
+        HeaderBase "$COL_RED" "$TXT_HEADER_LINE_CHAR" "$COL_RED" "$(EchoError "$MSG_HNDERR_FATAL") : $error_string" "1.5"
+
+        EchoError "$MSG_HNDERR_FATAL_HAP :"
+        EchoError "$error_string"
+        Newline
+
+        EchoError "$advise_string"
+        Newline
+
+        EchoError "$MSG_HNDERR_FATAL_LINE $lineno."
+        Newline
+
+        EchoError "$MSG_HNDERR_FATAL_STOP."
+        Newline
+
+        exit 1
+    fi
+}
+
+function HandleErrorsTee()
+{
+	#***** Paramètres *****
+	local return_code=$1       # Code de retour de la dernière commande lancée
+	local error_string=$2      # Chaîne de caractères du type d'erreur à afficher.
 	local advise_string=$3     # Chaîne de caractères affichants un conseil pour orienter l'utilisateur vers la meilleure solution en cas de problème.
     local lineno=$4            # Ligne à laquelle le message d'erreur s'est produite.
 
@@ -152,8 +175,8 @@ function HandleErrors()
         Newline
 
         # TODO : Modifier la détection d'arguments
-        # Si l'argument de débug n'est pas passé lors de l'exécution du script (donc un seul argument est passé).
-        if test "$#" -eq 1; then
+        # Si l'argument de débug n'est pas passé lors de l'exécution du script.
+        if test -z "${ARG_DEBUG}" 1; then
             # Si le fichier de logs se trouve toujours dans le dossier actuel (en dehors du dossier personnel de l'utilisateur).
             if test ! -f "$DIR_HOMEDIR/$FILE_LOG_NAME"; then
                 mv -v "$FILE_LOG_PATH" "$DIR_HOMEDIR" 2>&1 | tee -a "$DIR_HOMEDIR/$FILE_LOG_NAME" || { EchoError "$MSG_HNDERR_MV_FAIL."; Newline; exit 1; }

@@ -60,7 +60,7 @@ function OptimizeInstallation()
 EOF
 )
 
-	GETVAL=$(cat "$GETVAL_PATH")
+	local lineno=$LINENO; GETVAL=$(cat "$GETVAL_PATH" || HandleErrors "$?" "" "" "$lineno")
 
 	case "$GETVAL" in
 		"1")

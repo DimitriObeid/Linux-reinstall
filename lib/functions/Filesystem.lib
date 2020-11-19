@@ -1,33 +1,162 @@
 #!/usr/bin/env bash
 
-#### INCLUSION DES VARIABLES
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+############################### LINKING LIBRARY FILES TO THE SCRIPT ###############################
+
+#### INCLUDING MAIN SCRIPT VARIABLES
 # shellcheck source="../variables/filesystem.sh"
 source ../variables/filesystem.sh || echo "../variables/filesystem.sh : not found" && exit 1
 
 
-#### INCLUSION DES FONCTIONS | INCLUDING FUNCTIONS
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### INCLUDING REQUIRED FUNCTIONS
 # shellcheck source="Echo.sh"
-source Echo.sh || echo "Echo.sh : not found" && exit 1
+source Echo.sh || echo "../Functions/Echo.sh : not found" && exit 1
 
 # shellcheck source=Headers.sh
-source Headers.sh || echo "Headers.sh : not found" && exit 1
+source Headers.sh || echo "../Functions/Headers.sh : not found" && exit 1
 
 
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
-#### DÉFINITION DES FONCTIONS DE TRAITEMENT DE FICHIERS
 
-# Fonction de création de dossiers ET d'attribution récursive des droits de lecture et d'écriture à l'utilisateur.
-# LORS DE SON APPEL, LA SORTIE DE CETTE FONCTION DOIT ÊTRE REDIRIGÉE SOIT VERS LE TERMINAL ET LE FICHIER DE LOGS, SOIT VERS LE FICHIER DE LOGS UNIQUEMENT.
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+#################################### DEFINING LIBRARY FUNCTIONS ###################################
+
+#### FILESYSTEM PERMISSIONS AND OWNING
+
+## PERMISSIONS TREATMENT FUNCTIONS
+
+# -----------------------------------------------
+
+# 
+function Chmod()
+{
+
+}
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+## OWNING TREATMENT FUNCTIONS
+
+# -----------------------------------------------
+
+# 
+function Chown()
+{
+    #***** Paramètres *****
+    username=$1
+    path=$2
+    timer=$3
+
+    #***** Code *****
+    if test -d "$path"; then
+        EchoNewstepTimer "$MSG_MKDIR_CHMOD." "$sleep_txt"
+		echo
+
+		chown -Rv "${ARG_USERNAME}" "$path"
+
+        # On vérifie que les droits du dossier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
+		if test "$?" -eq "0"; then
+			echo
+
+			EchoSuccessTimer "$MSG_MKDIR_CHMOD_SUCC." "$sleep_txt"
+			echo
+
+			EchoSuccessTimer "$MSG_MKDIR_PROCESSING_END_SUCC." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo
+
+			return
+		else
+            echo
+
+			EchoErrorTimer "$MSG_MKDIR_CHMOD_FAIL_1." "$sleep_txt"
+			EchoErrorTimer "$MSG_MKDIR_CHMOD_FAIL_2 :" "$sleep_txt"
+			echo "	chown -R ${ARG_USERNAME} $path"
+			echo
+
+			EchoErrorTimer "$MSG_MKDIR_PROCESSING_END_FAIL." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"		# On dessine la deuxième et dernière ligne du bloc.
+			sleep "$sleep_blk"
+			echo
+
+			return
+        fi
+    elif test -f "$path"; then
+            chown -v "$username" "$path"
+
+        # On vérifie que les droits du fichier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
+        if test "$?" -eq "0"; then
+            echo
+
+            EchoSuccessTimer "Les droits du fichier $(DechoS "$parent") ont été changés avec succès." "$sleep_txt"
+            echo
+
+            EchoSuccessTimer "$MSG_MKFILE_PROCESSING_END_SUCC." "$sleep_txt"
+            DrawLine "$COL_RESET" "$block_char"
+            sleep "$sleep_blk"
+            echo
+
+            return
+        else
+            echo
+
+            EchoErrorTimer "Impossible de changer les droits du fichier $(DechoE "$path")." "$sleep_txt"
+            EchoErrorTimer "Pour changer les droits du fichier $(DechoE "$path")," "$sleep_txt"
+            EchoErrorTimer "utilisez la commande :" "$sleep_txt"
+            echo "	chown username chemin"
+
+            EchoErrorTimer "$MSG_MKFILE_PROCESSING_END_FAIL." "$sleep_txt"
+            DrawLine "$COL_RESET" "$block_char"
+            sleep "$sleep_blk"
+            echo
+
+            return
+        fi
+    else
+        EchoErrorTimer "Impossible de changer le moindre droit"
+        echo
+    fi
+}
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### FILESYSTEM TREATMENT
+
+## DIRECTORIES TREATMENT FUNCTIONS
+
+# -----------------------------------------------
+
+# Folder creation AND recursively assigning read and write rights to the user.
+
+# When this function is called, if a log file is used in the project, the output of this function must be redirected either to the terminal AND the log file (2>&1 | tee -a "$FILE_LOG_PATH"), or to the log file only (>> "$FILE_LOG_PATH") after passing all the mandatory arguments. Otherwise, leave everything blank after passing the arguments.
+
+# Required files and functions :
+#   - Echo.sh       -> EchoErrorTimer
+#   - Echo.sh       -> EchoNewstepTimer
+#   - Echo.sh       -> EchoSuccessTimer
+#   - Headers.sh    -> DrawLine   
+#   - Headers.sh    -> HandleErrors
 function Makedir()
 {
-	#***** Paramètres *****
+	#***** Parameters *****
 	local parent=$1		# Emplacement depuis la racine du dossier parent du dossier à traiter.
 	local name=$2		# Nom du dossier à traiter (dans son dossier parent).
 	local sleep_blk=$3	# Temps de pause du script avant et après la création d'une ligne d'un bloc d'informations sur le traitement du dossier.
 	local sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès lors du traitement du dossier.
 
-	#***** Autres variables *****
+	#***** Other variables *****
 	local path="$parent/$name"	# Chemin du dossier à traiter.
 	local block_char='"'		# Caractère composant la ligne (c'est un double quote (")).
 
@@ -79,7 +208,7 @@ function Makedir()
 
 	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier est vide.
 	elif test -d "$path" && test ! "$(ls -A "$path")"; then
-		EchoSuccessTimer "$MSG_MKDIR_EXISTS." "$sleep_txt"
+		EchoSuccessTimer "$MSG_MKDIR_EMPTY." "$sleep_txt"
 		echo
 
 		EchoSuccessTimer "$MSG_MKDIR_PROCESSING_END_SUCC." "$sleep_txt"
@@ -91,7 +220,7 @@ function Makedir()
 
 	# Sinon, si le dossier à traiter n'existe pas, alors le script le crée.
 	elif test ! -d "$path"; then
-		EchoNewstepTimer "$MSG_MKDIR_CREATE_MSG." "$sleep_txt"
+		EchoNewstepTimer "$MSG_MKDIR_CREATE." "$sleep_txt"
 		echo
 
 		# On crée une variable nommée "lineno". Elle enregistre la valeur de la variable globale "$LINENO", qui enregistre le numéro de la ligne dans laquelle est est appelée dans un script.
@@ -151,7 +280,8 @@ function Makedir()
 
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
-#### DÉFINITION DES FONCTIONS DE TRAITEMENT DE FICHIERS
+## FILES TREATMENT FUNCTIONS
+
 # Fonction de création de fichiers ET d'attribution des droits de lecture et d'écriture à l'utilisateur.
 # LORS DE SON APPEL, LA SORTIE DE CETTE FONCTION DOIT ÊTRE REDIRIGÉE SOIT VERS LE TERMINAL ET LE FICHIER DE LOGS, SOIT VERS LE FICHIER DE LOGS UNIQUEMENT.
 function Makefile()
@@ -205,7 +335,7 @@ function Makefile()
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il est vide.
 	elif test -f "$path" && test ! -s "$path"; then
-		EchoSuccessTimer "Le fichier $(DechoS "$name") existe déjà dans le dossier $(DechoS "$parent/")." "$sleep_txt"
+		EchoSuccessTimer "$MSG_MKFILE_EMPTY." "$sleep_txt"
 		echo
 
 		EchoSuccessTimer "$MSG_MKFILE_PROCESSING_END_SUCC." "$sleep_txt"
@@ -288,7 +418,6 @@ function UncompressArchive()
     "$cmd $option $path"
 
     HandleErrors "$?" "LA DÉCOMPRESSION DE L'ARCHIVE $(DechoE "$name") A ÉCHOUÉE"
-    
     EchoSuccessTee "La décompression de l'archive $(DechoS "$name") s'est effectuée avec brio."
     Newline
 }

@@ -1,21 +1,29 @@
 #!/usr/bin/env bash
 
-# /////////////////////////////////////////////////////////////////////////////////////////////// #
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
-## INCLUSION DES VARIABLES DU SCRIPT PRINCIPAL
+######################################## DEFINING VARIABLES #######################################
+
+#### INCLUDING MAIN SCRIPT VARIABLES
 # shellcheck source=../variables/colors.sh
-source ../variables/colors.sh
+source ../lib/variables/colors.sh || echo "../variables/colors.sh : not found" && exit 1
 
 # shellcheck source=../variables/filesystem.sh
-source ../variables/filesystem.sh
+source ../lib/variables/filesystem.sh || echo "../variables/filesystem.sh : not found" && exit 1
 
 # shellcheck source=../variables/colors.sh
-source ../variables/text.sh
+source ../lib/variables/text.sh || echo "../variables/text.sh : not found" && exit 1
 
 
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
-#### DÉFINITION DES VARIABLES LOCALES (CE FICHIER PEUT AINSI ËTRE RÉUTILISÉ DANS UN AUTRE PROJET EN NE MODIFIANT QUE LES VALEURS DES VARIABLES CI-DESSOUS) | DEFINING VARIABLES
+#### DEFINING FILE VARIABLES ()
+
+
+#### DÉFINITION DES VARIABLES LOCALES 
+#(CE FICHIER PEUT AINSI ËTRE RÉUTILISÉ DANS UN AUTRE PROJET EN NE MODIFIANT QUE LES VALEURS DES VARIABLES CI-DESSOUS) | DEFINING VARIABLES
+
+## COLORS
 COL_BLUE=$COL_BLUE
 COL_CYAN=$COL_CYAN
 COL_GREEN=$COL_GREEN

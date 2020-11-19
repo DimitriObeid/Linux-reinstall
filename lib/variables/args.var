@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# For more informations about this file, please check its documentation located at "docs/<your language>/variables/args.pdf"
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+######################################## DEFINING VARIABLES #######################################
+
+#### MANDATORY ARGUMENTS
+
+## ARGUMENTS ARRAY
+ARGV=("$@")
+
+# -----------------------------------------------
+
+# Arguments à placer après la commande d'exécution du script pour qu'il s'exécute.
+ARG_LANG=$1             # Premier argument : La langue dans laquelle exécuter le script
+ARG_LANG_INDEX='1'      # Language argument's index.
+
+ARG_USERNAME=$2         # Deuxième argument : Le nom du compte de l'utilisateur.
+ARG_USERNAME_INDEX='2'  # Username argument's index.
+
+ARG_INSTALL=$3          # Troisième argument : Le type de paquets à installer (version SIO (travail) ou personnelle (travail + logiciels pour un usage presonnel)).
+ARG_INSTALL_INDEX='3'   # Installation kind argument's index.
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### OPTIONAL ARGUMENTS
+ARG_DEBUG=$4            # Argument servant d'utilitaire de déboguage.
+ARG_DEBUG_INDEX='4'     # Debug argument's index.
+
+ARG_DEBUG_VAL="debug"   # Valeur de l'agument de déboguage.
+
+# -----------------------------------------------
