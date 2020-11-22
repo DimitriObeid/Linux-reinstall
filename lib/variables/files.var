@@ -4,48 +4,6 @@
 
 ######################################## DEFINING VARIABLES #######################################
 
-#### FOLDERS
-
-## USER'S HOME FOLDER.
-
-# Check if the "$ARG_USERNAME" variable is not empty
-if test ! -z "$ARG_USERNAME"; then
-    DIR_HOMEDIR="/home/${ARG_USERNAME}"     # Path
-fi
-
-# -----------------------------------------------
-
-## TEMPORARY FOLDER'S INFORMATIONS.
-
-DIR_TMP_NAME="Linux-reinstall.tmp.d"			# Name
-DIR_TMP_PARENT="/tmp"							# Parent folder
-DIR_TMP_PATH="$DIR_TMP_PARENT/$DIR_TMP_NAME"	# Full path
-
-# -----------------------------------------------
-
-## TEMPORARY FOLDER'S SUD-FOLDERS.
-
-# Folder containing the installation files and the installation script
-DIR_INSTALL_NAME="Install"                              # Name
-DIR_INSTALL_PATH="$DIR_TMP_PATH/$DIR_INSTALL_NAME"      # Path
-
-# Folder containing the logs file.
-DIR_LOG_NAME="Logs"
-DIR_LOG_PATH="$DIR_TMP_PATH/$DIR_LOG_NAME"
-
-# Folder containing the files that registers registering packages not found in the package manager's database or whose installation failed
-DIR_PACKAGES_NAME="Packages"
-DIR_PACKAGES_PATH="$DIR_TMP_PATH/$DIR_PACKAGES_NAME"
-
-# Unavailable softwares on package manager's installation folder
-DIR_SOFTWARE_NAME="Software.Linux-reinstall.d"
-DIR_SOFTWARE_PATH="$DIR_HOMEDIR/$DIR_SOFTWARE_NAME"
-
-# -----------------------------------------------
-
-
-# /////////////////////////////////////////////////////////////////////////////////////////////// #
-
 #### FILES
 
 ## LOG FILE
@@ -105,44 +63,5 @@ GETVAL_PATH="$DIR_INSTALL_PATH/$GETVAL_NAME"
 # If you want to remove the translations and write directly the variable values in your language
 # here, you can remove the following content and copy-paste the variables from the dedicated file.
 
-# This dedicated file is located in the src/lang/<language> folder, and is named in the same way
+# This dedicated file is located in the /lang/<language>/ folder, and is named in the same way
 # as this file, excepted its file extension, which corresponds to it's parent folder's name.
-
-
-
-# TODO : Remove it and pull if the file and dir var files.
-MSG_FILE_CHECKLOG="$MSG_FILE_CHECKLOG"
-
-#### 
-
-## TRANSLATION
-
-# Processing
-MSG_DIR_PROCESSING_BEGIN="$MSG_DIR_PROCESSING_BEGIN"            # Directory processing begin
-MSG_DIR_PROCESSING_END_FAIL="$MSG_DIR_PROCESSING_END_FAIL"      # Directory processing ending with an error
-MSG_DIR_PROCESSING_END_SUCC="$MSG_DIR_PROCESSING_END_SUCC"      # Directory processing ending sucessfully
-
-MSG_FILE_PROCESSING_BEGIN="$MSG_FILE_PROCESSING_BEGIN"          # File processing begin
-MSG_FILE_PROCESSING_END_FAIL="$MSG_FILE_PROCESSING_END_FAIL"    # File processing ending with an error
-MSG_FILE_PROCESSING_END_SUCC="$MSG_FILE_PROCESSING_END_SUCC"    # File processing ending sucessfully
-
-# -----------------------------------------------
-
-# Messages
-
-
-# -----------------------------------------------
-
-# Fail
-
-
-# -----------------------------------------------
-
-# Success
-
-
-# -----------------------------------------------
-
-## 
-
-

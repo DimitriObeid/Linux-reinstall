@@ -7,14 +7,26 @@
 
 ########################### DÉFINITION DES MESSAGES DU FICHIER  ##########################
 
-#### FONCTIONS DE CHANGEMENT DE PERMISSIONS
+#### FONCTIONS DE TRAITEMENT DE PERMISSIONS DE DOSSIERS
 
 ## FONCTION "ChownDir"
 
-# Changement des droits
-MSG_DIR_CHMOD="Changement récursif des droits du nouveau dossier $(DechoN "$path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")"    
+# Changement de propriété
+MSG_PERM_CHOWN_DIR="Transfert récursif des droits de propriété du nouveau dossier $(DechoN "$path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")"    
 
 # Issue
-MSG_DIR_CHMOD_SUCCESS="Les droits du dossier $(DechoS "$name") ont été changés avec succès de $(DechoS "$USER") en $(DechoS "$ARG_USERNAME")"
-MSG_DIR_CHMOD_FAIL_1="Impossible de changer les droits du dossier $(DechoE "$path/")"
-MSG_DIR_CHMOD_FAIL_2="Pour changer les droits du dossier $(DechoE "$path/") de manière récursive, utilisez la commande suivante"
+MSG_PERM_CHOWN_DIR_SUCCESS="Les droits de propriété du dossier $(DechoS "$name") ont été transférées de $(DechoS "$USER") à $(DechoS "$ARG_USERNAME") avec succès "
+MSG_PERM_CHOWN_DIR_FAIL="Impossible de transférer la propriété les droits du dossier $(DechoE "$path/") à $(DechoE "$ARG_USERNAME")"
+MSG_PERM_CHOWN_DIR_FAIL_ADVICE="Pour transférer récursivement la propriété du dossier $(DechoE "$path/") de manière récursive, utilisez la commande suivante"
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### FONCTIONS DE TRAITEMENT DE PERMISSIONS DE FICHIERS
+
+## FONCTION "ChowFile"
+
+# Changement des droits
+MSG_PERM_CHOWN_FILE=""

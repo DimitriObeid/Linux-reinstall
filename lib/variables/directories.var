@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+######################################## DEFINING VARIABLES #######################################
+
+#### FOLDERS
+
+## USER'S HOME FOLDER.
+
+# Check if the "$ARG_USERNAME" variable is not empty
+if test ! -z "$ARG_USERNAME"; then
+    DIR_HOMEDIR="/home/${ARG_USERNAME}"     # Path
+fi
+
+# -----------------------------------------------
+
+## TEMPORARY FOLDER'S INFORMATIONS.
+
+DIR_TMP_NAME="Linux-reinstall.tmp.d"			# Name
+DIR_TMP_PARENT="/tmp"							# Parent folder
+DIR_TMP_PATH="$DIR_TMP_PARENT/$DIR_TMP_NAME"	# Full path
+
+# -----------------------------------------------
+
+## TEMPORARY FOLDER'S SUD-FOLDERS.
+
+# Folder containing the installation files and the installation script
+DIR_INSTALL_NAME="Install"                              # Name
+DIR_INSTALL_PATH="$DIR_TMP_PATH/$DIR_INSTALL_NAME"      # Path
+
+# Folder containing the logs file.
+DIR_LOG_NAME="Logs"
+DIR_LOG_PATH="$DIR_TMP_PATH/$DIR_LOG_NAME"
+
+# Folder containing the files that registers registering packages not found in the package manager's database or whose installation failed
+DIR_PACKAGES_NAME="Packages"
+DIR_PACKAGES_PATH="$DIR_TMP_PATH/$DIR_PACKAGES_NAME"
+
+# Unavailable softwares on package manager's installation folder
+DIR_SOFTWARE_NAME="Software.Linux-reinstall.d"
+DIR_SOFTWARE_PATH="$DIR_HOMEDIR/$DIR_SOFTWARE_NAME"
+
+# -----------------------------------------------

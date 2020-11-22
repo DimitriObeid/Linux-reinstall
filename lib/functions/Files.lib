@@ -27,7 +27,11 @@ function Chmod()
 #   - Headers.sh    -> HandleErrors
 function ChownFile()
 {
-    EchoNewstepTimer "$MSG_MKFILE_CHMOD." "$timer"
+    #***** Parameters *****
+    
+
+    #***** Code *****
+    EchoNewstep "$MSG_MKFILE_CHMOD." "$timer"
 	echo
 
     chown -v "$username" "$path"
@@ -36,10 +40,10 @@ function ChownFile()
     if test "$?" -eq "0"; then
         echo
 
-        EchoSuccessTimer "Les droits du fichier $(DechoS "$parent") ont été changés avec succès." "$sleep_txt"
+        EchoSuccess "Les droits du fichier $(DechoS "$parent") ont été changés avec succès." "$sleep_txt"
         echo
 
-        EchoSuccessTimer "$MSG_MKFILE_PROCESSING_END_SUCC." "$timer"
+        EchoSuccess "$MSG_MKFILE_PROCESSING_END_SUCC." "$timer"
         DrawLine "$COL_RESET" "$block_char"
         sleep "$sleep_blk"
         echo
@@ -48,12 +52,12 @@ function ChownFile()
     else
         echo
 
-        EchoErrorTimer "Impossible de changer les droits du fichier $(DechoE "$path")." "$sleep_txt"
-        EchoErrorTimer "Pour changer les droits du fichier $(DechoE "$path")," "$sleep_txt"
-        EchoErrorTimer "utilisez la commande :" "$sleep_txt"
+        EchoError "Impossible de changer les droits du fichier $(DechoE "$path")." "$sleep_txt"
+        EchoError "Pour changer les droits du fichier $(DechoE "$path")," "$sleep_txt"
+        EchoError "utilisez la commande :" "$sleep_txt"
         echo "	chown username chemin"
 
-        EchoErrorTimer "$MSG_MKFILE_PROCESSING_END_FAIL." "$sleep_txt"
+        EchoError "$MSG_MKFILE_PROCESSING_END_FAIL." "$sleep_txt"
         DrawLine "$COL_RESET" "$block_char"
         sleep "$sleep_blk"
         echo
@@ -95,19 +99,19 @@ function Makefile()
 	sleep "$sleep_blk"
 	DrawLine "$COL_RESET" "$block_char"
 
-	EchoNewstepTimer "$MSG_MILE_PROCESSING_BEGIN." "$sleep_txt"
+	EchoNewstep "$MSG_MILE_PROCESSING_BEGIN." "$sleep_txt"
 	echo
 
 	# Si le fichier à traiter n'existe pas, on le crée avec l'aide de la commande "touch".
 	if test ! -f "$path"; then
-        EchoNewstepTimer "Création du fichier $(DechoN "$name") dans le dossier $(DechoN "$parent/")." "$sleep_txt"
+        EchoNewstep "Création du fichier $(DechoN "$name") dans le dossier $(DechoN "$parent/")." "$sleep_txt"
 		echo
 
 		local lineno=$LINENO; touch "$path"
 
 		# On vérifie que le fichier a bien été créé en vérifiant le code de retour de la commande "touch" via la fonction "HandleErrors".
         HandleErrors "$?" "LE FICHIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER $(DechoE "$parent/")" "Essayez de le créer manuellement." "$lineno"
-        EchoSuccessTimer "Le fichier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
+        EchoSuccess "Le fichier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")." "$sleep_txt"
         echo
 
 		# On change les droits du fichier créé par le script.
@@ -117,7 +121,7 @@ function Makefile()
 		#		- Le nom de l'utilisateur à qui donner les droits.
 		#		- Le chemin du dossier cible.
 
-		EchoNewstepTimer "Changement des droits du nouveau fichier $(DechoN "$path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")." "$sleep_txt"
+		EchoNewstep "Changement des droits du nouveau fichier $(DechoN "$path") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")." "$sleep_txt"
 		echo
 
 		chown -v "${ARG_USERNAME}" "$path"
@@ -126,10 +130,10 @@ function Makefile()
 		if test "$?" -eq "0"; then
 			echo
 
-			EchoSuccessTimer "Les droits du fichier $(DechoS "$parent") ont été changés avec succès." "$sleep_txt"
+			EchoSuccess "Les droits du fichier $(DechoS "$parent") ont été changés avec succès." "$sleep_txt"
 			echo
 
-			EchoSuccessTimer "$MSG_FILE_PROCESSING_END_SUCC." "$sleep_txt"
+			EchoSuccess "$MSG_FILE_PROCESSING_END_SUCC." "$sleep_txt"
 			DrawLine "$COL_RESET" "$block_char"
 			sleep "$sleep_blk"
 			echo
@@ -138,12 +142,12 @@ function Makefile()
 		else
 			echo
 
-			EchoErrorTimer "Impossible de changer les droits du fichier $(DechoE "$path")." "$sleep_txt"
-			EchoErrorTimer "Pour changer les droits du fichier $(DechoE "$path")," "$sleep_txt"
-			EchoErrorTimer "utilisez la commande :" "$sleep_txt"
+			EchoError "Impossible de changer les droits du fichier $(DechoE "$path")." "$sleep_txt"
+			EchoError "Pour changer les droits du fichier $(DechoE "$path")," "$sleep_txt"
+			EchoError "utilisez la commande :" "$sleep_txt"
 			echo "	chown ${ARG_USERNAME} $path"
 
-			EchoErrorTimer "$MSG_FILE_PROCESSING_END_FAIL." "$sleep_txt"
+			EchoError "$MSG_FILE_PROCESSING_END_FAIL." "$sleep_txt"
 			DrawLine "$COL_RESET" "$block_char"
 			sleep "$sleep_blk"
 			echo
@@ -153,26 +157,26 @@ function Makefile()
 	
 	# Sinon, si le fichier à créer existe déjà ET qu'il n'est pas vide.
 	elif test -f "$path" && test -s "$path"; then
-		EchoNewstepTimer "$MSG_FILE_NONEMPTY_1." "$sleep_txt"
-		EchoNewstepTimer "$MSG_FILE_NONEMPTY_2." "$sleep_txt"
+		EchoNewstep "$MSG_FILE_NONEMPTY_1." "$sleep_txt"
+		EchoNewstep "$MSG_FILE_NONEMPTY_2." "$sleep_txt"
 		echo
 
 		true > "$path"
 
 		# On vérifie que le contenu du fichier cible a bien été supprimé en testant le code de retour de la commande "true".
 		if test "$?" -eq "0"; then
-			EchoSuccessTimer "$MSG_FILE_NONEMPTY_SUCC." "$sleep_txt"
+			EchoSuccess "$MSG_FILE_NONEMPTY_SUCC." "$sleep_txt"
 			echo
 
-			EchoSuccessTimer "$MSG_FILE_PROCESSING_END_SUCC." "$sleep_txt"
+			EchoSuccess "$MSG_FILE_PROCESSING_END_SUCC." "$sleep_txt"
 			DrawLine "$COL_RESET" "$block_char"
 			sleep "$sleep_blk"
 			echo
         else
-            EchoErrorTimer "$MSG_FILE_NONEMPTY_FAIL." "$sleep_txt"
+            EchoError "$MSG_FILE_NONEMPTY_FAIL." "$sleep_txt"
 			echo
 
-			EchoErrorTimer "$MSG_FILE_PROCESSING_END_FAIL." "$sleep_txt"
+			EchoError "$MSG_FILE_PROCESSING_END_FAIL." "$sleep_txt"
 			DrawLine "$COL_RESET" "$block_char"
 			sleep "$sleep_blk"
 			echo
@@ -182,10 +186,10 @@ function Makefile()
 
 	# Sinon, si le fichier à créer existe déjà ET qu'il est vide.
 	elif test -f "$path" && test ! -s "$path"; then
-		EchoSuccessTimer "$MSG_MKFILE_EMPTY." "$sleep_txt"
+		EchoSuccess "$MSG_MKFILE_EMPTY." "$sleep_txt"
 		echo
 
-		EchoSuccessTimer "$MSG_MKFILE_PROCESSING_END_SUCC." "$sleep_txt"
+		EchoSuccess "$MSG_MKFILE_PROCESSING_END_SUCC." "$sleep_txt"
 		DrawLine "$COL_RESET" "$block_char"
 
 		return
@@ -212,6 +216,7 @@ function UncompressArchive()
     "$cmd $option $path"
 
     HandleErrors "$?" "LA DÉCOMPRESSION DE L'ARCHIVE $(DechoE "$name") A ÉCHOUÉE"
-    EchoSuccessTee "La décompression de l'archive $(DechoS "$name") s'est effectuée avec brio."
+    
+    EchoSuccess "La décompression de l'archive $(DechoS "$name") s'est effectuée avec brio."
     Newline
 }

@@ -2,9 +2,9 @@
 
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
-#### FUNCTIONS WITHOUT REDIRECTIONS TOWARDS A LOG FILE
+#### TEXT WRITING
 
-## COLOR A PART OF THE TEXT WITH ANOTHER COLOR.
+## COLOR A PART OF A TEXT WITH ANOTHER COLOR.
 ## Pun between "deco(ration)" and "echo", followed by the first letter of the message type name (header (H), moving to a new sub-step (N), error (E) or success (S)).
 
 function Decho() { local string=$1; echo "$COL_CYAN$string$COL_RESET"; }    # Colouring a part of a simple message written via the "echo" command.
@@ -17,68 +17,107 @@ function DechoS() { local string=$1; echo "$COL_CYAN$string$COL_GREEN"; }   # Su
 
 ## DISPLAYING A MESSAGE ACCORDING TO THE CONTEXT.
 
-function EchoError() { local string=$1; echo "$TXT_R_TAB $string$COL_RESET"; sleep .5; }    # Error message
-function EchoNewstep() { local string=$1; echo "$TXT_Y_TAB $string$COL_RESET"; sleep .5; }  # New sub-step message
-function EchoSuccess() { local string=$1; echo "$TXT_G_TAB $string$COL_RESET"; sleep .5; }  # Success message
+# Error message
+function EchoError() {
+    #***** Parameters *****
+    local string=$1
+    local timer=$2
+    
+    #***** Code *****
+    if test -z "$timer"; then
+        timer=".5"
+    fi
+    
+    if test -z "$MAIN_SCRIPT_LOG" || test -z "$FILE_LOG_PATH"; then
+        echo "$TXT_R_TAB $string$COL_RESET"
+    else
+        CheckLog
+        
+        if test "$MAIN_SCRIPT_LOG" = "log"; then
+            echo "$TXT_R_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"
+            
+        elif test "$MAIN_SCRIPT_LOG" = "tee"; then
+            echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"
+            
+        else
+            echo "Non-valid write output mode defined"
+        
+            return
+        fi
+    fi
 
-# -----------------------------------------------
+    sleep "$timer"
+}
 
-## DISPLAYING A MESSAGE WHOSE PAUSE TIME CAN BE CHOSEN AS SECOND ARGUMENT.
+# New sub-step message
+function EchoNewstep() { local string=$1; 
+    #***** Parameters *****
+    local string=$1
+    local timer=$2
+    
+    #***** Code *****
+    if test -z "$timer"; then
+        timer=".5"
+    fi
+    
+    if test -z "$MAIN_SCRIPT_LOG" || test -z "$FILE_LOG_PATH"; then
+        echo "$TXT_N_TAB $string$COL_RESET"
+    else
+        CheckLog
+        
+        if test "$MAIN_SCRIPT_LOG" = "log"; then
+            echo "$TXT_N_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"
+            
+        elif test "$MAIN_SCRIPT_LOG" = "tee"; then
+            echo "$TXT_N_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"
+            
+        else
+            echo "Non-valid write output mode defined"
+        
+            return
+        fi
+    fi
 
-function EchoErrorTimer() { local string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET"; sleep "$timer"; }     # Error message
-function EchoNewstepTimer() { local string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET"; sleep "$timer"; }   # New sub-step message.
-function EchoSuccessTimer() { local string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET"; sleep "$timer"; }   # Success message
+    sleep "$timer"
+}
 
-# -----------------------------------------------
+# Success message
+function EchoSuccess() { 
+    #***** Parameters *****
+    local string=$1
+    local timer=$2
+
+    #***** Code *****
+    if test -z "$timer"; then
+        timer=".5"
+    fi
+    
+    if test -z "$MAIN_SCRIPT_LOG" || test -z "$FILE_LOG_PATH"; then
+        echo "$TXT_S_TAB $string$COL_RESET"
+    else
+        CheckLog
+        
+        if test "$MAIN_SCRIPT_LOG" = "log"; then
+            echo "$TXT_S_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"
+            
+        elif test "$MAIN_SCRIPT_LOG" = "tee"; then
+            echo "$TXT_S_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"
+            
+        else
+            echo "Non-valid write output mode defined"
+        
+            return
+        fi
+    fi
+
+    sleep "$timer"
+}
 
 
-# /////////////////////////////////////////////////////////////////////////////////////////////// #
-
-#### FUNCTIONS WITH REDIRECTIONS TOWARDS A LOGS FILE ONLY
-
-## CHECKING REQUIRED FUNCTIONNALITIES
-
-## DISPLAY A MESSAGE BY REDIRECTING STANDARD AND ERROR OUTPUTS, ACCORDING TO ITS DISPLAY COLOR, WITH CHEVRONS AND WITHOUT HAVING TO ENCODE THE COLOR AT THE BEGINNING AND THE END OF THE STRING.
-
-function EchoErrorLog() { CheckLog; local string=$1; echo "$TXT_R_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep .5; }     # Error message
-function EchoNewstepLog() { CheckLog; local string=$1; echo "$TXT_Y_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep .5; }   # New sub-step message
-function EchoSuccessLog() { CheckLog; local string=$1; echo "$TXT_G_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep .5; }   # Success message
-
-# -----------------------------------------------
-
-## DISPLAYING A MESSAGE WHOSE PAUSE TIME CAN BE CHOSEN AS SECOND ARGUMENT.
-
-function EchoErrorTimerLog() { CheckLog; local string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep "$timer"; }    # Error message
-function EchoNewstepTimerLog() { CheckLog; local string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep "$timer"; }  # New sub-step message
-function EchoSuccessTimerLog() { CheckLog; local string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep "$timer"; }  # Success message
-
-# -----------------------------------------------
-
-## LINE BREAKS
+#### LINE BREAKS
 
 # Redirecting the output of the "echo" command
 function EchoLog() { CheckLog && echo "" >> "$FILE_LOG_PATH"; }
-
-# -----------------------------------------------
-
-
-# /////////////////////////////////////////////////////////////////////////////////////////////// #
-
-#### FUNCTIONS WITH REDIRECTIONS TOWARDS THE TERMINAL AND A LOG FILE
-
-## DISPLAY A MESSAGE BY REDIRECTING STANDARD AND ERROR OUTPUTS, ACCORDING TO ITS DISPLAY COLOR, WITH CHEVRONS AND WITHOUT HAVING TO ENCODE THE COLOR AT THE BEGINNING AND THE END OF THE STRING.
-
-function EchoErrorTee() { CheckLog; local string=$1; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }     # Error message
-function EchoNewstepTee() { CheckLog; local string=$1; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }   # New sub-step message
-function EchoSuccessTee() { CheckLog; local string=$1; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep .5; }   # Success message
-
-# -----------------------------------------------
-
-## DISPLAYING A MESSAGE WHOSE PAUSE TIME CAN BE CHOSEN AS SECOND ARGUMENT.
-
-function EchoErrorTimerTee() { CheckLog; local string=$1; timer=$2; echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep "$timer"; }    # Error message
-function EchoNewstepTimerTee() { CheckLog; local string=$1; timer=$2; echo "$TXT_Y_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep "$timer"; }  # New sub-step message
-function EchoSuccessTimerTee() { CheckLog; local string=$1; timer=$2; echo "$TXT_G_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"; sleep "$timer"; }  # Success message
 
 # -----------------------------------------------
 

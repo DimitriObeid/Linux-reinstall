@@ -27,13 +27,15 @@
 
 MAIN_LOG="initscript.log"
 
+if test ! -f "$MAIN_LOG"; then touch "$MAIN_LOG"; fi
+
 # Paths
 MAIN_LANG="lang"
 MAIN_L_FNCTS="lib/functions"
 MAIN_L_VARS="lib/variables"
-MAIN_S_INST="src/install"
+MAIN_S_INST="src/installcat"
 MAIN_S_LANG="src/lang"
-MAIN_S_RES="src/res"
+MAIN_S_VARS="src/variables"
 
 # Script Version
 MAIN_SCRIPT_VERSION="2.0"    # Script's current version
@@ -81,7 +83,7 @@ CheckSubFolder "$MAIN_L_FNCTS"
 CheckSubFolder "$MAIN_L_VARS"
 CheckSubFolder "$MAIN_S_INST"
 CheckSubFolder "$MAIN_S_LANG"
-CheckSubFolder "$MAIN_S_RES"
+CheckSubFolder "$MAIN_S_VARS"
 echo >> "$MAIN_LOG"
 
 
@@ -93,11 +95,15 @@ echo >> "$MAIN_LOG"
 
 #### INCLUDING FILES
 
-## TRANSLATION FILE
+## TRANSLATION FILES
 
-# shellcheck source="$MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh"
-source "$MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh" \
-    || echo "$PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh : Unable to find the translation file" && exit 1
+# shellcheck source="$MAIN_PROJECT_ROOT/$MAIN_S_LANG/SetMainLang.sh"
+source "$MAIN_PROJECT_ROOT/$MAIN_S_LANG/SetMainLang.sh" \
+    || echo "$MAIN_PROJECT_ROOT/$MAIN_S_LANG/SetMainLang.sh : Unable to find the main file's variables translation file" && exit 1
+
+# shellcheck source="$MAIN_PROJECT_ROOT/$MAIN_LANG/SetLibLang.sh"
+source "$MAIN_PROJECT_ROOT/$MAIN_LANG/SetLibLang.sh" \
+    || echo "$MAIN_PROJECT_ROOT/$MAIN_LANG/SetLibLang.sh : Unable to find the library variables translation file" && exit 1
 echo "Included file : $MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh" >> 
 
 # -----------------------------------------------
@@ -106,7 +112,7 @@ echo "Included file : $MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh" >>
 
 # shellcheck source=$MAIN_PROJECT_ROOT/$MAIN_S_RES/main.var
 source "$MAIN_PROJECT_ROOT/$MAIN_S_RES/main.var" || echo "$MAIN_S_RES/main.var : not found" && exit 1
-echo "Included variable file : $MAIN_S_RES/main.var"
+echo "Included variable file : $MAIN_S_VARS/main.var"
 
 # shellcheck source=lib/variables/colors.var
 source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/colors.var" || echo "$MAIN_L_VARS/colors.var : not found" && exit 1

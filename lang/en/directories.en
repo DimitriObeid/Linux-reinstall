@@ -1,1 +1,46 @@
 #/usr/bin/env bash
+
+# Read the "lib/variables/directories.var" and "docs/en/variables/variables.pdf" files for more
+# informations about these variables. 
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+##################################### DEFINING FILE MESSAGES  #####################################
+
+#### DIRECTORY PROCESSING FUNCTIONS
+
+## GENERAL
+
+# Processing
+    MSG_DIR_PROCESSING_BEGIN="Processing the $(DechoN "$name") folder in the parent folder $(DechoN "$parent")"
+    MSG_DIR_PROCESSING_END_FAIL="End of processing the $(DechoE "$path/") folder"
+    MSG_DIR_PROCESSING_END_SUCCESS="End of processing the $(DechoS "$path/") folder"
+
+# -----------------------------------------------
+
+## "OverwriteDir" FUNCTION
+
+# Existing and non-empty directory
+    MSG_DIR_OVRWRT_DETECTED="A non-empty folder with exactly the same name ($(DechoN "$name")) is already in the target folder $(DechoN "$parent/")"
+    
+# Deleting existing data
+    MSG_DIR_OVRWRT_OVERWRITE="Deleting the contents of the $(DechoN "$path/") folder"
+
+# Issues
+    MSG_DIR_OVRWRT_SUCCESS="Deletion of the contents of the folder $(DechoS "$path/") performed successfully"
+    MSG_DIR_OVRWRT_FAIL="Unable to delete the contents of the $(DechoE "$path/") folder."
+
+# -----------------------------------------------
+
+## "Makedir" FUNCTION
+
+# Non-existent folder : creation
+    MSG_DIR_MKDIR="Creating the $(DechoN "$name") folder in the parent folder $(DechoN "$parent/")"
+
+# Issues
+    MSG_DIR_MKDIR_SUCCESS="The $(DechoS "$name") was successfully created in the $(DechoS "$parent") folder"
+    MSG_DIR_MKDIR_FAIL="THE $(DechoE "$name") FOLDER CANNOT BE CREATED IN THE PARENT FILE $(DechoE "$parent/")"
+    MSG_DIR_MKDIR_FAIL_ADV="Check if the $(DechoE "mkdir") command exists."
+
+# Existing and empty directory
+    MSG_DIR_MKDIR_EMPTY="The $(DechoS "$path/") folder already exists in the $(DechoS "$parent/") folder and is empty"

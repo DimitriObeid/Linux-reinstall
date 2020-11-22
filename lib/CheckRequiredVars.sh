@@ -13,7 +13,7 @@
 function CheckRoot()
 {
     if test "$EUID" -ne 0; then
-        HandleFatalErrors "" "" "" "" ""
+        HandleErrors "" "" "" "" ""
     fi
 }
 
@@ -25,6 +25,7 @@ function CheckRoot()
 function CheckArgUsername()
 {
     if test -z "$ARG_USERNAME"; then
+        HandleErrors "" "" "" ""
         EchoError "No username passed as argument"; echo; exit 1
     fi
 }

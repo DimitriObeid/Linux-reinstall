@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Lisez les fichiers "lib/variables/directories.var" et "docs/variables/variables.pdf"
+# Lisez les fichiers "lib/variables/directories.var" et "docs/fr/variables/variables.pdf"
 # pour plus d'informations sur ces variables. 
 
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
@@ -9,34 +9,38 @@
 
 #### FONCTIONS DE TRAITEMENT DE DOSSIERS
 
+## GÉNÉRAL
+
+# Traitement
+    MSG_DIR_PROCESSING_BEGIN="Traitement du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")"
+    MSG_DIR_PROCESSING_END_FAIL="Fin du traitement du dossier $(DechoE "$path/")"
+    MSG_DIR_PROCESSING_END_SUCCESS="Fin du traitement du dossier $(DechoS "$path/")"
+
+# -----------------------------------------------
+
 ## FONCTION "OverwriteDir"
 
 # Dossier existant ET non-vide
-MSG_DIR_NONEMPTY_1="Un dossier non-vide portant exactement le même nom ($(DechoN "$name")) se trouve déjà dans le dossier cible $(DechoN "$parent/")"
+    MSG_DIR_OVRWRT_DETECTED="Un dossier non-vide portant exactement le même nom ($(DechoN "$name")) se trouve déjà dans le dossier cible $(DechoN "$parent/")"
 
-# Écrasement des données
-MSG_DIR_NONEMPTY_2="Suppression du contenu du dossier $(DechoN "$path/")"
+# Suppression des données existantes
+    MSG_DIR_OVRWRT_OVERWRITE="Suppression du contenu du dossier $(DechoN "$path/")"
 
 # Issues
-MSG_DIR_NONEMPTY_SUCCESS="Suppression du contenu du dossier $(DechoS "$path/") effectuée avec succès."
-MSG_DIR_NONEMPTY_FAIL_1="Impossible de supprimer le contenu du dossier $(DechoE "$path/")"
-MSG_DIR_NONEMPTY_FAIL_2="Le contenu de tout fichier du dossier $(DechoE "$path/") portant le même nom qu'un des fichiers créés ou téléchargés sera écrasé"
-
+    MSG_DIR_OVRWRT_SUCCESS="Suppression du contenu du dossier $(DechoS "$path/") effectuée avec succès."
+    MSG_DIR_OVRWRT_FAIL="Impossible de supprimer le contenu du dossier $(DechoE "$path/")"
 
 # -----------------------------------------------
 
 ## FONCTION "Makedir"
 
-# Traitement
-MSG_DIR_PROCESSING_BEGIN="Traitement du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")"
-MSG_DIR_PROCESSING_END_FAIL="Fin du traitement du dossier $(DechoE "$path/")"
-MSG_DIR_PROCESSING_END_SUCCESS="Fin du traitement du dossier $(DechoS "$path/")"
-
-# Dossier non-existant : Création
-MSG_DIR_CREATE="Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")"    
-MSG_DIR_CREATE_FAIL="LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")"
-MSG_DIR_CREATE_FAIL_ADV="Vérifiez si la commande $(DechoE "mkdir") existe."
-MSG_DIR_CREATE_SUCCESS="Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")"
+# Dossier inexistant : création
+    MSG_DIR_MKDIR="Création du dossier $(DechoN "$name") dans le dossier parent $(DechoN "$parent/")"
+    
+# Issues
+    MSG_DIR_MKDIR_SUCCESS="Le dossier $(DechoS "$name") a été créé avec succès dans le dossier $(DechoS "$parent/")"
+    MSG_DIR_MKDIR_FAIL="LE DOSSIER $(DechoE "$name") N'A PAS PU ÊTRE CRÉÉ DANS LE DOSSIER PARENT $(DechoE "$parent/")"
+    MSG_DIR_MKDIR_FAIL_ADV="Vérifiez si la commande $(DechoE "mkdir") existe."
 
 # Dossier existant ET vide
-MSG_DIR_EMPTY="Le dossier $(DechoS "$path/") existe déjà dans le dossier $(DechoS "$parent/") et est vide"
+    MSG_DIR_MKDIR_EMPTY="Le dossier $(DechoS "$path/") existe déjà dans le dossier $(DechoS "$parent/") et est vide"
