@@ -9,34 +9,121 @@
 # Example :
 # sudo bash -x reinstall.sh
 
-# Or debut it by using Shellcheck :
+# Or debug it by using Shellcheck :
 #	Online -> https://www.shellcheck.net/
 #	On command line interface -> shellcheck beta.sh
 #		--> Shellcheck install command : sudo $package_manager $install_command shellcheck
 
 
-
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
-############################### LINKING LIBRARY FILES TO THE SCRIPT ###############################
+###################################### INCLUDING DEPENDENCIES #####################################
 
-# Including the functions source files
+#### CHECKING PROJECT'S ROOT DIRECTORY
+
+## DEFINING PROJECT'S ROOT DIRECTORY
+
+# /home/dimob/Projets/Linux-reinstall/src
+#                     ROOT_DIR        srcdir
+
+MAIN_PROJECT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; cd .. && pwd -P )"
+
+shopt -s extglob                # enable +(...) glob syntax
+MAIN_PROJECT_FOLDER=${MAIN_PROJECT_PATH%%+(/)}   # Trimming however many trailing slashes exist
+MAIN_PROJECT_RESULT=${MAIN_PROJECT_PATH##*/}     # Removing everything before the last / that still remains to get only the project root folder's name
+printf '%s\n' "$MAIN_PROJECT_RESULT"
+
+# Failsafe : verifying if the result matches with the project root folder's name.
+if test "$MAIN_PROJECT_RESULT" != "Linux-reinstall"; then
+    echo "Unable to find the project's root directory path"; exit 1
+fi
+
+# -----------------------------------------------
+
+## DEFINING MAIN SCRIPT VARIABLES
+
+MAIN_PROJECT_ROOT="$(dirname "$PWD")/"
+MAIN_L_FNCTS="lib/functions"
+MAIN_L_VARS="lib/variables"
+MAIN_S_INST="src/install"
+MAIN_S_LANG="src/lang"
+MAIN_S_RES="src/res"
+MAIN_SCRIPT_VERSION="2.0"    # Script's current version
+
+
+# -----------------------------------------------
+
+## CHECKING IF THE SUB-FOLDERS EXISTS
+
+# Function checking if the project's subfolders paths passed as argument exist
+function CheckSubFolder()   
+{
+    #***** Parameters *****
+    local path=$1;
+
+    #***** Code *****
+    if test -d "$MAIN_PROJECT_PATH/$path"; then
+        # TODO : return
+        echo "$MAIN_PROJECT_PATH/$path : true"
+    else
+        echo "$path : not found"
+
+        exit 1
+    fi
+}
+
+# Calling the above function and passing targeted directories paths as argument
+CheckSubFolder "$MAIN_L_FNCTS"
+CheckSubFolder "$MAIN_L_VARS"
+CheckSubFolder "$MAIN_S_INST"
+CheckSubFolder "$MAIN_S_LANG"
+CheckSubFolder "$MAIN_S_RES"
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+
+#### INCLUDING FILES
+
+## TRANSLATION FILE
+
+source "$MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh" \
+    || echo "$PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh : Unable to find the translation file" && exit 1
+
+# -----------------------------------------------
+
+## VARIABLES FILES
+
+# shellcheck source=lib/variables/args.var
+source "$MAIN_PROJECT_ROOT/$MAIN_S_RES/main.var" || echo 
+
+# shellcheck source=lib/variables/colors.var
+source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/colors.var" || echo "$MAIN_L_VARS/colors.var : not found" && exit 1
+
+# shellcheck source=../variables/filesystem.var
+source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/filesystem.sh" || echo "$MAIN_L_VARS/filesystem.var : not found" && exit 1
+
+# shellcheck source=../variables/colors.var
+source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/text.var" || echo "$MAIN_L_VARS/text.var : not found" && exit 1
+
+# -----------------------------------------------
+
+## FUNCTION FILES
 
 # shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Echo.sh"
-source ./"../lib/functions/Echo.sh" && echo "True" || exit 1
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Echo.sh" || echo "$MAIN_L_FNCTS/Echo.sh : not found" && exit 1
 
 # shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Filesystem.sh"
-source ./"../lib/functions/Filesystem.sh" && echo "True" || exit 1
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Filesystem.sh" || echo "$MAIN_L_FNCTS/Filesystem.sh : not found" && exit 1
 
 # shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Headers.sh"
-source ./"../lib/functions/Headers.sh" && echo "True" || exit 1
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Headers.sh" || echo "$MAIN_L_FNCTS/Headers.sh : not found" && exit 1
 
-# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Install.sh"
-source ./"../lib/functions/Install.sh" && echo "True" || exit 1
-
-
-## VERSION
-VER_SCRIPT="2.0"    # Version actuelle du script.
+# shellcheck source="/home/dimob/ProjetLinux-reinstall/lib/functions/Install.sh"
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Install.sh" || echo "$MAIN_L_FNCTS/Install.sh : not found" && exit 1
 
 
 
@@ -44,6 +131,7 @@ VER_SCRIPT="2.0"    # Version actuelle du script.
 
 ################################ DEFINING THE MAIN SCRIPT VARIABLES ###############################
 
+# TODO : Mettre ça dans les fichiers de traduction du script principal
 declare -A MSG_LANG_YES
 declare -A MSG_LANG_NO
 
@@ -52,47 +140,13 @@ MSG_LANG_NO=("non" "no")
 
 
 
-# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
-############################################# DÉFINITIONS DES FONCTIONS #############################################
+####################################### INITIALIZING SCRIPT #######################################
 
 #### DÉFINITION DES FONCTIONS DÉPENDANTES DE L'AVANCEMENT DU SCRIPT ####
 
 ## DÉFINITION DES FONCTIONS D'INITIALISATION
-# Détection de la langue
-function CheckLang()
-{
-    if test -z "$ARG_LANG"; then
-        EchoError "Missing parameter : Language"
-        EchoError "Please execute this script by passing at least three arguments :"
-        echo "$0 your_language your_username installation_type"
-        echo
-        
-        EchoError "For further information, please RTFM !"
-        echo
-        
-        exit 1
-    else
-        case ${ARG_LANG,,} in
-            "en" | "en_*")
-                for _ in ../src/lang/EN/*.sh; do
-                    source _ || EchoError "$_ : not found" && exit 1
-                done
-                ;;
-            "fr" | "fr_*")
-                for _ in ../src/lang/FR/*.sh; do
-                    source _ || EchoError "$_ : not found" && exit 1
-                done
-                ;;
-            *)
-                EchoError "No files found for this language."
-                echo
-                
-                exit 1
-        esac
-    fi
-}
-
 # Détection du passage des arguments au script
 function CheckArgs()
 {
@@ -100,16 +154,16 @@ function CheckArgs()
     
 	# If the script is not run as super-user (root)
 	if test "$EUID" -ne 0; then
-		EchoErrorLog "$MSG_INIT_ROOT_1."
-		EchoErrorLog "$MSG_INIT_ROOT_2 :"
+		EchoErrorLog "$MSG_INIT_ROOT_ZERO."
+		EchoErrorLog "$MSG_INIT_ROOT_ZERO_EXEC :"
 
 		# La variable "$0" ci-dessous est le nom du fichier shell en question avec le "./" placé devant (argument 0).
 		# Si ce fichier est exécuté en dehors de son dossier, le chemin vers le script depuis le dossier actuel sera affiché.
 		echo "$MSG_INIT_ARGS_SUDO"
 		echo
 
-		EchoErrorLog "$MSG_INIT_ROOT_3,"
-		EchoErrorLog "$MSG_INIT_ROOT_4 :"
+		EchoErrorLog "$MSG_INIT_ROOT_ZERO_OR_1,"
+		EchoErrorLog "$MSG_INIT_ROOT_ZERO_OR_2 :"
 		echo "$MSG_INIT_ARGS"
 		echo
 
@@ -176,8 +230,8 @@ function CheckArgs()
                 ;;
         esac
     fi
-		
-	
+
+
 	# I use this function to test features on my script without waiting for it to reach their step. Its content is likely to change a lot.
 	# Checking if the user passed a string named "debug" as last argument. 
 	if test "$ARG_DEBUG_VAL" = "${ARG_DEBUG}"; then
@@ -190,7 +244,7 @@ function CheckArgs()
 		CreateLogFile			# On appelle la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant.
 		Mktmpdir				# Puis la fonction de création du dossier temporaire.
 		GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur.
-		WritePackScript			# Puis la fonction de création de scripts d'installation.
+		WriteInstallScript		# Puis la fonction de création de scripts d'installation.
 
 		# APPEL DES FONCTIONS À TESTER
 		EchoNewstepTee "Test de la fonction d'installation"
@@ -203,8 +257,8 @@ function CheckArgs()
 
 	# Si un deuxième argument est passé ET si la valeur attendue ("debug") ne correspond pas à la valeur du dernier argument.
 	elif test ! -z "${ARG_DEBUG}" && test "$ARG_DEBUG_VAL" != "${ARG_DEBUG}" ; then
-		EchoError "LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS À LA VALEUR ATTENDUE : $(DechoE "debug")"
-		EchoError "Si vous souhaitez tester une fonction du script, passez la valeur $(DechoE "debug") sans faire de fautes"
+		EchoError "$MSG_INIT_DEBUG_FAIL : $(DechoE "debug")"
+		EchoError "$MSG_INIT_DEBUG_ADVICE"
 		echo
 
 		exit 1
@@ -221,23 +275,23 @@ function CreateLogFile()
 	
 	# On vérifie si le fichier de logs a bien été créé.
 	if test -f "$FILE_LOG_PATH"; then
-		EchoSuccessLog "Fichier de logs créé avec succès"
+		EchoSuccessLog "$MSG_CRLOGFILE_SUCCESS"
 
 		HeaderBase "$COL_BLUE" "$TXT_HEADER_LINE_CHAR" "$COL_BLUE" "RÉCUPÉRATION DES INFORMATIONS SUR LE SYSTÈME DE L'UTILISATEUR" "0" >> "$FILE_LOG_PATH"	# Au moment de la création du fichier de logs, la variable "$FILE_LOG_PATH" correspond au dossier actuel de l'utilisateur.
 
 		# Récupération des informations sur le système d'exploitation de l'utilisateur contenues dans le fichier "/etc/os-release".
-		EchoNewstepLog "Informations sur le système d'exploitation de l'utilisateur $(DechoN "${ARG_USERNAME}") :"
+		EchoNewstepLog "$MSG_CRLOGFILE_GETOSINFOS :"
 		cat "/etc/os-release" >> "$FILE_LOG_PATH"
 		EchoLog
 
-		EchoSuccessLog "Fin de la récupération d'informations sur le système d'exploitation."
+		EchoSuccessLog "$MSG_CRLOGFILE_GOTOSINFOS."
     else
         # Étant donné que le fichier de logs n'existe pas dans ce cas, il est impossible d'appeler la fonction "HandleErrors" sans que le moindre bug ne se produise (cependant, il ne s'agit pas de bugs importants).
-        EchoError "IMPOSSIBLE DE CRÉER LE FICHIER DE LOGS"
-        EchoError ""
+        EchoError "$MSG_CRLOGFILE_FAIL"
+        EchoError "$MSG_CRLOGFILE_ADVICE"
         echo
         
-        EchoError "L'erreur s'est produite à la ligne $lineno."
+        EchoError "$MSG_LINENO $lineno."
         echo
         
         exit 1
@@ -302,7 +356,7 @@ function GetMainPackageManager()
 }
 
 # Création du script de traitement de paquets à installer.
-function WritePackScript()
+function WriteInstallScript()
 {
 	# Création du dossier contenant le script de traitement de paquets et les fichiers contenant les commandes de recherche et d'installation de paquets.
 	# Creating the folder containing the packages treatment script and the files containing the packages search and installation commands.
@@ -353,7 +407,7 @@ function ScriptInit()
 	CreateLogFile			# Puis la fonction de création du fichier de logs. À partir de maintenant, chaque sortie peut être redirigée vers un fichier de logs existant,
 	Mktmpdir 				# Puis la fonction de création du dossier temporaire,
 	GetMainPackageManager	# Puis la fonction de détection du gestionnaire de paquets principal de la distribution de l'utilisateur,
-	WritePackScript			# Puis la fonction de création de scripts d'installation.
+	WriteInstallScript		# Puis la fonction de création de scripts d'installation.
 
 	# On écrit dans le fichier de logs que l'on passe à la première étape "visible dans le terminal", à savoir l'étape d'initialisation du script.
 	{
@@ -403,7 +457,7 @@ function ScriptInit()
 function LaunchScript()
 {
     # Affichage du header de bienvenue
-    HeaderStep "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $VER_SCRIPT"
+    HeaderStep "BIENVENUE DANS L'INSTALLATEUR DE PROGRAMMES POUR LINUX : VERSION $MAIN_SCRIPT_VERSION"
     EchoNewstepTee "Début de l'installation."
 	Newline
 
@@ -451,6 +505,7 @@ function LaunchScript()
 	ReadLaunchScript
 }
 
+# -----------------------------------------------
 
 ## DÉFINITION DES FONCTIONS DE CONNEXION À INTERNET ET DE MISES À JOUR
 # Vérification de la connexion à Internet.
@@ -710,8 +765,10 @@ function LaravelInstall()
     
     # Installation de Composer pour gérer les paquets PHP
     curl -sS https://getcomposer.org/installer | php
-    mv composer.phar /usr/local/bin/composer
+    mv -v composer.phar /usr/local/bin/composer
+    HandleFatalErrors "$?" "" "" ""
     composer --version
+    HandleFatalErrors "$?" "" "" ""
     
     # Installation de Laravel
     composer global require laravel/installer
@@ -748,13 +805,13 @@ function InstallAndConfig()
     case ${VER_PACKS,,} in
     "sio")
         # shellcheck source=../src/install/sio.sh
-        local lineno=$LINENO; source install/sio.sh \
+        local lineno=$LINENO; source src/install/sio.sh \
             || HandleErrors "1" "LE FICHIER $(DechoE "install/sio.sh") N'EXISTE PAS" "Vérifiez s'il existe" "$lineno"
         SIOInstall
         ;;
     "custom")
         # shellcheck source=../src/install/custom.sh
-        local lineno=$LINENO; source install/custom.sh \
+        local lineno=$LINENO; source src/install/custom.sh \
             || HandleErrors "1" "LE FICHIER $(DechoE "install/custom.sh") N'EXISTE PAS" "Vérifiez s'il existe" "$lineno"
         SIOInstall
         CustomInstall

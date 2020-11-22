@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+MSG_LINENO="L'erreur s'est produite à la ligne"
+
 ## Messages de la fonction "HandleErrors"
 MSG_HNDERR_FATAL="ERREUR FATALE"
 MSG_HNDERR_FATAL_HAP="Une erreur fatale s'est produite"

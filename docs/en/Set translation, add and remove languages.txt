@@ -1,0 +1,13 @@
+Note : this part is already done for you, but I added it to explain how did I added translations for the script.
+If you wish to set translations for your script, please follow these instructions :
+    - 1) Create a folder named "lang" (you can name it as you wish).
+    - 2) In the "lang" folder, create a sub-folder matching the . For example : "en" for English, "fr" for French or "es" for Spanish.
+    - 3) Create a file named "DetectLocale.sh" (for example), then, follow these instructions :
+        - a) Write the following shebang on the very first line --> #!/usr/bin/env bash
+        - b)
+    
+If you wish to add a language, please follow these instructions :
+    - 1)
+
+If you wish to remove a language, please follow these instructions :
+    - 1)

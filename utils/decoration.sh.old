@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+## Decorating new library files
+
+# Arguments
+ARG_NAME=$1
+ARG_TYPE=$2
+
+# Directory
+WORKING_DIR="$HOME/Projets/Linux-reinstall"
+NEW_FILE="$WORKING_DIR/$ARG_NAME"
+
+# Library files
+function Lib()
+{
+    file_kind=$1
+
+    if test -f "$NEW_FILE"; then
+        echo "This file already exists" && exit 1
+    fi
+    
+    if test "func" = "$file_kind"; then
+        cat <<-EOF > "$WORKING_DIR/lib/function/$ARG_NAME"
+#!/usr/bin/env bash
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+############################### LINKING LIBRARY FILES TO THE SCRIPT ###############################
+
+#### INCLUDING FILES
+
+## FUNCTIONS
+
+# There's currently no function library files to include on this file.
+
+# -----------------------------------------------
+
+
+## VARIABLES
+
+# There's currently no function library files to include on this file.
+
+# -----------------------------------------------
+
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+######################################## DEFINING VARIABLES #######################################
+
+#### DEFINING FILE VARIABLES (THIS FILE CAN THUS BE REUSED IN ANOTHER PROJECT BY MODIFYING ONLY THE VALUES OF THE VARIABLES LISTED BELOW).
+
+## LOREM IPSUM
+
+# Lorem ipsum
+
+# -----------------------------------------------
+
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+#################################### DEFINING LIBRARY FUNCTIONS ###################################
+
+#### LOREM IPSUM
+
+## LOREM IPSUM
+
+# Lorem ipsum dolor sit amet
+
+# Required files and function (if functions from other scripts are used)
+#   - file.sh    -> FunctionName
+function JohnDoe()
+{
+    #***** Parameters *****
+
+    #***** Code *****
+    
+}
+
+# -----------------------------------------------
+
+## LOREM IPSUM
+
+# Lorem ipsum dolor sit amet
+
+# Required files and function (if functions from other scripts are used)
+#   - file.sh    -> FunctionName
+function MarcelDupont()
+{
+    #***** Parameters *****
+
+    #***** Code *****
+    
+}
+
+# -----------------------------------------------
+
+
+EOF
+    fi
+}
+
+# Translate files
+function Translate()
+{
+    if test -f "$NEW_FILE"; then
+        echo "This file already exists" && exit 1
+    fi
+
+    
+}
+
+function main()
+{
+    if test "var" = "${ARG_TYPE}"; then
+        Lib "var"
+    elif test "func" = "${ARG_TYPE}"; then
+        Lib "func"
+    elif test "trans" = "${ARG_TYPE}"; then
+        Translate
+    else
+        echo "Bad argument" && exit 1
+    fi
+}

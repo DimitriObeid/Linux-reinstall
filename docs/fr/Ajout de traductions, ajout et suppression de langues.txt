@@ -1,0 +1,13 @@
+Note : cette partie est déjà faite pour vous, mais je l'ai ajoutée pour expliquer comment j'ai procédé à l'ajout de traductions.
+Si vous souhaitez ajouter des traductions à votre script, veuillez suivre ces instructions :
+    - 1) Créez un dossier nommé "lang" (vous pouvez l'appeler comme vous le souhaitez).
+    - 2) Dans le dossier "lang", créez un sous dossier correspondant à . Par exemple : "en" pour l'anglais, "fr" pour le français ou "es" pour l'espagnol.
+    - 3) Créez un fichier nommé "DetectLocale.sh" (par exemple), puis suivez ces instructions :
+        - a) Écrivez le shebang suivant sur la toute première ligne --> #!/usr/bin/env bash
+        - b)
+    
+    Si vous souhaitez ajouter une langue, veuillez suivre ces instructions :
+        - 1)
+    
+    Si vous souhaitez supprimer une langue, veuillez suivre ces instructions :
+        - 1)

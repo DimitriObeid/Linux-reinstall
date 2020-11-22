@@ -1,28 +1,24 @@
 #!/usr/bin/env bash
 
-# For more informations about this file, please check its documentation located at "docs/<your language>/variables/args.pdf"
-
-
 # ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
 
 ######################################## DEFINING VARIABLES #######################################
 
 #### MANDATORY ARGUMENTS
 
-## ARGUMENTS ARRAY
+## ARGUMENT VALUES ARRAY
 ARGV=("$@")
 
 # -----------------------------------------------
 
+## ARGUMENT VALUES
+
 # Arguments à placer après la commande d'exécution du script pour qu'il s'exécute.
-ARG_LANG=$1             # Premier argument : La langue dans laquelle exécuter le script
-ARG_LANG_INDEX='1'      # Language argument's index.
+ARG_USERNAME=$1         # First argument : username's account.
+ARG_USERNAME_INDEX='1'  # Username argument's index.
 
-ARG_USERNAME=$2         # Deuxième argument : Le nom du compte de l'utilisateur.
-ARG_USERNAME_INDEX='2'  # Username argument's index.
-
-ARG_INSTALL=$3          # Troisième argument : Le type de paquets à installer (version SIO (travail) ou personnelle (travail + logiciels pour un usage presonnel)).
-ARG_INSTALL_INDEX='3'   # Installation kind argument's index.
+ARG_INSTALL=$2          # Second argument : Le type de paquets à installer (version SIO (travail) ou personnelle (travail + logiciels pour un usage presonnel)).
+ARG_INSTALL_INDEX='2'   # Installation kind argument's index.
 
 # -----------------------------------------------
 
@@ -31,8 +27,23 @@ ARG_INSTALL_INDEX='3'   # Installation kind argument's index.
 
 #### OPTIONAL ARGUMENTS
 ARG_DEBUG=$4            # Argument servant d'utilitaire de déboguage.
-ARG_DEBUG_INDEX='4'     # Debug argument's index.
+ARG_DEBUG_INDEX='3'     # Debug argument's index.
 
 ARG_DEBUG_VAL="debug"   # Valeur de l'agument de déboguage.
 
 # -----------------------------------------------
+
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+################################# DEFINING TEXT DISPLAY VARIABLES #################################
+
+# If you want to remove the translations and write directly the variable values in your language
+# here, you can remove the following content and copy-paste the variables from the dedicated file.
+
+# This dedicated file is located in the src/lang/<language> folder, and is named in the same way
+# as this file, excepted its file extension, which corresponds to it's parent folder's name.
+
+
+## No translations exists yet for this file, as it's not necessary for now

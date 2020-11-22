@@ -1,0 +1,231 @@
+#!/usr/bin/env bash
+
+# Lisez le fichier "lib/var/main.var" pour plus d'informations sur ces variables. 
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+########################### DÉFINITION DES MESSAGES DU FICHIER PRINCIPAL ##########################
+
+#### MESSAGES DE LA FONCTION "ScriptInit"
+
+## ARGUMENTS
+
+# Présentation de la méthode d'exécution du script
+MSG_INIT_ARGS=" $0 nom_d'utilisateur installation"
+MSG_INIT_ARGS_SUDO="    sudo $MSG_INIT_ARGS"
+
+# -----------------------------------------------
+
+## VÉRIFICATION DU LANCEMENT DU SCRIPT EN MODE SUPER-UTILISATEUR
+
+# Script exécuté sans les permissions du super-utilisateur
+MSG_INIT_ROOT_ZERO="Ce script doit être exécuté en tant que super-utilisateur (root)"
+MSG_INIT_ROOT_ZERO_EXEC="Exécutez ce script en plaçant la commande $(DechoE "sudo") devant votre commande :"
+MSG_INIT_ROOT_ZERO_OR_1="Ou connectez vous directement en tant que super-utilisateur"
+MSG_INIT_ROOT_ZERO_OR_2="et tapez cette commande"
+
+# Message d'erreur
+MSG_INIT_ROOT_FAIL="SCRIPT LANCÉ EN TANT QU'UTILISATEUR NORMAL"
+MSG_INIT_ROOT_ADVICE="Relancez le script avec les droits de super-utilisateur (avec la commande $(DechoE "sudo")) ou en vous connectant en mode root"
+
+# -----------------------------------------------
+
+## VÉRIFICATION DU PASSAGE DE L'ARGUMENT DE NOM D'UTILISATEUR
+
+# Script exécuté sans l'argument de nom d'utilisateur
+MSG_INIT_USERNAME_ZERO="Veuillez lancer le script en plaçant votre nom d'utilisateur après la commande d'exécution du script"
+
+# Message d'erreur : script exécuté sans l'argument de nom d'utilisateur
+MSG_INIT_USERNAME_FAIL="VOUS N'AVEZ PAS PASSÉ VOTRE NOM D'UTILISATEUR EN ARGUMENT"
+MSG_INIT_USERNAME_ADVICE="Veuillez entrer votre nom d'utilisateur juste après le nom du script"
+
+# Message d'erreur : nom d'utilisateur incorrect
+MSG_INIT_USERNAME_INCORRECT="NOM D'UTILISATEUR INEXISTANT"
+MSG_INIT_USERNAME_INCORRECT_ADVICE="Veuillez entrer correctement votre nom d'utilisateur"
+
+# -----------------------------------------------
+
+## VÉRIFICATION DU PASSAGE DE L'ARGUMENT DE TYPE D'INSTALLATION
+
+# Message d'erreur : script exécuté sans l'argument de type d'installation
+MSG_INIT_INSTALL_FAIL="VOUS N'AVEZ PAS PASSÉ LE TYPE D'INSTALLATION EN DEUXIÈME ARGUMENT"
+MSG_INIT_INSTALL_FAIL_ADVICE="Veuillez entrez une seule valeur après votre nom d'utilisateur"
+
+# Message d'erreur : argument de type d'installation incorrect
+MSG_INIT_INSTALL_DIFFERENT="LA VALEUR DU DEUXIÈME ARGUMENT NE CORRESPOND PAS À L'UNE DES VALEURS ATTENDUES"
+MSG_INIT_INSTALL_AWAITED="Les valeurs attendues sont : $(DechoE "perso") ou $(DechoE "sio")"
+
+
+# -----------------------------------------------
+
+## VÉRIFICATION DU PASSAGE DE L'ARGUMENT DE DÉBUG
+
+# Message d'erreur : la valeur passée ne correspond pas à la valeur attendue
+MSG_INIT_DEBUG_FAIL="LA CHAÎNE DE CARACTÈRES PASSÉE EN DEUXIÈME ARGUMENT NE CORRESPOND PAS À LA VALEUR ATTENDUE"
+MSG_INIT_DEBUG_ADVICE="Si vous souhaitez tester une fonction du script, passez la valeur $(DechoE "debug") sans faire de fautes"
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "CreateLogFile"
+
+## SI LE FICHIER DE LOGS A ÉTÉ CRÉÉ AVEC SUCCÈS
+
+# Message de succès
+MSG_CRLOGFILE_SUCCESS="Fichier de logs créé avec succès"
+
+# Récupération des informations sur le système d'exploitation
+MSG_CRLOGFILE_GETOSINFOS="Informations sur le système d'exploitation de l'utilisateur $(DechoN "${ARG_USERNAME}")"
+MSG_CRLOGFILE_GOTOSINFOS="Fin de la récupération d'informations sur le système d'exploitation"
+
+# -----------------------------------------------
+
+## SINON, SI LE FICHIER DE LOGS N'A PAS PU ÊTRE CRÉÉ
+
+# Message d'erreur :
+MSG_CRLOGFILE_FAIL="IMPOSSIBLE DE CRÉER LE FICHIER DE LOGS"
+MSG_CRLOGFILE_ADVICE=""
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "Mktmpdir"
+
+##
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+# TODO : Déplacer cette fonction et cette section dans le fichier de librairie "Install.lib" (la fonction dans le fichier principal) et "install.var" (les variables ci-dessous)
+
+#### MESSAGES DE LA FONCTION "GetDistPackageManager"
+
+##
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+# TODO : Déplacer cette fonction et cette section dans le fichier de librairie "Install.lib" (la fonction dans le fichier principal) et "install.var" (les variables ci-dessous)
+
+#### MESSAGES DE LA FONCTION "WriteInstallScript"
+
+##
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "ScriptInit"
+
+##
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "LaunchScript"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "ReadLaunchScript"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "CheckInternetConnection"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "DistUpgrade"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "SetSudo"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "ReadSetSudo"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "InstallAndConfig"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "Autoremove"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "ReadAutoremove"
+
+##
+
+
+# -----------------------------------------------
+
+
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
+#### MESSAGES DE LA FONCTION "IsInstallationDone"
+
+##
+
+
+# -----------------------------------------------
