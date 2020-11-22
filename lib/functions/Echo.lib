@@ -2,7 +2,7 @@
 
 # /////////////////////////////////////////////////////////////////////////////////////////////// #
 
-#### TEXT WRITING
+#### TEXT WRITING AND DECORATION
 
 ## COLOR A PART OF A TEXT WITH ANOTHER COLOR.
 ## Pun between "deco(ration)" and "echo", followed by the first letter of the message type name (header (H), moving to a new sub-step (N), error (E) or success (S)).
@@ -15,7 +15,7 @@ function DechoS() { local string=$1; echo "$COL_CYAN$string$COL_GREEN"; }   # Su
 
 # -----------------------------------------------
 
-## DISPLAYING A MESSAGE ACCORDING TO THE CONTEXT.
+## DISPLAYING A MESSAGE ACCORDING TO THE CONTEXT AND THE "$MAIN_SCRIPT_LOG" VARIABLE VALUE.
 
 # Error message
 function EchoError() {
@@ -40,7 +40,7 @@ function EchoError() {
             echo "$TXT_R_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"
             
         else
-            echo "Non-valid write output mode defined"
+            echo "EchoError : no valid write output mode defined"
         
             return
         fi
@@ -72,7 +72,7 @@ function EchoNewstep() { local string=$1;
             echo "$TXT_N_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"
             
         else
-            echo "Non-valid write output mode defined"
+            echo "EchoNewstep: no valid write output mode defined"
         
             return
         fi
@@ -95,8 +95,6 @@ function EchoSuccess() {
     if test -z "$MAIN_SCRIPT_LOG" || test -z "$FILE_LOG_PATH"; then
         echo "$TXT_S_TAB $string$COL_RESET"
     else
-        CheckLog
-        
         if test "$MAIN_SCRIPT_LOG" = "log"; then
             echo "$TXT_S_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"
             
@@ -104,8 +102,9 @@ function EchoSuccess() {
             echo "$TXT_S_TAB $string$COL_RESET" 2>&1 | tee -a "$FILE_LOG_PATH"
             
         else
-            echo "Non-valid write output mode defined"
-        
+            echo "EchoSuccess : no valid write output mode defined"
+            echo
+
             return
         fi
     fi
@@ -114,14 +113,28 @@ function EchoSuccess() {
 }
 
 
+# /////////////////////////////////////////////////////////////////////////////////////////////// #
+
 #### LINE BREAKS
 
-# Redirecting the output of the "echo" command
-function EchoLog() { CheckLog && echo "" >> "$FILE_LOG_PATH"; }
-
-# -----------------------------------------------
-
-## LINE BREAKS
+## LINE BREAKS ACCORDING TO THE "$MAIN_SCRIPT_LOG" VARIABLE VALUE.
 
 # Redirecting the output of the "echo" command
-function Newline() { CheckLog && echo "" 2>&1 | tee -a "$FILE_LOG_PATH"; }
+function Newline()
+{
+    if test -z "$MAIN_SCRIPT_LOG" || test -z "$FILE_LOG_PATH"; then
+        echo
+    else
+        CheckLog
+        
+        if test "$MAIN_SCRIPT_LOG" = "log"; then
+            echo "" >> "$FILE_LOG_PATH"
+        elif
+            echo "" 2>&1 | tee -a "$FILE_LOG_PATH"
+        else
+            echo "No valid write output mode defined"
+        
+            return
+        fi
+    fi
+}
