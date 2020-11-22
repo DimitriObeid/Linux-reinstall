@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Lisez les fichiers "lib/variables/permissions.var" et "docs/variables/variables.pdf"
+# pour plus d'informations sur ces variables. 
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+########################### DÉFINITION DES MESSAGES DU FICHIER  ##########################
+
+#### FONCTIONS DE CHANGEMENT DE PERMISSIONS
+
+## FONCTION "ChownDir"
+
+# Changement des droits
+MSG_DIR_CHMOD="Changement récursif des droits du nouveau dossier $(DechoN "$path/") de $(DechoN "$USER") en $(DechoN "$ARG_USERNAME")"    
+
+# Issue
+MSG_DIR_CHMOD_SUCCESS="Les droits du dossier $(DechoS "$name") ont été changés avec succès de $(DechoS "$USER") en $(DechoS "$ARG_USERNAME")"
+MSG_DIR_CHMOD_FAIL_1="Impossible de changer les droits du dossier $(DechoE "$path/")"
+MSG_DIR_CHMOD_FAIL_2="Pour changer les droits du dossier $(DechoE "$path/") de manière récursive, utilisez la commande suivante"

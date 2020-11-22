@@ -1,1 +1,16 @@
- 
+#!/usr/bin/env bash
+
+
+
+# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; #
+
+################################# DEFINING TEXT DISPLAY VARIABLES #################################
+
+# If you want to remove the translations and write directly the variable values in your language
+# here, you can remove the following content and copy-paste the variables from the dedicated file.
+
+# This dedicated file is located in the src/lang/<language> folder, and is named in the same way
+# as this file, excepted its file extension, which corresponds to it's parent folder's name.
+
+
+## No translations exists yet for this file, as it's not necessary for now

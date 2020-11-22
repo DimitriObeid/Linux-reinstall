@@ -2,7 +2,7 @@
 
 # Detecting user's language with the "$LANG" environment variable.
 case "$LANG" in
-    # English
+# English
     "en_*")
         for f in "$MAIN_PROJECT_ROOT/$MAIN_SRC_LANG/en/*.en"; do
             source $f || echo "At least one of the translation files cannot be included" && exit 1

@@ -38,18 +38,6 @@ function EchoSuccessTimer() { local string=$1; timer=$2; echo "$TXT_G_TAB $strin
 
 ## CHECKING REQUIRED FUNCTIONNALITIES
 
-# Checking the recording of a value in the variable "$FILE_LOG_PATH".
-function CheckLog()
-{
-    if test -z "$FILE_LOG_PATH"; then
-        EchoError "No path provided for the log file."; echo; exit 1
-    fi
-}
-
-# The above function must be called before writing the text in one of ALL the following functions, until the end of this file.
-
-# -----------------------------------------------
-
 ## DISPLAY A MESSAGE BY REDIRECTING STANDARD AND ERROR OUTPUTS, ACCORDING TO ITS DISPLAY COLOR, WITH CHEVRONS AND WITHOUT HAVING TO ENCODE THE COLOR AT THE BEGINNING AND THE END OF THE STRING.
 
 function EchoErrorLog() { CheckLog; local string=$1; echo "$TXT_R_TAB $string$COL_RESET" >> "$FILE_LOG_PATH"; sleep .5; }     # Error message

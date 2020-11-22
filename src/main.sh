@@ -19,37 +19,41 @@
 
 ###################################### INCLUDING DEPENDENCIES #####################################
 
-#### CHECKING PROJECT'S ROOT DIRECTORY
-
-## DEFINING PROJECT'S ROOT DIRECTORY
-
-# /home/dimob/Projets/Linux-reinstall/src
-#                     ROOT_DIR        srcdir
-
-MAIN_PROJECT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; cd .. && pwd -P )"
-
-shopt -s extglob                # enable +(...) glob syntax
-MAIN_PROJECT_FOLDER=${MAIN_PROJECT_PATH%%+(/)}   # Trimming however many trailing slashes exist
-MAIN_PROJECT_RESULT=${MAIN_PROJECT_PATH##*/}     # Removing everything before the last / that still remains to get only the project root folder's name
-printf '%s\n' "$MAIN_PROJECT_RESULT"
-
-# Failsafe : verifying if the result matches with the project root folder's name.
-if test "$MAIN_PROJECT_RESULT" != "Linux-reinstall"; then
-    echo "Unable to find the project's root directory path"; exit 1
-fi
-
-# -----------------------------------------------
+#### INITIALIZING DEPENDENCIES
 
 ## DEFINING MAIN SCRIPT VARIABLES
 
-MAIN_PROJECT_ROOT="$(dirname "$PWD")/"
+# Log
+
+MAIN_LOG="initscript.log"
+
+# Paths
+MAIN_LANG="lang"
 MAIN_L_FNCTS="lib/functions"
 MAIN_L_VARS="lib/variables"
 MAIN_S_INST="src/install"
 MAIN_S_LANG="src/lang"
 MAIN_S_RES="src/res"
+
+# Script Version
 MAIN_SCRIPT_VERSION="2.0"    # Script's current version
 
+# -----------------------------------------------
+
+## DEFINING PROJECT'S ROOT DIRECTORY
+
+MAIN_PROJECT_ROOT="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; cd .. && pwd -P )"
+{ echo "$MAIN_PROJECT_ROOT"; echo; } > "$MAIN_LOGs"
+
+shopt -s extglob                # enable +(...) glob syntax
+MAIN_PROJECT_RESULT=${MAIN_PROJECT_ROOT%%+(/)}   # Trimming however many trailing slashes exist
+MAIN_PROJECT_RESULT=${MAIN_PROJECT_ROOT##*/}     # Removing everything before the last / that still remains to get only the project root folder's name
+{ echo "$MAIN_PROJECT_RESULT"; echo; } >> "$MAIN_LOG"
+
+# Failsafe : verifying if the result matches with the project root folder's name.
+if test "$MAIN_PROJECT_RESULT" != "Linux-reinstall"; then
+    echo "Unable to find the project's root directory path"; exit 1
+fi
 
 # -----------------------------------------------
 
@@ -62,22 +66,23 @@ function CheckSubFolder()
     local path=$1;
 
     #***** Code *****
-    if test -d "$MAIN_PROJECT_PATH/$path"; then
-        # TODO : return
-        echo "$MAIN_PROJECT_PATH/$path : true"
+    if test -d "$MAIN_PROJECT_ROOT/$path"; then
+        echo "Included file : $path" >> "$MAIN_LOG"
     else
-        echo "$path : not found"
+        echo "Cannot include $path, abort"
 
         exit 1
     fi
 }
 
 # Calling the above function and passing targeted directories paths as argument
+CheckSubFolder "$MAIN_LANG"
 CheckSubFolder "$MAIN_L_FNCTS"
 CheckSubFolder "$MAIN_L_VARS"
 CheckSubFolder "$MAIN_S_INST"
 CheckSubFolder "$MAIN_S_LANG"
 CheckSubFolder "$MAIN_S_RES"
+echo >> "$MAIN_LOG"
 
 
 # -----------------------------------------------
@@ -90,40 +95,50 @@ CheckSubFolder "$MAIN_S_RES"
 
 ## TRANSLATION FILE
 
+# shellcheck source="$MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh"
 source "$MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh" \
     || echo "$PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh : Unable to find the translation file" && exit 1
+echo "Included file : $MAIN_PROJECT_ROOT/$MAIN_S_LANG/DetectLocale.sh" >> 
 
 # -----------------------------------------------
 
 ## VARIABLES FILES
 
-# shellcheck source=lib/variables/args.var
-source "$MAIN_PROJECT_ROOT/$MAIN_S_RES/main.var" || echo 
+# shellcheck source=$MAIN_PROJECT_ROOT/$MAIN_S_RES/main.var
+source "$MAIN_PROJECT_ROOT/$MAIN_S_RES/main.var" || echo "$MAIN_S_RES/main.var : not found" && exit 1
+echo "Included variable file : $MAIN_S_RES/main.var"
 
 # shellcheck source=lib/variables/colors.var
 source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/colors.var" || echo "$MAIN_L_VARS/colors.var : not found" && exit 1
+echo "Included variable file : $MAIN_L_VARS/colors.var"
 
 # shellcheck source=../variables/filesystem.var
-source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/filesystem.sh" || echo "$MAIN_L_VARS/filesystem.var : not found" && exit 1
+source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/files.sh" || echo "$MAIN_L_VARS/filesystem.var : not found" && exit 1
+echo "Included variable file : $MAIN_L_VARS/files.sh"
 
 # shellcheck source=../variables/colors.var
 source "$MAIN_PROJECT_ROOT/$MAIN_L_VARS/text.var" || echo "$MAIN_L_VARS/text.var : not found" && exit 1
+echo "Included variable file : $MAIN_L_VARS/text.var"
 
 # -----------------------------------------------
 
 ## FUNCTION FILES
 
-# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Echo.sh"
-source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Echo.sh" || echo "$MAIN_L_FNCTS/Echo.sh : not found" && exit 1
+# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Echo.lib"
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Echo.lib" || echo "$MAIN_L_FNCTS/Echo.lib : not found" && exit 1
+echo "Included function file : $MAIN_L_FNCTS/Echo.lib"
 
-# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Filesystem.sh"
-source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Filesystem.sh" || echo "$MAIN_L_FNCTS/Filesystem.sh : not found" && exit 1
+# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Filesystem.lib"
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Filesystem.lib" || echo "$MAIN_L_FNCTS/Filesystem.lib : not found" && exit 1
+echo "Included function file : $MAIN_L_FNCTS/"
 
-# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Headers.sh"
-source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Headers.sh" || echo "$MAIN_L_FNCTS/Headers.sh : not found" && exit 1
+# shellcheck source="/home/dimob/Projets/Linux-reinstall/lib/functions/Headers.lib"
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Headers.sh" || echo "$MAIN_L_FNCTS/Headers.lib : not found" && exit 1
+echo "Included function file : $MAIN_L_FNCTS/Headers.lib"
 
-# shellcheck source="/home/dimob/ProjetLinux-reinstall/lib/functions/Install.sh"
-source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Install.sh" || echo "$MAIN_L_FNCTS/Install.sh : not found" && exit 1
+# shellcheck source="/home/dimob/Projets/sLinux-reinstall/lib/functions/Install.lib"
+source "$MAIN_PROJECT_ROOT/$MAIN_L_FNCTS/Install.lib" || echo "$MAIN_L_FNCTS/Install.lib : not found" && exit 1
+echo "Included function file : $MAIN_L_FNCTS/Install.lib"
 
 
 
@@ -149,9 +164,7 @@ MSG_LANG_NO=("non" "no")
 ## DÉFINITION DES FONCTIONS D'INITIALISATION
 # Détection du passage des arguments au script
 function CheckArgs()
-{
-    CheckLang
-    
+{    
 	# If the script is not run as super-user (root)
 	if test "$EUID" -ne 0; then
 		EchoErrorLog "$MSG_INIT_ROOT_ZERO."
@@ -779,6 +792,7 @@ function LaravelInstall()
 EOF
 
     # Mise à jour du fichier de configuration "~/.bashrc" et vérification de l'application de la modification de la variable d'environnement
+    # shellcheck source="$DIR_HOMEDIR/.bashrc"
     source "$DIR_HOMEDIR/.bashrc"
     echo "$PATH" | grep "$envpath"
     

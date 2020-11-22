@@ -108,6 +108,9 @@ GETVAL_PATH="$DIR_INSTALL_PATH/$GETVAL_NAME"
 # This dedicated file is located in the src/lang/<language> folder, and is named in the same way
 # as this file, excepted its file extension, which corresponds to it's parent folder's name.
 
+
+
+# TODO : Remove it and pull if the file and dir var files.
 MSG_FILE_CHECKLOG="$MSG_FILE_CHECKLOG"
 
 #### 

@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+
+# Change directory owner
+function ChownDir()
+{
+    #***** Paramètres *****
+    username=$1
+    path=$2
+    timer=$3
+
+    #***** Code *****
+    # Since it's mandatory to be logged as root while 
+    
+    EchoNewstepTimer "$MSG_MKDIR_CHMOD." "$timer"
+	echo
+
+	chown -Rv "${ARG_USERNAME}" "$path"
+
+    # On vérifie que les droits du dossier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
+	if test "$?" -eq "0"; then
+		echo
+
+		EchoSuccessTimer "$MSG_MKDIR_CHMOD_SUCC." "$timer"
+		echo
+
+		EchoSuccessTimer "$MSG_MKDIR_PROCESSING_END_SUCC." "$timer"
+		DrawLine "$COL_RESET" "$block_char"
+		sleep "$sleep_blk"
+		echo
+
+		return
+	else
+        echo
+
+		EchoErrorTimer "$MSG_MKDIR_CHMOD_FAIL_1." "$timer"
+		EchoErrorTimer "$MSG_MKDIR_CHMOD_FAIL_2 :" "$timer"
+		echo "	chown -R ${ARG_USERNAME} $path"
+		echo
+
+		EchoErrorTimer "$MSG_MKDIR_PROCESSING_END_FAIL." "$timer"
+		DrawLine "$COL_RESET" "$block_char"		# On dessine la deuxième et dernière ligne du bloc.
+		sleep "$sleep_blk"
+		echo
+
+		return
+    fi
+}
+
+
+
+## TREATMENT FUNCTIONS
+
+
+function OverwriteDir()
+{
+
+}
+
+
+
+# Folder creation AND recursively assigning read and write rights to the user.
+# When this function is called, if a log file is used in the project, the output of this function must be redirected either to the terminal AND the log file (2>&1 | tee -a "$FILE_LOG_PATH"), or to the log file only (>> "$FILE_LOG_PATH") after passing all the mandatory arguments. Otherwise, leave everything blank after passing the arguments.
+
+# Required files and functions :
+#   - Echo.sh       -> EchoErrorTimer
+#   - Echo.sh       -> EchoNewstepTimer
+#   - Echo.sh       -> EchoSuccessTimer
+#   - Headers.sh    -> DrawLine   
+#   - Headers.sh    -> HandleErrors
+function Makedir()
+{
+	#***** Parameters *****
+	local parent=$1		# Emplacement depuis la racine du dossier parent du dossier à traiter.
+	local name=$2		# Nom du dossier à traiter (dans son dossier parent).
+	local sleep_blk=$3	# Temps de pause du script avant et après la création d'une ligne d'un bloc d'informations sur le traitement du dossier.
+	local sleep_txt=$4	# Temps d'affichage des messages de passage à une nouvelle sous-étape, d'échec ou de succès lors du traitement du dossier.
+
+	#***** Other variables *****
+	local path="$parent/$name"	# Chemin du dossier à traiter.
+	local block_char='"'		# Caractère composant la ligne (c'est un double quote (")).
+
+	#***** Code *****
+	# On commence par dessiner la première ligne du bloc.
+	sleep "$sleep_blk"
+	DrawLine "$COL_RESET" "$block_char"
+
+	EchoNewstepTimer "$MSG_MKDIR_PROCESSING_BEGIN." "$sleep_txt"
+	echo   # On ne redirige aucun saut de ligne vers le fichier de logs, pour éviter de les afficher en double, étant donné que la fonction est appelée avec une redirection (directement dans le fichier de logs ou dans ce dernier PLUS sur le terminal).
+
+	# Si le dossier à traiter n'existe pas, alors le script le crée.
+	if test ! -d "$path"; then
+		EchoNewstepTimer "$MSG_MKDIR_CREATE." "$sleep_txt"
+		echo
+
+		# On crée une variable nommée "lineno". Elle enregistre la valeur de la variable globale "$LINENO", qui enregistre le numéro de la ligne dans laquelle est est appelée dans un script.
+		local lineno=$LINENO; mkdir -v "$path"
+
+        # On vérifie si le dossier a bien été créé en vérifiant le code de retour de la commande "mkdir" via la fonction "HandleErrors"
+		HandleErrors "$?" "$MSG_MKDIR_CREATE_FAIL." "$MSG_MKDIR_CREATE_FAIL_ADV" "$lineno"
+        echo
+
+        EchoSuccessTimer "$MSG_MKDIR_CREATE_SUCC." "$sleep_txt"
+        echo
+
+		# On change les droits du dossier nouvellement créé par le script
+		# Comme ce dernier est exécuté en mode super-utilisateur, tout dossier ou fichier créé appartient à l'utilisateur root.
+		# Pour attribuer récursivement la propriété du dossier à l'utilisateur normal, on appelle la commande chown avec pour arguments :
+		#		- Le nom de l'utilisateur à qui donner les droits
+		#		- Le chemin du dossier cible
+
+		EchoNewstepTimer "$MSG_MKDIR_CHMOD." "$sleep_txt"
+		echo
+
+		chown -Rv "${ARG_USERNAME}" "$path"
+
+        # On vérifie que les droits du dossier nouvellement créé ont bien été changés, en vérifiant le code de retour de la commande "chown".
+		if test "$?" -eq "0"; then
+			echo
+
+			EchoSuccessTimer "$MSG_MKDIR_CHMOD_SUCC." "$sleep_txt"
+			echo
+
+			EchoSuccessTimer "$MSG_MKDIR_PROCESSING_END_SUCC." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo
+
+			return
+		else
+            echo
+
+			EchoErrorTimer "$MSG_MKDIR_CHMOD_FAIL_1." "$sleep_txt"
+			EchoErrorTimer "$MSG_MKDIR_CHMOD_FAIL_2 :" "$sleep_txt"
+			echo "	chown -R ${ARG_USERNAME} $path"
+			echo
+
+			EchoErrorTimer "$MSG_MKDIR_PROCESSING_END_FAIL." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"		# On dessine la deuxième et dernière ligne du bloc.
+			sleep "$sleep_blk"
+			echo
+
+			return
+        fi
+	
+    # Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier contient AU MOINS un fichier ou dossier.
+	elif test -d "$path" && test "$(ls -A "$path")"; then
+		EchoNewstepTimer "$MSG_MKDIR_NONEMPTY_1." "$sleep_txt"
+		EchoNewstepTimer "$MSG_MKDIR_NONEMPTY_2." "$sleep_txt"
+		echo
+
+		# ATTENTION À NE PAS MODIFIER LA COMMANDE SUIVANTE", À MOINS DE SAVOIR EXACTEMENT CE QUE VOUS FAITES !!!
+		# Pour plus d'informations sur cette commande complète --> https://github.com/koalaman/shellcheck/wiki/SC2115
+		rm -rfv "${path/:?}/"*
+
+		if test "$?" -eq "0"; then
+			echo
+
+			EchoSuccessTimer "$MSG_MKDIR_NONEMPTY_SUCC." "$sleep_txt"
+			echo
+
+			EchoSuccessTimer "$MSG_MKDIR_PROCESSING_END_SUCC." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo
+
+		else
+            echo
+
+            EchoErrorTimer "$MSG_MKDIR_NONEMPTY_FAIL_1." "$sleep_txt";
+			EchoErrorTimer "$MSG_MKDIR_NONEMPTY_FAIL_2" "$sleep_txt"
+			echo
+
+			EchoErrorTimer "$MSG_MKDIR_PROCESSING_END_FAIL." "$sleep_txt"
+			DrawLine "$COL_RESET" "$block_char"
+			sleep "$sleep_blk"
+			echo
+
+			return
+		fi
+
+		return
+
+	# Sinon, si le dossier à créer existe déjà dans son dossier parent ET que ce dossier est vide.
+	elif test -d "$path" && test ! "$(ls -A "$path")"; then
+		EchoSuccessTimer "$MSG_MKDIR_EMPTY." "$sleep_txt"
+		echo
+
+		EchoSuccessTimer "$MSG_MKDIR_PROCESSING_END_SUCC." "$sleep_txt"
+		DrawLine "$COL_RESET" "$block_char"
+		sleep "$sleep_blk"
+		echo
+
+		return
+    fi
+}
+
